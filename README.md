@@ -1,2 +1,2 @@
-# optimization-methods
-## Studying various optimization metrics for ML models applied to SE tasks
+# code2seq experiments
+Numerical experiments for the model [code2seq](https://github.com/JetBrains-Research/code2seq)
