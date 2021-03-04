@@ -1,2 +1,3 @@
-# optimization-methods
-## Studying various optimization metrics for ML models applied to SE tasks
+# Experiments with embedding for trees
+
+Numerical experiments for the model [embeddings-for-trees](https://github.com/JetBrains-Research/embeddings-for-trees)
