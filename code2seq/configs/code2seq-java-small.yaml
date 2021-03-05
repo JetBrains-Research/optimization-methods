@@ -26,7 +26,7 @@ log_every_epoch: 10
 progress_bar_refresh_rate: 1
 
 hyper_parameters:
-  n_epochs: 3000
+  n_epochs: 5
   patience: 10
   batch_size: 512
   test_batch_size: 512
@@ -35,7 +35,7 @@ hyper_parameters:
   random_context: true
   shuffle_data: true
 
-  optimizer: "Nadam"
+  optimizer: "Adam"
   nesterov: true
   learning_rate: 0.01
   weight_decay: 0

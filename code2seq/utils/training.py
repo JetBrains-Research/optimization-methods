@@ -3,7 +3,7 @@ from typing import List, Tuple, Iterable
 import numpy
 import torch
 from omegaconf import DictConfig
-from torch.optim import Adam, Optimizer, SGD
+from torch.optim import Adam, Optimizer, SGD, Adadelta, Adagrad, Adamax, RMSprop, LBFGS
 from optimizer import Nadam
 from torch.optim.lr_scheduler import _LRScheduler, LambdaLR
 
@@ -31,8 +31,24 @@ def configure_optimizers_alon(
         optimizer = Adam(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
     elif hyper_parameters.optimizer == "Nadam":
         optimizer = Nadam(parameters, lr=hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
+        
+    elif hyper_parameters.optimizer == "Adadelta":
+        optimizer = Adadelta(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
+    
+    elif hyper_parameters.optimizer == "Adagrad":
+        optimizer = Adagrad(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
+    
+    elif hyper_parameters.optimizer == "Adamax":
+        optimizer = Adamax(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
+    
+    elif hyper_parameters.optimizer == "RMSprop":
+        optimizer = RMSprop(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
+    
+    elif hyper_parameters.optimizer == "LBFGS":
+        optimizer = LBFGS(parameters, hyper_parameters.learning_rate)
+    
     else:
-        raise ValueError(f"Unknown optimizer name: {hyper_parameters.optimizer}, try one of: Adam, Momentum")
+        raise ValueError(f"Unknown optimizer name: {hyper_parameters.optimizer}")
     scheduler = LambdaLR(optimizer, lr_lambda=lambda epoch: hyper_parameters.decay_gamma ** epoch)
     return [optimizer], [scheduler]
 

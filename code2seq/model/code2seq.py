@@ -12,6 +12,9 @@ from code2seq.model.modules import PathEncoder, PathDecoder
 from code2seq.utils.metrics import PredictionStatistic
 from code2seq.utils.training import configure_optimizers_alon
 from code2seq.utils.vocabulary import Vocabulary, SOS, PAD, UNK, EOS
+import numpy as np
+
+import pickle
 
 
 class Code2Seq(LightningModule):
@@ -140,6 +143,10 @@ class Code2Seq(LightningModule):
                 log[f"{group}/{key}"] = value
             self.log_dict(log)
             self.log(f"{group}_loss", mean_loss)
+            if group == "test":
+                with open('test_losses.pickle', 'wb') as f:
+                    pickle.dump([out["loss"] for out in outputs], f)
+                print('losses dumped')
 
     def training_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "train")

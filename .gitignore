@@ -3,6 +3,7 @@
 tests/
 code2seq/permanent-data/
 LICENSE
+code2seq/lightning_logs/
 LICENSE.md
 scripts/
 setup.py

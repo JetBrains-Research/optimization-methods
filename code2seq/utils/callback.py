@@ -1,5 +1,6 @@
 from os.path import join, split
 from typing import List, Dict
+import numpy as np
 
 from pytorch_lightning import Callback, LightningModule, Trainer
 from pytorch_lightning.loggers import WandbLogger
@@ -31,5 +32,8 @@ class PrintEpochResultCallback(Callback):
                 continue
             group, metric = key.split("/")
             if group in metrics_to_print:
-                metrics_to_print[group].append(f"{metric}={round(value, 2)}")
+                try:
+                    metrics_to_print[group].append(f"{metric}={np.around(value.detach().cpu().numpy(), 2)}")
+                except AttributeError:
+                    metrics_to_print[group].append(f"{metric}={round(value, 2)}")
         print_table(metrics_to_print)

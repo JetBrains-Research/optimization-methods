@@ -36,7 +36,6 @@ def load_typed_code2seq(
 
 KNOWN_MODELS = {"code2seq": load_code2seq, "code2class": load_code2class, "typed-code2seq": load_typed_code2seq}
 
-
 def test(checkpoint_path: str, data_folder: str = None, batch_size: int = None):
     checkpoint = torch.load(checkpoint_path, map_location=torch.device("cpu"))
     config = checkpoint["hyper_parameters"]["config"]
@@ -55,7 +54,7 @@ def test(checkpoint_path: str, data_folder: str = None, batch_size: int = None):
     gpu = 1 if torch.cuda.is_available() else None
     trainer = Trainer(gpus=gpu)
     trainer.test(model, datamodule=data_module)
-
+    
 
 if __name__ == "__main__":
     arg_parser = ArgumentParser()
