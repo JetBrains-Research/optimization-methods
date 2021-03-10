@@ -6,7 +6,8 @@ Numerical experiments for the model [code2seq](https://github.com/JetBrains-Rese
   New implemented optimization methods
 
 ### third party links
-* [W&B plots](https://wandb.ai/dmivilensky/code2seq-java-small)
+* [W&B plots java-small](https://wandb.ai/dmivilensky/code2seq-java-small)
+* [W&B plots java-med (random 10%)](https://wandb.ai/dmivilensky/code2seq-java-med)
 
 ### reports
 ## [1-report](https://github.com/JetBrains-Research/optimization-methods/blob/dmivilensky_experiments/reports/1-report/Рапорт%201.%20Предварительный%20анализ.pdf)
