@@ -41,7 +41,7 @@ def train_treelstm(config: DictConfig):
     )
     upload_checkpoint_callback = UploadCheckpointCallback(wandb_logger.experiment.dir)
     # define early stopping callback
-    early_stopping_callback = EarlyStopping(patience=config.patience, monitor="val_loss", verbose=True, mode="min")
+    early_stopping_callback = EarlyStopping(patience=config.hyper_parameters.patience, monitor="val_loss", verbose=True, mode="min")
     # define callback for printing intermediate result
     print_epoch_result_callback = PrintEpochResultCallback("train", "val")
     # use gpu if it exists
@@ -49,8 +49,8 @@ def train_treelstm(config: DictConfig):
     # define learning rate logger
     lr_logger = LearningRateMonitor("step")
     trainer = Trainer(
-        max_epochs=config.n_epochs,
-        gradient_clip_val=config.clip_norm,
+        max_epochs=config.hyper_parameters.n_epochs,
+        gradient_clip_val=config.hyper_parameters.clip_norm,
         deterministic=True,
         check_val_every_n_epoch=config.val_every_epoch,
         log_every_n_steps=config.log_every_step,

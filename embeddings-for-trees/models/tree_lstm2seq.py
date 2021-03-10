@@ -45,9 +45,7 @@ class TreeLSTM2Seq(LightningModule):
     # ========== Main PyTorch-Lightning hooks ==========
 
     def configure_optimizers(self) -> Tuple[List[Optimizer], List[_LRScheduler]]:
-        optimizer = Adam(self.parameters(), lr=self._config.learning_rate, weight_decay=self._config.weight_decay)
-        scheduler = LambdaLR(optimizer, lr_lambda=lambda epoch: self._config.lr_decay_gamma ** epoch)
-        return [optimizer], [scheduler]
+        return configure_optimizers_alon(self._config.hyper_parameters, self.parameters())
 
     def forward(  # type: ignore
         self,
