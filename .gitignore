@@ -1,4 +1,5 @@
 .idea/
+code2seq/download_data.sh
 .ipynb_checkpoints/
 tests/
 code2seq/permanent-data/

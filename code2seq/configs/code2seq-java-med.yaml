@@ -14,7 +14,7 @@ log_offline: false
 resume_from_checkpoint: null
 
 # data keys
-data_folder: /home/dmivilensky/code2seq/code2seq/permanent-data
+data_folder: /home/dmivilensky/optimization-methods/code2seq/permanent-data
 vocabulary_name: vocabulary.pkl
 train_holdout: train
 val_holdout: val
@@ -35,14 +35,14 @@ hyper_parameters:
   random_context: true
   shuffle_data: true
 
-  optimizer: "NovoGrad"
+  optimizer: "RAdam"
   nesterov: true
   learning_rate: 0.01
   weight_decay: 0
   decay_gamma: 0.95
 
 dataset:
-  name: java-small
+  name: java-med
   target:
     max_parts: 7
     is_wrapped: true
