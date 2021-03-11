@@ -127,7 +127,8 @@ class TreeLSTM2Seq(LightningModule):
                 log[f"{group}/{key}"] = value
             self.log_dict(log)
             self.log(f"{group}_loss", mean_loss)
-            torch.save(outputs, "../data/model_outputs.pkl")
+            if group == "test":
+                torch.save(outputs, "../data/model_test_outputs.pkl")
 
     def training_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "train")
