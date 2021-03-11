@@ -25,16 +25,17 @@ max_tree_nodes: 250
 max_tree_depth: 20
 
 # ===== Hyperparameters =====
-learning_rate: 0.01
-weight_decay: 0
-lr_decay_gamma: 0.95
+hyper_parameters:
+  optimizer: "Momentum"
+  learning_rate: 0.01
+  weight_decay: 0
+  lr_decay_gamma: 0.95
 
-batch_size: 512
-n_epochs: 100
+  batch_size: 512
+  n_epochs: 5
+  patience: 10
+  clip_norm: 5
 
-patience: 10
-clip_norm: 5
-teacher_forcing: 1
 
 # ===== Training parameters =====
 val_every_epoch: 1
@@ -50,3 +51,4 @@ encoder_size: 128
 decoder_size: 320
 decoder_num_layers: 1
 rnn_dropout: 0.5
+teacher_forcing: 1

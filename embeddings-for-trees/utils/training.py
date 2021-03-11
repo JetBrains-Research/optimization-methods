@@ -57,7 +57,7 @@ def configure_optimizers_alon(
 
     else:
         raise ValueError(f"Unknown optimizer name: {hyper_parameters.optimizer}")
-    scheduler = LambdaLR(optimizer, lr_lambda=lambda epoch: hyper_parameters.decay_gamma ** epoch)
+    scheduler = LambdaLR(optimizer, lr_lambda=lambda epoch: hyper_parameters.lr_decay_gamma ** epoch)
     return [optimizer], [scheduler]
 
 
