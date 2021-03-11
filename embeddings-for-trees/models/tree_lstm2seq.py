@@ -8,6 +8,7 @@ from torch.optim import Optimizer, Adam
 from torch.optim.lr_scheduler import _LRScheduler, LambdaLR
 
 from models.parts import NodeEmbedding, LSTMDecoder, TreeLSTM
+from utils.training import configure_optimizers_alon
 from utils.common import PAD, UNK, EOS, SOS
 from utils.metrics import PredictionStatistic
 from utils.vocabulary import Vocabulary
@@ -126,6 +127,7 @@ class TreeLSTM2Seq(LightningModule):
                 log[f"{group}/{key}"] = value
             self.log_dict(log)
             self.log(f"{group}_loss", mean_loss)
+            torch.save(outputs, "../data/model_outputs.pkl")
 
     def training_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "train")

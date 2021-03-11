@@ -1,5 +1,7 @@
-from typing import List, Tuple
+from typing import List, Tuple, Iterable
+from omegaconf import DictConfig
 import torch
+from omegaconf import DictConfig
 from torch.optim import Adam, Optimizer, SGD, Adadelta, Adagrad, Adamax, RMSprop, LBFGS, ASGD
 import torch_optimizer as optim
 from torch.optim.lr_scheduler import _LRScheduler, LambdaLR

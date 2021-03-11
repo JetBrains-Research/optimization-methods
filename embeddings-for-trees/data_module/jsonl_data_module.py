@@ -66,7 +66,7 @@ class JsonlDataModule(LightningDataModule):
         dataset = JsonlASTDataset(holdout_file, self._vocabulary, self._config)
         return DataLoader(
             dataset,
-            self._config.batch_size,
+            self._config.hyper_parameters.batch_size,
             shuffle=shuffle,
             num_workers=self._config.num_workers,
             collate_fn=self._collate_batch,
