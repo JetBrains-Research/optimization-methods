@@ -24,8 +24,8 @@ class JsonlDataModule(LightningDataModule):
         "java-full-asts": "https://s3-eu-west-1.amazonaws.com/datasets.ml.labs.aws.intellij.net/code-summarization/java-full-asts.tar.gz",
         "java-test-typed-asts": "https://s3-eu-west-1.amazonaws.com/datasets.ml.labs.aws.intellij.net/java-ast-methods/java-test-typed-asts.tar.gz",
         "java-small-typed-asts": "https://s3-eu-west-1.amazonaws.com/datasets.ml.labs.aws.intellij.net/java-ast-methods/java-small-typed-asts.tar.gz",
-        "java-med-tenth1": "https://www.dropbox.com/s/a7te4cydysm3e36/java-med-tenth1.tar.gz?dl=1",
-        "java-med-tenth2": "https://www.dropbox.com/s/5hrq323iem222eh/java-med-tenth2.tar.gz?dl=1",
+        "java-med-tenth1": "https://www.dropbox.com/s/4y88jj1i3a1h3s3/java-med-tenth1.tar.gz?dl=1",
+        "java-med-tenth2": "https://www.dropbox.com/s/8qbzrayo2l1fotj/java-med-tenth2.tar.gz?dl=1",
     }
 
     def __init__(self, config: DictConfig):
@@ -35,10 +35,7 @@ class JsonlDataModule(LightningDataModule):
         self._vocabulary: Optional[Vocabulary] = None
 
     def prepare_data(self):
-        if path.exists(self._dataset_dir):
-            print(f"Dataset is already downloaded")
-            return
-        print(f"Could not find dataset {self._config.dataset} in {self._config.data_folder}. Try to download it.")
+        print("Downloading dataset...")
         if self._config.dataset not in self._known_datasets:
             print(
                 f"Unknown dataset name ({self._config.dataset}).\n"
