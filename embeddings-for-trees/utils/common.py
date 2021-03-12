@@ -35,7 +35,7 @@ def get_lines_in_file(file_path: str) -> int:
 
 def download_dataset(url: str, dataset_dir: str, dataset_name: str):
     download_dir = dirname(dataset_dir)
-    download_command_result = subprocess.run(["wget", "-O", f"{dataset_name}.tar.gz", url, "-P", download_dir], capture_output=True, encoding="utf-8")
+    download_command_result = subprocess.run(["wget", "-O", f"{download_dir}/{dataset_name}.tar.gz", url], capture_output=True, encoding="utf-8")
     if download_command_result.returncode != 0:
         raise RuntimeError(f"Failed to download dataset. Error:\n{download_command_result.stderr}")
     tar_name = join(download_dir, f"{dataset_name}.tar.gz")
