@@ -69,6 +69,7 @@ def train_treelstm(config: DictConfig):
 
     trainer.fit(model=model, datamodule=data_module)
     trainer.test()
+    model.write_prediction('test_predictions', model._test_outputs, file_name='../data/sgd_predictions.pt')
 
 
 if __name__ == "__main__":

@@ -24,6 +24,8 @@ class JsonlDataModule(LightningDataModule):
         "java-full-asts": "https://s3-eu-west-1.amazonaws.com/datasets.ml.labs.aws.intellij.net/code-summarization/java-full-asts.tar.gz",
         "java-test-typed-asts": "https://s3-eu-west-1.amazonaws.com/datasets.ml.labs.aws.intellij.net/java-ast-methods/java-test-typed-asts.tar.gz",
         "java-small-typed-asts": "https://s3-eu-west-1.amazonaws.com/datasets.ml.labs.aws.intellij.net/java-ast-methods/java-small-typed-asts.tar.gz",
+        "java-med-tenth1": "https://drive.google.com/file/d/1BWIAC1ItNQ0Ejzib3bknGj3fNpg47WgO/view?usp=sharing",
+        "java-med-tenth2": "https://drive.google.com/file/d/1bNgsuIwvFUL-N4UTrC4rAWGc1R9OiBjU/view?usp=sharing",
     }
 
     def __init__(self, config: DictConfig):

@@ -31,6 +31,7 @@ class TreeLSTM2Seq(LightningModule):
         self._embedding = self._get_embedding()
         self._encoder = TreeLSTM(config)
         self._decoder = LSTMDecoder(config, vocabulary)
+        self._test_outputs = []
 
     @property
     def config(self) -> DictConfig:
@@ -104,6 +105,7 @@ class TreeLSTM2Seq(LightningModule):
         labels, graph = batch
         # [seq length; batch size; vocab size]
         logits = self(graph, labels.shape[0], labels)
+        self._test_outputs.append(logits)
         loss = self._calculate_loss(logits, labels)
         prediction = logits.argmax(-1)
 
@@ -113,7 +115,18 @@ class TreeLSTM2Seq(LightningModule):
         return {"loss": loss, "statistic": statistic}
 
     def test_step(self, batch: Tuple[torch.Tensor, dgl.DGLGraph], batch_idx: int) -> Dict:  # type: ignore
-        return self.validation_step(batch, batch_idx)
+        labels, graph = batch
+        # [seq length; batch size; vocab size]
+        logits = self(graph, labels.shape[0], labels)
+        self._test_outputs.append(logits)
+        self._test_outputs.append(logits)
+        loss = self._calculate_loss(logits, labels)
+        prediction = logits.argmax(-1)
+
+        statistic = PredictionStatistic(True, self._label_pad_id, self._metric_skip_tokens)
+        statistic.update_statistic(labels, prediction)
+
+        return {"loss": loss, "statistic": statistic}
 
     # ========== On epoch end ==========
 
@@ -127,8 +140,6 @@ class TreeLSTM2Seq(LightningModule):
                 log[f"{group}/{key}"] = value
             self.log_dict(log)
             self.log(f"{group}_loss", mean_loss)
-            if group == "test":
-                torch.save(outputs, "../data/model_test_outputs.pkl")
 
     def training_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "train")
