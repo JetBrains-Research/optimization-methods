@@ -105,7 +105,6 @@ class TreeLSTM2Seq(LightningModule):
         labels, graph = batch
         # [seq length; batch size; vocab size]
         logits = self(graph, labels.shape[0], labels)
-        self._test_outputs.append(logits)
         loss = self._calculate_loss(logits, labels)
         prediction = logits.argmax(-1)
 
@@ -118,10 +117,11 @@ class TreeLSTM2Seq(LightningModule):
         labels, graph = batch
         # [seq length; batch size; vocab size]
         logits = self(graph, labels.shape[0], labels)
-        self._test_outputs.append(logits)
-        self._test_outputs.append(logits)
+
         loss = self._calculate_loss(logits, labels)
+
         prediction = logits.argmax(-1)
+        self._test_outputs.append(prediction.detach())
 
         statistic = PredictionStatistic(True, self._label_pad_id, self._metric_skip_tokens)
         statistic.update_statistic(labels, prediction)

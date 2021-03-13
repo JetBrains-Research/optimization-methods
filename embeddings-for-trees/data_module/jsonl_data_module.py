@@ -35,6 +35,9 @@ class JsonlDataModule(LightningDataModule):
         self._vocabulary: Optional[Vocabulary] = None
 
     def prepare_data(self):
+        if path.exists(self._dataset_dir):
+            print(f"Dataset is already downloaded")
+            return
         print("Downloading dataset...")
         if self._config.dataset not in self._known_datasets:
             print(
