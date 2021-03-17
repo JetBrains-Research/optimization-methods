@@ -14,7 +14,7 @@ from utils.metrics import PredictionStatistic
 from utils.vocabulary import Vocabulary
 
 
-class TreeLSTM2Seq(LightningModule):
+class TreeLSTM2SeqManual(LightningModule):
     def __init__(self, config: DictConfig, vocabulary: Vocabulary):
         super().__init__()
         self.save_hyperparameters()
