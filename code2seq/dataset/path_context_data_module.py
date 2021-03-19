@@ -43,7 +43,7 @@ class PathContextDataModule(LightningDataModule):
             dataset,
             batch_size=self._config.hyper_parameters.batch_size,
             shuffle=self._config.hyper_parameters.shuffle_data,
-            num_workers=self._config.num_workers,
+            num_workers=8,#self._config.num_workers,
             collate_fn=self.collate_wrapper,
             pin_memory=True,
         )
@@ -54,7 +54,7 @@ class PathContextDataModule(LightningDataModule):
             dataset,
             batch_size=self._config.hyper_parameters.test_batch_size,
             shuffle=False,
-            num_workers=self._config.num_workers,
+            num_workers=8,#self._config.num_workers,
             collate_fn=self.collate_wrapper,
             pin_memory=True,
         )
@@ -65,7 +65,7 @@ class PathContextDataModule(LightningDataModule):
             dataset,
             batch_size=self._config.hyper_parameters.batch_size,
             shuffle=False,
-            num_workers=self._config.num_workers,
+            num_workers=8,#self._config.num_workers,
             collate_fn=self.collate_wrapper,
             pin_memory=True,
         )

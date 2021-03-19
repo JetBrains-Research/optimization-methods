@@ -4,9 +4,10 @@ import numpy
 import torch
 from omegaconf import DictConfig
 from torch.optim import Adam, Optimizer, SGD, Adadelta, Adagrad, Adamax, RMSprop, LBFGS
+from torchcontrib.optim import SWA
 import torch_optimizer as optim
-from optimizer import Nadam, SVRG
-from torch.optim.lr_scheduler import _LRScheduler, LambdaLR
+from optimizer import Nadam, SVRG, LocalSGD
+from torch.optim.lr_scheduler import _LRScheduler, LambdaLR, CosineAnnealingLR
 
 
 def configure_optimizers_alon(
@@ -30,6 +31,12 @@ def configure_optimizers_alon(
         )
     elif hyper_parameters.optimizer == "Adam":
         optimizer = Adam(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
+        
+    elif hyper_parameters.optimizer == "SWA_Adam":
+        base_opt = Adam(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
+        optimizer = SWA(base_opt)
+        optimizer.defaults = []
+    
     elif hyper_parameters.optimizer == "Nadam":
         optimizer = Nadam(parameters, lr=hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
         
@@ -103,12 +110,16 @@ def configure_optimizers_alon(
     elif hyper_parameters.optimizer == "SVRG":
         optimizer = SVRG(parameters, hyper_parameters.learning_rate, freq=80)
     
+    elif hyper_parameters.optimizer == "LocalSGD":
+        optimizer = LocalSGD(parameters, lr=hyper_parameters.learning_rate, size=8, gmf=0.01, tau=8)
+    
     elif hyper_parameters.optimizer == "LBFGS":
         optimizer = LBFGS(parameters, hyper_parameters.learning_rate)
     
     else:
         raise ValueError(f"Unknown optimizer name: {hyper_parameters.optimizer}")
-    scheduler = LambdaLR(optimizer, lr_lambda=lambda epoch: hyper_parameters.decay_gamma ** epoch)
+#     scheduler = LambdaLR(optimizer, lr_lambda=lambda epoch: hyper_parameters.decay_gamma ** epoch)
+    scheduler = CosineAnnealingLR(optimizer, T_max=40, eta_min=0)
     return [optimizer], [scheduler]
 
 

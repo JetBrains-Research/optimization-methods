@@ -69,6 +69,12 @@ def train(config: DictConfig):
     gpu = 1 if torch.cuda.is_available() else None
     # define learning rate logger
     lr_logger = LearningRateMonitor("step")
+    
+#     torch.distributed.init_process_group(backend="nccl", 
+#                                      init_method='tcp://h0:22000', 
+#                                      rank=0, 
+#                                      world_size=8)
+    
     trainer = Trainer(
         max_epochs=config.hyper_parameters.n_epochs,
         gradient_clip_val=config.hyper_parameters.clip_norm,

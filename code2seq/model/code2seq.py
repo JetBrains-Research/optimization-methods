@@ -13,6 +13,7 @@ from code2seq.utils.metrics import PredictionStatistic
 from code2seq.utils.training import configure_optimizers_alon
 from code2seq.utils.vocabulary import Vocabulary, SOS, PAD, UNK, EOS
 import numpy as np
+import random
 from rouge_metric import PyRouge
 
 import pickle
@@ -66,7 +67,17 @@ class Code2Seq(LightningModule):
     # ========== Main PyTorch-Lightning hooks ==========
 
     def configure_optimizers(self) -> Tuple[List[Optimizer], List[_LRScheduler]]:
-        return configure_optimizers_alon(self._config.hyper_parameters, self.parameters())
+        res = configure_optimizers_alon(self._config.hyper_parameters, self.parameters())
+        self.sch = res[1][0]
+        return res
+    
+    def backward(self, loss, optimizer, optimizer_idx):
+        loss.backward()
+        self.sch.step()
+        if optimizer.param_groups[0]["lr"] < (0.01) * 0.1:
+            print("!")
+            optimizer.update_swa()
+            optimizer.swap_swa_sgd()
 
     def forward(  # type: ignore
         self,
@@ -122,14 +133,13 @@ class Code2Seq(LightningModule):
         # [seq length; batch size; vocab size]
         logits = self(batch.contexts, batch.contexts_per_label, batch.labels.shape[0])
         loss = self._calculate_loss(logits, batch.labels)
-        if test:
-            print(batch.labels.cpu().numpy().shape, logits.argmax(-1).unsqueeze(1).cpu().numpy().shape)
-            rouge = PyRouge(rouge_n=(1, 2, 4), rouge_l=True, rouge_w=True,
-                rouge_w_weight=1.2, rouge_s=True, rouge_su=True, skip_gap=4)
-            print(rouge.evaluate_tokenized(
-                np.array(batch.labels.cpu().numpy(), dtype=str), 
-                np.array(logits.argmax(-1).unsqueeze(1).cpu().numpy(), dtype=str)
-            ))
+#         if test:
+#             rouge = PyRouge(rouge_n=(1, 2, 4), rouge_l=True, rouge_w=True,
+#                 rouge_w_weight=1.2, rouge_s=True, rouge_su=True, skip_gap=4)
+#             print(rouge.evaluate_tokenized(
+#                 np.array(batch.labels.cpu().numpy(), dtype=str), 
+#                 np.array(logits.argmax(-1).unsqueeze(1).cpu().numpy(), dtype=str)
+#             ))
         prediction = logits.argmax(-1)
 
         statistic = PredictionStatistic(True, self._label_pad_id, self._metric_skip_tokens)
