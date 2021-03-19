@@ -8,13 +8,13 @@ hydra:
 name: code2seq
 
 seed: 7
-num_workers: 2
+num_workers: 1
 log_offline: false
 
 resume_from_checkpoint: null
 
 # data keys
-data_folder: /home/dmivilensky/optimization-methods/code2seq/permanent-data
+data_folder: /home/dmivilensky/code2seq/code2seq/permanent-data
 vocabulary_name: vocabulary.pkl
 train_holdout: train
 val_holdout: val
@@ -35,7 +35,7 @@ hyper_parameters:
   random_context: true
   shuffle_data: true
 
-  optimizer: "RAdam"
+  optimizer: "Apollo"
   nesterov: true
   learning_rate: 0.01
   weight_decay: 0

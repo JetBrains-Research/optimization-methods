@@ -13,6 +13,7 @@ from code2seq.utils.metrics import PredictionStatistic
 from code2seq.utils.training import configure_optimizers_alon
 from code2seq.utils.vocabulary import Vocabulary, SOS, PAD, UNK, EOS
 import numpy as np
+from rouge_metric import PyRouge
 
 import pickle
 
@@ -117,19 +118,31 @@ class Code2Seq(LightningModule):
 
         return {"loss": loss, "statistic": statistic}
 
-    def validation_step(self, batch: PathContextBatch, batch_idx: int) -> Dict:  # type: ignore
+    def validation_step(self, batch: PathContextBatch, batch_idx: int, test=False) -> Dict:  # type: ignore
         # [seq length; batch size; vocab size]
         logits = self(batch.contexts, batch.contexts_per_label, batch.labels.shape[0])
         loss = self._calculate_loss(logits, batch.labels)
+        if test:
+            print(batch.labels.cpu().numpy().shape, logits.argmax(-1).unsqueeze(1).cpu().numpy().shape)
+            rouge = PyRouge(rouge_n=(1, 2, 4), rouge_l=True, rouge_w=True,
+                rouge_w_weight=1.2, rouge_s=True, rouge_su=True, skip_gap=4)
+            print(rouge.evaluate_tokenized(
+                np.array(batch.labels.cpu().numpy(), dtype=str), 
+                np.array(logits.argmax(-1).unsqueeze(1).cpu().numpy(), dtype=str)
+            ))
         prediction = logits.argmax(-1)
 
         statistic = PredictionStatistic(True, self._label_pad_id, self._metric_skip_tokens)
         statistic.update_statistic(batch.labels, prediction)
-
+        
+#         if test:
+#             with open('outputs/prediction' + str(batch_idx) + '.pickle', 'wb') as f:
+#                 pickle.dump(prediction, f)
+        
         return {"loss": loss, "statistic": statistic}
 
     def test_step(self, batch: PathContextBatch, batch_idx: int) -> Dict:  # type: ignore
-        return self.validation_step(batch, batch_idx)
+        return self.validation_step(batch, batch_idx, test=True)
 
     # ========== On epoch end ==========
 
@@ -143,10 +156,6 @@ class Code2Seq(LightningModule):
                 log[f"{group}/{key}"] = value
             self.log_dict(log)
             self.log(f"{group}_loss", mean_loss)
-            if group == "test":
-                with open('test_losses.pickle', 'wb') as f:
-                    pickle.dump([out["loss"] for out in outputs], f)
-                print('losses dumped')
 
     def training_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "train")
