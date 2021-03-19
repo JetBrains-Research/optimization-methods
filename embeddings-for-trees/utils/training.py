@@ -4,7 +4,8 @@ import torch
 from omegaconf import DictConfig
 from torch.optim import Adam, Optimizer, SGD, Adadelta, Adagrad, Adamax, RMSprop, LBFGS, ASGD
 import torch_optimizer as optim
-from torch.optim.lr_scheduler import _LRScheduler, LambdaLR, CyclicLR
+from torch.optim.lr_scheduler import _LRScheduler, LambdaLR
+from scheduler import MyCyclicLR
 
 
 def configure_optimizers_alon(
@@ -57,7 +58,7 @@ def configure_optimizers_alon(
 
     else:
         raise ValueError(f"Unknown optimizer name: {hyper_parameters.optimizer}")
-    if hyper_parameters.straregy == "decay":
+    if hyper_parameters.strategy == "decay":
         scheduler = {
             'scheduler': LambdaLR(optimizer, lr_lambda=lambda epoch: hyper_parameters.lr_decay_gamma ** epoch),
             'interval': 'epoch',  # or 'epoch'
@@ -65,8 +66,8 @@ def configure_optimizers_alon(
         }
     elif hyper_parameters.strategy == "cyclic":
         scheduler = {
-            'scheduler': CyclicLR(optimizer, base_lr=hyper_parameters.min_lr, max_lr=hyper_parameters.max_lr,
-                                  step_size_up=0, step_size_down=hyper_parameters.cycle_len),
+            'scheduler': MyCyclicLR(optimizer, min_lr=hyper_parameters.min_lr, max_lr=hyper_parameters.max_lr,
+                                    cycle_len=hyper_parameters.cycle_len),
             'interval': 'step',  # or 'epoch'
             'frequency': 1
         }
