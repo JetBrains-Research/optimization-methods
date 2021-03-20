@@ -20,14 +20,12 @@ def configure_optimizers_alon(
     :return: list of optimizers and schedulers
     """
     optimizer: Optimizer
-    if hyper_parameters.optimizer == "Momentum":
+    if hyper_parameters.optimizer == "SGD":
         # using the same momentum value as in original realization by Alon
         optimizer = SGD(
             parameters,
             hyper_parameters.learning_rate,
-            momentum=0.95,
-            nesterov=hyper_parameters.nesterov,
-            weight_decay=hyper_parameters.weight_decay,
+            weight_decay=hyper_parameters.weight_decay
         )
     elif hyper_parameters.optimizer == "Adam":
         optimizer = Adam(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
@@ -118,8 +116,8 @@ def configure_optimizers_alon(
     
     else:
         raise ValueError(f"Unknown optimizer name: {hyper_parameters.optimizer}")
-#     scheduler = LambdaLR(optimizer, lr_lambda=lambda epoch: hyper_parameters.decay_gamma ** epoch)
-    scheduler = CosineAnnealingLR(optimizer, T_max=40, eta_min=0)
+    scheduler = LambdaLR(optimizer, lr_lambda=lambda epoch: hyper_parameters.decay_gamma ** epoch)
+#     scheduler = CosineAnnealingLR(optimizer, T_max=40, eta_min=0)
     return [optimizer], [scheduler]
 
 

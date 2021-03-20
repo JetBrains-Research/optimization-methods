@@ -71,13 +71,13 @@ class Code2Seq(LightningModule):
         self.sch = res[1][0]
         return res
     
-    def backward(self, loss, optimizer, optimizer_idx):
-        loss.backward()
-        self.sch.step()
-        if optimizer.param_groups[0]["lr"] < (0.01) * 0.1:
-            print("!")
-            optimizer.update_swa()
-            optimizer.swap_swa_sgd()
+#     def backward(self, loss, optimizer, optimizer_idx):
+#         loss.backward()
+#         self.sch.step()
+#         if optimizer.param_groups[0]["lr"] < (0.01) * 0.1:
+#             print("!")
+#             optimizer.update_swa()
+#             optimizer.swap_swa_sgd()
 
     def forward(  # type: ignore
         self,
