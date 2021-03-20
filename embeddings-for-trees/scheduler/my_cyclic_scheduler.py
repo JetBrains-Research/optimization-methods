@@ -1,4 +1,5 @@
 from torch.optim.lr_scheduler import _LRScheduler
+from torch.optim import Optimizer
 
 
 class MyCyclicLR(_LRScheduler):
@@ -32,7 +33,7 @@ class MyCyclicLR(_LRScheduler):
 
         self.gamma = gamma
 
-        super(CyclicLR, self).__init__(optimizer, last_epoch, verbose)
+        super(MyCyclicLR, self).__init__(optimizer, last_epoch, verbose)
 
     def _format_param(self, name, optimizer, param):
         """Return correctly formatted lr/momentum for each param group."""

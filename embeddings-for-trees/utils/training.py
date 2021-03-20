@@ -3,6 +3,7 @@ from omegaconf import DictConfig
 import torch
 from omegaconf import DictConfig
 from torch.optim import Adam, Optimizer, SGD, Adadelta, Adagrad, Adamax, RMSprop, LBFGS, ASGD
+from optimizer import SVRG
 import torch_optimizer as optim
 from torch.optim.lr_scheduler import _LRScheduler, LambdaLR
 from scheduler import MyCyclicLR
@@ -56,8 +57,12 @@ def configure_optimizers_alon(
     elif hyper_parameters.optimizer == "LBFGS":
         optimizer = LBFGS(parameters, hyper_parameters.learning_rate)
 
+    elif hyper_parameters.optimizer == "SVRG":
+        optimizer = SVRG(parameters, hyper_parameters.learning_rate, freq=80)
+
     else:
         raise ValueError(f"Unknown optimizer name: {hyper_parameters.optimizer}")
+
     if hyper_parameters.strategy == "decay":
         scheduler = {
             'scheduler': LambdaLR(optimizer, lr_lambda=lambda epoch: hyper_parameters.lr_decay_gamma ** epoch),
