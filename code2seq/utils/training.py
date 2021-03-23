@@ -117,7 +117,7 @@ def configure_optimizers_alon(
         
     if hyper_parameters.strategy == "decay":
         scheduler = {
-            'scheduler': LambdaLR(optimizer, lr_lambda=lambda epoch: hyper_parameters.lr_decay_gamma ** epoch),
+            'scheduler': LambdaLR(optimizer, lr_lambda=lambda epoch: hyper_parameters.decay_gamma ** epoch),
             'interval': 'epoch',  # or 'epoch'
             'frequency': 1
         }
