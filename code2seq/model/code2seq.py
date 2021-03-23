@@ -14,7 +14,7 @@ from code2seq.utils.training import configure_optimizers_alon
 from code2seq.utils.vocabulary import Vocabulary, SOS, PAD, UNK, EOS
 import numpy as np
 import random
-from rouge_metric import PyRouge
+from allennlp.training.metrics.rouge import ROUGE
 
 import pickle
 
@@ -35,6 +35,9 @@ class Code2Seq(LightningModule):
             raise ValueError(f"Can't find SOS token in label to id vocabulary")
         self.encoder = self._get_encoder()
         self.decoder = self._get_decoder()
+        
+        self.rouge_metric = ROUGE(2, set([0, 1]))
+        self.rouge_metric.reset()
 
     @property
     def config(self) -> DictConfig:
@@ -130,26 +133,23 @@ class Code2Seq(LightningModule):
         return {"loss": loss, "statistic": statistic}
 
     def validation_step(self, batch: PathContextBatch, batch_idx: int, test=False) -> Dict:  # type: ignore
+        if test and batch_idx == 0:
+            self.rouge_metric.reset()
+            
         # [seq length; batch size; vocab size]
         logits = self(batch.contexts, batch.contexts_per_label, batch.labels.shape[0])
         loss = self._calculate_loss(logits, batch.labels)
-#         if test:
-#             rouge = PyRouge(rouge_n=(1, 2, 4), rouge_l=True, rouge_w=True,
-#                 rouge_w_weight=1.2, rouge_s=True, rouge_su=True, skip_gap=4)
-#             print(rouge.evaluate_tokenized(
-#                 np.array(batch.labels.cpu().numpy(), dtype=str), 
-#                 np.array(logits.argmax(-1).unsqueeze(1).cpu().numpy(), dtype=str)
-#             ))
+        
         prediction = logits.argmax(-1)
+        
+        self.rouge_metric(torch.transpose(prediction, 0, 1), torch.transpose(batch.labels, 0, 1))
+        if batch_idx % 150 == 0:
+            print(self.rouge_metric.get_metric())
 
         statistic = PredictionStatistic(True, self._label_pad_id, self._metric_skip_tokens)
         statistic.update_statistic(batch.labels, prediction)
         
-#         if test:
-#             with open('outputs/prediction' + str(batch_idx) + '.pickle', 'wb') as f:
-#                 pickle.dump(prediction, f)
-        
-        return {"loss": loss, "statistic": statistic}
+        return {"loss": loss, "statistic": statistic, "rouge": self.rouge_metric}
 
     def test_step(self, batch: PathContextBatch, batch_idx: int) -> Dict:  # type: ignore
         return self.validation_step(batch, batch_idx, test=True)
@@ -164,6 +164,8 @@ class Code2Seq(LightningModule):
             log: Dict[str, Union[float, torch.Tensor]] = {f"{group}/loss": mean_loss}
             for key, value in epoch_metrics.items():
                 log[f"{group}/{key}"] = value
+            if "rouge" in out[-1]:
+                log[f"{group}/rouge"] = out[-1].get_metric()
             self.log_dict(log)
             self.log(f"{group}_loss", mean_loss)
 
