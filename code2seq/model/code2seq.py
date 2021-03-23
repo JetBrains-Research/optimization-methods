@@ -164,8 +164,8 @@ class Code2Seq(LightningModule):
             log: Dict[str, Union[float, torch.Tensor]] = {f"{group}/loss": mean_loss}
             for key, value in epoch_metrics.items():
                 log[f"{group}/{key}"] = value
-            if "rouge" in out[-1]:
-                log[f"{group}/rouge"] = out[-1].get_metric()
+            if "rouge" in outputs[-1]:
+                log[f"{group}/rouge"] = outputs[-1]["rouge"].get_metric()
             self.log_dict(log)
             self.log(f"{group}_loss", mean_loss)
 

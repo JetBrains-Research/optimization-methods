@@ -36,10 +36,14 @@ hyper_parameters:
   shuffle_data: true
 
   optimizer: "SGD"
+  strategy: "cyclic"
   nesterov: true
   learning_rate: 0.01
   weight_decay: 0
   decay_gamma: 0.95
+  min_lr: 0.001
+  max_lr: 0.01
+  cycle_len: 600
 
 dataset:
   name: java-med

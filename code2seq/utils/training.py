@@ -6,8 +6,9 @@ from omegaconf import DictConfig
 from torch.optim import Adam, Optimizer, SGD, Adadelta, Adagrad, Adamax, RMSprop, LBFGS
 from torchcontrib.optim import SWA
 import torch_optimizer as optim
-from optimizer import Nadam, SVRG, LocalSGD
+from optimizer import Nadam, SVRG
 from torch.optim.lr_scheduler import _LRScheduler, LambdaLR, CosineAnnealingLR
+from scheduler import MyCyclicLR
 
 
 def configure_optimizers_alon(
@@ -108,16 +109,28 @@ def configure_optimizers_alon(
     elif hyper_parameters.optimizer == "SVRG":
         optimizer = SVRG(parameters, hyper_parameters.learning_rate, freq=80)
     
-    elif hyper_parameters.optimizer == "LocalSGD":
-        optimizer = LocalSGD(parameters, lr=hyper_parameters.learning_rate, size=8, gmf=0.01, tau=8)
-    
     elif hyper_parameters.optimizer == "LBFGS":
         optimizer = LBFGS(parameters, hyper_parameters.learning_rate)
     
     else:
         raise ValueError(f"Unknown optimizer name: {hyper_parameters.optimizer}")
-    scheduler = LambdaLR(optimizer, lr_lambda=lambda epoch: hyper_parameters.decay_gamma ** epoch)
-#     scheduler = CosineAnnealingLR(optimizer, T_max=40, eta_min=0)
+        
+    if hyper_parameters.strategy == "decay":
+        scheduler = {
+            'scheduler': LambdaLR(optimizer, lr_lambda=lambda epoch: hyper_parameters.lr_decay_gamma ** epoch),
+            'interval': 'epoch',  # or 'epoch'
+            'frequency': 1
+        }
+    elif hyper_parameters.strategy == "cyclic":
+        scheduler = {
+            'scheduler': MyCyclicLR(optimizer, min_lr=hyper_parameters.min_lr, max_lr=hyper_parameters.max_lr,
+                                    cycle_len=hyper_parameters.cycle_len),
+            'interval': 'step',  # or 'epoch'
+            'frequency': 1
+        }
+    else:
+        raise ValueError('No such learning rate strategy')
+    
     return [optimizer], [scheduler]
 
 
