@@ -57,7 +57,7 @@ class SVRG(Optimizer):
 
                 #dont update parameters when computing large batch (low variance gradients)
                 if self.counter != freq and self.flag != False:
-                    p.data.add_(-group['lr'], (d_p - buf2 + buf) )
+                    p.data.add_((d_p - buf2 + buf), alpha=-group['lr'])
 
         self.flag = True #rough way of not updating the weights the FIRST time we calculate the large batch gradient
         
