@@ -3,6 +3,7 @@ from omegaconf import DictConfig
 import torch
 from omegaconf import DictConfig
 from torch.optim import Adam, Optimizer, SGD, Adadelta, Adagrad, Adamax, RMSprop, LBFGS, ASGD
+from torchcontrib.optim import SWA
 from optimizer import SVRG
 import torch_optimizer as optim
 from torch.optim.lr_scheduler import _LRScheduler, LambdaLR
@@ -28,6 +29,17 @@ def configure_optimizers_alon(
             nesterov=hyper_parameters.nesterov,
             weight_decay=hyper_parameters.weight_decay,
         )
+    elif hyper_parameters.optimizer == "SWA":
+        base_opt = torch.optim.SGD(
+            parameters,
+            hyper_parameters.learning_rate,
+            momentum=0.95,
+            nesterov=hyper_parameters.nesterov,
+            weight_decay=hyper_parameters.weight_decay,
+        )
+        optimizer = SWA(base_opt, swa_start=hyper_parameters.swa_start, swa_freq=hyper_parameters.swa_freq,
+                        swa_lr=hyper_parameters.swa_lr)
+        optimizer.defaults = []
 
     elif hyper_parameters.optimizer == "ASGD":
         optimizer = ASGD(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
@@ -48,11 +60,20 @@ def configure_optimizers_alon(
         optimizer = RMSprop(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
 
     elif hyper_parameters.optimizer == "RAdam":
-        optimizer = optim.RAdam(parameters, lr=hyper_parameters.learning_rate,
-                                weight_decay=hyper_parameters.weight_decay,
-                                betas=(0.9, 0.999),
-                                eps=1e-8
-                                )
+        optimizer = optim.RAdam(
+            parameters, lr=hyper_parameters.learning_rate,
+            weight_decay=hyper_parameters.weight_decay,
+            betas=(0.9, 0.999),
+            eps=1e-8
+        )
+
+    elif hyper_parameters.optimizer == "Lamb":
+        optimizer = optim.Lamb(
+            parameters, lr=hyper_parameters.learning_rate,
+            weight_decay=hyper_parameters.weight_decay,
+            betas=(0.9, 0.999),
+            eps=1e-8
+        )
 
     elif hyper_parameters.optimizer == "LBFGS":
         optimizer = LBFGS(parameters, hyper_parameters.learning_rate)
