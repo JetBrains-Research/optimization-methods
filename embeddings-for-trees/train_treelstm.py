@@ -3,7 +3,8 @@ import hydra
 import torch
 from omegaconf import DictConfig
 from pytorch_lightning import seed_everything, Trainer, LightningModule
-from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping, LearningRateMonitor, StochasticWeightAveraging
+from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping, LearningRateMonitor
+from pytorch_lightning.callbacks.swa import StochasticWeightAveraging
 from pytorch_lightning.loggers import WandbLogger
 
 from data_module.jsonl_data_module import JsonlDataModule

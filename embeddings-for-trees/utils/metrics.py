@@ -1,5 +1,5 @@
 from typing import Dict, List, Optional
-from allennlp.training.metrics import rouge
+
 import torch
 
 
@@ -10,8 +10,7 @@ class PredictionStatistic:
         self._mask_after_pad = mask_after_pad
         self._pad_id = pad_id
         self._skip_tokens = [] if skip_tokens is None else skip_tokens
-        self._true_positive = self._false_positive = self._false_negative = self._rouge = 0
-        selg.rouge_metric = rouge(ngram_size=2, exclude_indices=skip_tokens)
+        self._true_positive = self._false_positive = self._false_negative = 0
 
     @staticmethod
     def _calculate_metric(true_positive: int, false_positive: int, false_negative: int) -> Dict[str, float]:
@@ -22,8 +21,7 @@ class PredictionStatistic:
             recall = true_positive / (true_positive + false_negative)
         if precision + recall > 0:
             f1 = 2 * precision * recall / (precision + recall)
-        rouge2 = self.rouge_metric.get_metric(reset=True)[1]
-        metrics_dict = {"precision": precision, "recall": recall, "f1": f1, "rouge-2": rouge2}
+        metrics_dict = {"precision": precision, "recall": recall, "f1": f1}
         return metrics_dict
 
     def get_metric(self) -> Dict[str, float]:
@@ -50,8 +48,6 @@ class PredictionStatistic:
             prediction = self._mask_tensor_after_pad(prediction)
 
         true_positive = false_positive = false_negative = 0
-
-        self.rouge_metric(prediction.T, original.T)    # Update recall counts
 
         for batch_idx in range(batch_size):
             gt_seq = [st for st in original[:, batch_idx] if st not in self._skip_tokens]
