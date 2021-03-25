@@ -110,7 +110,7 @@ class TreeLSTM2Seq(LightningModule):
         logits = self(graph, labels.shape[0], labels)
         loss = self._calculate_loss(logits, labels)
         prediction = logits.argmax(-1)
-        self.rouge_metric(torch.transpose(prediction, 0, 1), torch.transpose(batch.labels, 0, 1))
+        self.rouge_metric(prediction.T, labels.T)
         statistic = PredictionStatistic(True, self._label_pad_id, self._metric_skip_tokens)
         statistic.update_statistic(labels, prediction)
 

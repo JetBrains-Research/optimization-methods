@@ -34,5 +34,9 @@ class PrintEpochResultCallback(Callback):
             if group in metrics_to_print:
                 if isinstance(value, torch.Tensor):
                     value = value.item()
-                metrics_to_print[group].append(f"{metric}={round(value, 2)}")
+                if isinstance(value, Dict):
+                    metrics_to_print[group].append(f"{metric}={value}")
+                else:
+                    metrics_to_print[group].append(f"{metric}={round(value, 2)}")
+
         print_table(metrics_to_print)

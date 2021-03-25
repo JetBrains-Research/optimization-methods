@@ -5,7 +5,7 @@ hydra:
   job_logging: null
   hydra_logging: null
 
-num_workers: 4
+num_workers: 2
 seed: 7
 log_offline: false
 
@@ -26,15 +26,16 @@ max_tree_depth: 20
 
 # ===== Hyperparameters =====
 hyper_parameters:
-  n_epochs: 5
+  n_epochs: 10
   patience: 10
   batch_size: 512
   clip_norm: 5
 
-  optimizer: "Momentum"
+  optimizer: "Adam"
   nesterov: true
   learning_rate: 0.01
   weight_decay: 0
+  strategy: "decay"
   lr_decay_gamma: 0.95
 
 # ===== Training parameters =====
@@ -52,3 +53,4 @@ encoder_size: 128
 decoder_size: 320
 decoder_num_layers: 1
 rnn_dropout: 0.5
+

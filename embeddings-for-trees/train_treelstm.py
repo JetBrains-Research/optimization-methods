@@ -66,7 +66,6 @@ def train_treelstm(config: DictConfig):
             print_epoch_result_callback,
         ],
         resume_from_checkpoint=config.resume_checkpoint,
-        stochastic_weight_avg=config.hyper_parameters.swa,
     )
 
     trainer.fit(model=model, datamodule=data_module)
