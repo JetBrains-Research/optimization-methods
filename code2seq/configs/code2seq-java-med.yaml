@@ -16,8 +16,8 @@ resume_from_checkpoint: null
 # data keys
 data_folder: /home/dmivilensky/code2seq/code2seq/permanent-data
 vocabulary_name: vocabulary.pkl
-train_holdout: train
-val_holdout: val
+train_holdout: train.1
+val_holdout: val.1
 test_holdout: test
 
 save_every_epoch: 1

@@ -2,7 +2,7 @@
 code2seq/download_data.sh
 .ipynb_checkpoints/
 tests/
-code2seq/permanent-data/
+code2seq/permanent-data/java-med
 LICENSE
 code2seq/lightning_logs/
 LICENSE.md
