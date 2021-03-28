@@ -38,6 +38,8 @@ class Code2Seq(LightningModule):
         
         self.rouge_metric = ROUGE(2, set([0, 1]))
         self.rouge_metric.reset()
+        
+        self.val = False
 
     @property
     def config(self) -> DictConfig:
@@ -71,16 +73,7 @@ class Code2Seq(LightningModule):
 
     def configure_optimizers(self) -> Tuple[List[Optimizer], List[_LRScheduler]]:
         res = configure_optimizers_alon(self._config.hyper_parameters, self.parameters())
-        self.sch = res[1][0]
         return res
-    
-#     def backward(self, loss, optimizer, optimizer_idx):
-#         loss.backward()
-#         self.sch.step()
-#         if optimizer.param_groups[0]["lr"] < (0.01) * 0.1:
-#             print("!")
-#             optimizer.update_swa()
-#             optimizer.swap_swa_sgd()
 
     def forward(  # type: ignore
         self,
@@ -134,6 +127,11 @@ class Code2Seq(LightningModule):
 
     def validation_step(self, batch: PathContextBatch, batch_idx: int, test=False) -> Dict:  # type: ignore
         # [seq length; batch size; vocab size]
+        if not self.val:
+            print("start validation")
+            self.trainer.optimizers[0].swap_swa_sgd()
+            self.val = True
+            
         logits = self(batch.contexts, batch.contexts_per_label, batch.labels.shape[0])
         loss = self._calculate_loss(logits, batch.labels)
         
@@ -176,6 +174,9 @@ class Code2Seq(LightningModule):
 
     def validation_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "val")
+        print("finish validation")
+        self.trainer.optimizers[0].swap_swa_sgd()
+        self.val = False
 
     def test_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "test")

@@ -95,7 +95,7 @@ def train(config: DictConfig):
     )
 
     trainer.fit(model=model, datamodule=data_module)
-    trainer.test()
+#     trainer.test()
 
 
 if __name__ == "__main__":

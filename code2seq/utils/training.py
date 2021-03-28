@@ -30,9 +30,13 @@ def configure_optimizers_alon(
         )
     elif hyper_parameters.optimizer == "Adam":
         optimizer = Adam(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
+    elif hyper_parameters.optimizer == "Lookahead":
+        adam = Adam(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
+        optimizer = optim.Lookahead(adam, k=5, alpha=0.5)
+        optimizer.defaults = []
         
-    elif hyper_parameters.optimizer == "SWA_Adam":
-        base_opt = Adam(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
+    elif hyper_parameters.optimizer == "SWA":
+        base_opt = SGD(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
         optimizer = SWA(base_opt)
         optimizer.defaults = []
     
@@ -124,7 +128,7 @@ def configure_optimizers_alon(
     elif hyper_parameters.strategy == "cyclic":
         scheduler = {
             'scheduler': MyCyclicLR(optimizer, min_lr=hyper_parameters.min_lr, max_lr=hyper_parameters.max_lr,
-                                    cycle_len=hyper_parameters.cycle_len),
+                                    cycle_len=hyper_parameters.cycle_len, start_from=hyper_parameters.start_from, swa=True),
             'interval': 'step',  # or 'epoch'
             'frequency': 1
         }

@@ -10,13 +10,15 @@ class MyCyclicLR(_LRScheduler):
                  cycle_len,
                  gamma=1.,
                  last_epoch=-1,
-                 verbose=False):
+                 verbose=False,
+                 start_from=None, swa=False):
 
         # Attach optimizer
         if not isinstance(optimizer, Optimizer):
             raise TypeError('{} is not an Optimizer'.format(
                 type(optimizer).__name__))
         self.optimizer = optimizer
+        self.swa = swa
 
         self.max_lrs = self._format_param('max_lr', optimizer, max_lr)
         # if last_epoch == -1:
@@ -24,6 +26,7 @@ class MyCyclicLR(_LRScheduler):
         #         group['lr'] = lr
 
         self.cycle_len = cycle_len
+        self.start_from = start_from if start_from is not None else 0
         self.min_lrs = self._format_param('min_lr', optimizer, min_lr)
 
         # step_size_up = float(step_size_up)
@@ -59,11 +62,16 @@ class MyCyclicLR(_LRScheduler):
 
         iteration = self.last_epoch
 
-        t = (iteration % self.cycle_len + 1) / self.cycle_len
+        t = ((iteration - self.start_from) % self.cycle_len + 1) / self.cycle_len
+        if iteration < self.start_from:
+            t = 0
+        if self.swa and t > 0.98:
+            print("update swa")
+            self.optimizer.update_swa()
 
         lrs = []
         for min_lr, max_lr in zip(self.min_lrs, self.max_lrs):
-            lr = (1 - t) * max_lr + t * min_lr
+            lr = (1 - t) * (0.5 if iteration >= self.start_from else 1.) * max_lr + t * min_lr
             lrs.append(lr)
 
         return lrs
