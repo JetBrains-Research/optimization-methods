@@ -34,6 +34,13 @@ def configure_optimizers_alon(
         adam = Adam(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
         optimizer = optim.Lookahead(adam, k=5, alpha=0.5)
         optimizer.defaults = []
+    elif hyper_parameters.optimizer == "Lookahead_RAdam":
+        radam = optim.RAdam(parameters, lr=hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay,
+    betas=(0.9, 0.999),
+    eps=1e-8
+)
+        optimizer = optim.Lookahead(radam, k=5, alpha=0.5)
+        optimizer.defaults = []
         
     elif hyper_parameters.optimizer == "SWA":
         base_opt = SGD(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
@@ -45,6 +52,11 @@ def configure_optimizers_alon(
         
     elif hyper_parameters.optimizer == "Adadelta":
         optimizer = Adadelta(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
+        
+    elif hyper_parameters.optimizer == "Lookahead_Adadelta":
+        adadelta = Adadelta(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
+        optimizer = optim.Lookahead(adadelta, k=20, alpha=0.5)
+        optimizer.defaults = []
     
     elif hyper_parameters.optimizer == "Adagrad":
         optimizer = Adagrad(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)

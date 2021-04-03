@@ -11,7 +11,7 @@ seed: 7
 num_workers: 1
 log_offline: false
 
-resume_from_checkpoint: null
+resume_from_checkpoint: ./wandb/LaRAdam/files/epoch=12-val_loss=16.2255.ckpt
 
 # data keys
 data_folder: /home/dmivilensky/code2seq/code2seq/permanent-data
@@ -26,7 +26,7 @@ log_every_epoch: 10
 progress_bar_refresh_rate: 1
 
 hyper_parameters:
-  n_epochs: 7
+  n_epochs: 17
   patience: 10
   batch_size: 512
   test_batch_size: 512
@@ -35,16 +35,16 @@ hyper_parameters:
   random_context: true
   shuffle_data: true
 
-  optimizer: "SWA"
-  strategy: "cyclic"
+  optimizer: "Lookahead_Adadelta"
+  strategy: "decay"
   nesterov: true
-  learning_rate: 0.015
+  learning_rate: 0.0003
   weight_decay: 0
   decay_gamma: 0.95
   min_lr: 0.003
   max_lr: 0.015
-  cycle_len: 600
-  start_from: 3000
+  cycle_len: 300
+  start_from: 2400
 
 dataset:
   name: java-med

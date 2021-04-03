@@ -60,9 +60,9 @@ def train(config: DictConfig):
     )
     upload_checkpoint_callback = UploadCheckpointCallback(wandb_logger.experiment.dir)
     # define early stopping callback
-    early_stopping_callback = EarlyStopping(
-        patience=config.hyper_parameters.patience, monitor="val_loss", verbose=True, mode="min"
-    )
+#     early_stopping_callback = EarlyStopping(
+#         patience=config.hyper_parameters.patience, monitor="val_loss", verbose=True, mode="min"
+#     )
     # define callback for printing intermediate result
     print_epoch_result_callback = PrintEpochResultCallback("train", "val")
     # use gpu if it exists
@@ -86,7 +86,7 @@ def train(config: DictConfig):
         progress_bar_refresh_rate=config.progress_bar_refresh_rate,
         callbacks=[
             lr_logger,
-            early_stopping_callback,
+#             early_stopping_callback,
             checkpoint_callback,
             upload_checkpoint_callback,
             print_epoch_result_callback,
