@@ -1,5 +1,6 @@
 from os.path import split, join
 from typing import Dict, List
+import numpy as np
 
 import torch
 from pytorch_lightning import Callback, Trainer, LightningModule
@@ -32,11 +33,11 @@ class PrintEpochResultCallback(Callback):
                 continue
             group, metric = key.split("/")
             if group in metrics_to_print:
-                if isinstance(value, torch.Tensor):
-                    value = value.item()
                 if isinstance(value, Dict):
-                    metrics_to_print[group].append(f"{metric}={value}")
+                    metrics_to_print[group].append(f"{metric}={str(value)}")
                 else:
-                    metrics_to_print[group].append(f"{metric}={round(value, 2)}")
-
+                    try:
+                        metrics_to_print[group].append(f"{metric}={np.around(value.detach().numpy().cpu(), 2)}")
+                    except AttributeError:
+                        metrics_to_print[group].append(f"{metric}={round(value, 2)}")
         print_table(metrics_to_print)

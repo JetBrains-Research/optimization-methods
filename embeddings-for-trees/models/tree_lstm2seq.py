@@ -14,6 +14,8 @@ from utils.metrics import PredictionStatistic
 from utils.vocabulary import Vocabulary
 from allennlp.training.metrics.rouge import ROUGE
 
+import pickle
+
 
 class TreeLSTM2Seq(LightningModule):
     def __init__(self, config: DictConfig, vocabulary: Vocabulary):
@@ -104,37 +106,24 @@ class TreeLSTM2Seq(LightningModule):
 
         return {"loss": loss, "statistic": statistic}
 
-    def validation_step(self, batch: Tuple[torch.Tensor, dgl.DGLGraph], batch_idx: int) -> Dict:  # type: ignore
+    def validation_step(self, batch: Tuple[torch.Tensor, dgl.DGLGraph], batch_idx: int, test=False) -> Dict:  # type: ignore
         labels, graph = batch
         # [seq length; batch size; vocab size]
         logits = self(graph, labels.shape[0], labels)
         loss = self._calculate_loss(logits, labels)
         prediction = logits.argmax(-1)
         self.rouge_metric(prediction.T, labels.T)
+
+        if test:
+            self._test_outputs.append(prediction.detach())
+
         statistic = PredictionStatistic(True, self._label_pad_id, self._metric_skip_tokens)
         statistic.update_statistic(labels, prediction)
 
         return {"loss": loss, "statistic": statistic, "rouge": self.rouge_metric}
 
     def test_step(self, batch: Tuple[torch.Tensor, dgl.DGLGraph], batch_idx: int) -> Dict:  # type: ignore
-        if batch_idx == 0:
-            self.rouge_metric.reset()
-
-        labels, graph = batch
-        # [seq length; batch size; vocab size]
-        logits = self(graph, labels.shape[0], labels)
-
-        loss = self._calculate_loss(logits, labels)
-
-        prediction = logits.argmax(-1)
-        self.rouge_metric(prediction.T, labels.T)
-
-        self._test_outputs.append(prediction.detach())
-
-        statistic = PredictionStatistic(True, self._label_pad_id, self._metric_skip_tokens)
-        statistic.update_statistic(labels, prediction)
-
-        return {"loss": loss, "statistic": statistic, "rouge": self.rouge_metric}
+        return self.validation_step(batch, batch_idx, test=True)
 
     # ========== On epoch end ==========
 
@@ -150,6 +139,11 @@ class TreeLSTM2Seq(LightningModule):
                 log[f"{group}/rouge"] = outputs[-1]["rouge"].get_metric()
             self.log_dict(log)
             self.log(f"{group}_loss", mean_loss)
+            print("reset!")
+            if "rouge" in outputs[-1]:
+                outputs[-1]["rouge"].reset()
+            if self.rouge_metric:
+                self.rouge_metric.reset()
 
     def training_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "train")
