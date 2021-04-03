@@ -37,7 +37,7 @@ class PrintEpochResultCallback(Callback):
                     metrics_to_print[group].append(f"{metric}={str(value)}")
                 else:
                     try:
-                        metrics_to_print[group].append(f"{metric}={np.around(value.detach().numpy().cpu(), 2)}")
+                        metrics_to_print[group].append(f"{metric}={np.around(value.detach().cpu().numpy(), 2)}")
                     except AttributeError:
                         metrics_to_print[group].append(f"{metric}={round(value, 2)}")
         print_table(metrics_to_print)
