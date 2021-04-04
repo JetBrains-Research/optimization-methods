@@ -70,7 +70,7 @@ def train_treelstm(config: DictConfig):
 
     trainer.fit(model=model, datamodule=data_module)
     if config.hyper_parameters.optimizer == "SWA":
-        trainer.train_loop.prepare_optimizers().swap_swa_sgd()
+        model.trainer.optimizers[0].swap_swa_sgd()
     trainer.test()
     torch.save(model._test_outputs, '../data/sgd_predictions.pkl')
 

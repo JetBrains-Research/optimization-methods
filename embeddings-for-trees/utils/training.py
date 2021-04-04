@@ -37,8 +37,7 @@ def configure_optimizers_alon(
             nesterov=hyper_parameters.nesterov,
             weight_decay=hyper_parameters.weight_decay,
         )
-        optimizer = SWA(base_opt, swa_start=hyper_parameters.swa_start, swa_freq=hyper_parameters.swa_freq,
-                        swa_lr=hyper_parameters.swa_lr)
+        optimizer = SWA(base_opt)
         optimizer.defaults = []
 
     elif hyper_parameters.optimizer == "ASGD":
@@ -47,7 +46,7 @@ def configure_optimizers_alon(
     elif hyper_parameters.optimizer == "Adam":
         optimizer = Adam(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
 
-    elif hyper_parameters == "Lookahead":
+    elif hyper_parameters.optimizer == "Lookahead":
         sgd = SGD(
             parameters,
             hyper_parameters.learning_rate,
@@ -120,7 +119,7 @@ def configure_optimizers_alon(
     elif hyper_parameters.strategy == "cyclic":
         scheduler = {
             'scheduler': MyCyclicLR(optimizer, min_lr=hyper_parameters.min_lr, max_lr=hyper_parameters.max_lr,
-                                    cycle_len=hyper_parameters.cycle_len),
+                                    cycle_len=hyper_parameters.cycle_len, start_from=hyper_parameters.start_from, swa=hyper_parameters.swa),
             'interval': 'step',  # or 'epoch'
             'frequency': 1
         }
