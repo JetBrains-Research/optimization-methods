@@ -66,13 +66,13 @@ class MyCyclicLR(_LRScheduler):
 
         if iteration < self.start_from:
             t = 0
-        if self.swa and t == 1:
+        if self.swa and t == 1.:
             print("update_swa")
             self.optimizer.update_swa()
 
         lrs = []
         for min_lr, max_lr in zip(self.min_lrs, self.max_lrs):
-            if swa and iteration < self.start_from:
+            if self.swa and iteration < self.start_from:
                 lr = max_lr * self.gamma**(iteration // self.cycle_len)
             else:
                 lr = (1 - t) * (self.gamma**(self.start_from // self.cycle_len) if iteration >= self.start_from else 1) * max_lr + t * min_lr

@@ -119,7 +119,8 @@ def configure_optimizers_alon(
     elif hyper_parameters.strategy == "cyclic":
         scheduler = {
             'scheduler': MyCyclicLR(optimizer, min_lr=hyper_parameters.min_lr, max_lr=hyper_parameters.max_lr,
-                                    cycle_len=hyper_parameters.cycle_len, start_from=hyper_parameters.start_from, swa=hyper_parameters.swa),
+                                    cycle_len=hyper_parameters.cycle_len, gamma=hyper_parameters.lr_decay_gamma,
+                                    start_from=hyper_parameters.start_from, swa=(hyper_parameters.optimizer == "SWA")),
             'interval': 'step',  # or 'epoch'
             'frequency': 1
         }
