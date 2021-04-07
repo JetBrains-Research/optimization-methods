@@ -15,6 +15,7 @@ from utils.vocabulary import Vocabulary
 from allennlp.training.metrics.rouge import ROUGE
 
 import pickle
+from google.colab import files
 
 
 class TreeLSTM2Seq(LightningModule):
@@ -36,7 +37,8 @@ class TreeLSTM2Seq(LightningModule):
         self._decoder = LSTMDecoder(config, vocabulary)
         self.rouge_metric = ROUGE(2, set([0, 1]))
         self.rouge_metric.reset()
-        self._test_outputs = []
+        self.test_outputs_ = []
+        self.val_outputs_ = []
 
     @property
     def config(self) -> DictConfig:
@@ -115,7 +117,9 @@ class TreeLSTM2Seq(LightningModule):
         self.rouge_metric(prediction.T, labels.T)
 
         if test:
-            self._test_outputs.append(prediction.detach())
+            self.test_outputs_.append(prediction.detach().cpu())
+        else:
+            self.val_outputs_.append(prediction.detach().cpu())
 
         statistic = PredictionStatistic(True, self._label_pad_id, self._metric_skip_tokens)
         statistic.update_statistic(labels, prediction)
@@ -150,6 +154,11 @@ class TreeLSTM2Seq(LightningModule):
 
     def validation_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "val")
+        torch.save(self.val_outputs_, f"{self.config.optimizer}_epoch{self.current_epoch}_val_outputs.pkl")
+        files.download(f"{self.config.optimizer}_epoch{self.current_epoch}_val_outputs.pkl")
+        self.val_outputs_ = []
 
     def test_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "test")
+        torch.save(self.test_outputs_, f"{self.config.optimizer}_test_outputs.pkl")
+        files.download(f"{self.config.optimizer}_test_outputs.pkl")

@@ -67,6 +67,10 @@ class Vocabulary:
         return self._vocabs[LABEL]
 
     @property
+    def id_to_label(self) -> Dict[int, str]:
+        return {v: k for k, v in self._vocabs[LABEL].items()}
+
+    @property
     def type_to_id(self) -> Dict[str, int]:
         return self._vocabs[TYPE]
 

@@ -72,7 +72,6 @@ def train_treelstm(config: DictConfig):
     if config.hyper_parameters.optimizer == "SWA":
         model.trainer.optimizers[0].swap_swa_sgd()
     trainer.test()
-    torch.save(model._test_outputs, '../data/sgd_predictions.pkl')
 
 
 if __name__ == "__main__":
