@@ -25,6 +25,6 @@ with open(f"{data_dir}/{output_file}", 'w') as fout:
                 if idx == 2:
                     continue
                 if idx == 3:
-                  break
+                    break
                 res += f"{id2label[idx.item()]}|"
             fout.write(res[:-1] + '\n')
