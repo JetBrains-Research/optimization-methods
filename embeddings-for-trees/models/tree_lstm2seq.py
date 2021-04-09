@@ -154,11 +154,11 @@ class TreeLSTM2Seq(LightningModule):
 
     def validation_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "val")
-        torch.save(self.val_outputs_, f"{self._config.hyper_parameters.optimizer}_epoch{self.current_epoch}_val_outputs.pkl")
+        torch.save(self.val_outputs_, f"../data/outputs/{self._config.hyper_parameters.optimizer}_epoch{self.current_epoch}_val_outputs.pkl")
         # files.download(f"{self._config.hyper_parameters.optimizer}_epoch{self.current_epoch}_val_outputs.pkl")
         self.val_outputs_ = []
 
     def test_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "test")
-        torch.save(self.test_outputs_, f"{self._config.hyper_parameters.optimizer}_test_outputs.pkl")
+        torch.save(self.test_outputs_, f"../data/outputs/{self._config.hyper_parameters.optimizer}_test_outputs.pkl")
         # files.download(self.test_outputs_, f"{self._config.hyper_parameters.optimizer}_test_outputs.pkl")
