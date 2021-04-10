@@ -39,6 +39,8 @@ class TreeLSTM2Seq(LightningModule):
         self.rouge_metric.reset()
         self.test_outputs_ = []
         self.val_outputs_ = []
+        self.val = False
+        self.swa = (config.hyper_parameters.optimizer == "SWA")
 
     @property
     def config(self) -> DictConfig:
@@ -109,6 +111,10 @@ class TreeLSTM2Seq(LightningModule):
         return {"loss": loss, "statistic": statistic}
 
     def validation_step(self, batch: Tuple[torch.Tensor, dgl.DGLGraph], batch_idx: int, test=False) -> Dict:  # type: ignore
+        if self.swa and not self.val:
+            print("Validation starts")
+            self.trainer.optimizers[0].swap_swa_sgd()
+            self.val = True
         labels, graph = batch
         # [seq length; batch size; vocab size]
         logits = self(graph, labels.shape[0], labels)
@@ -157,6 +163,10 @@ class TreeLSTM2Seq(LightningModule):
         torch.save(self.val_outputs_, f"../data/outputs/{self._config.hyper_parameters.optimizer}_epoch{self.current_epoch}_val_outputs.pkl")
         # files.download(f"{self._config.hyper_parameters.optimizer}_epoch{self.current_epoch}_val_outputs.pkl")
         self.val_outputs_ = []
+        print("Validation finished")
+        if self.swa:
+            self.trainer.optimizers[0].swap_swa_sgd()
+        self.val = False
 
     def test_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "test")
