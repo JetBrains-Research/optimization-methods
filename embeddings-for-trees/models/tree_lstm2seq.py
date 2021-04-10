@@ -166,7 +166,7 @@ class TreeLSTM2Seq(LightningModule):
         print("Validation finished")
         if self.swa:
             self.trainer.optimizers[0].swap_swa_sgd()
-        self.val = False
+            self.val = False
 
     def test_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "test")
