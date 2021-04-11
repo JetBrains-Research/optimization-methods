@@ -1,5 +1,5 @@
 from .svrg import SVRG
-from .sdlbfgs.py import SdLBFGS
+from .sdlbfgs import SdLBFGS
 
 
 __all__ = [
