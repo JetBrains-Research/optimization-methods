@@ -39,6 +39,8 @@ class Code2Seq(LightningModule):
         self.rouge_metric = ROUGE(2, set([0, 1]))
         self.rouge_metric.reset()
         
+        self.test_outputs_ = []
+        
         self.val = False
 
     @property
@@ -140,6 +142,9 @@ class Code2Seq(LightningModule):
         self.rouge_metric(torch.transpose(prediction, 0, 1), torch.transpose(batch.labels, 0, 1))
         if batch_idx % 150 == 0:
             print(self.rouge_metric.get_metric())
+            
+        if test:
+            self.test_outputs_.append(prediction.detach().cpu())
 
         statistic = PredictionStatistic(True, self._label_pad_id, self._metric_skip_tokens)
         statistic.update_statistic(batch.labels, prediction)
@@ -180,3 +185,4 @@ class Code2Seq(LightningModule):
 
     def test_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "test")
+        torch.save(self.test_outputs_, f"/home/dmivilensky/code2seq/code2seq/outputs/{self._config.hyper_parameters.optimizer}_test_outputs.pkl")

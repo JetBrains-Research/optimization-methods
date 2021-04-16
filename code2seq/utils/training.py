@@ -34,6 +34,14 @@ def configure_optimizers_alon(
         adam = Adam(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
         optimizer = optim.Lookahead(adam, k=5, alpha=0.5)
         optimizer.defaults = []
+    elif hyper_parameters.optimizer == "Lookahead_A2GradExp":
+        a2gradexp = optim.A2GradExp(parameters, lr=hyper_parameters.learning_rate,
+            beta=10.0,
+            lips=10.0,
+            rho=0.5
+        )
+        optimizer = optim.Lookahead(a2gradexp, k=5, alpha=0.5)
+        optimizer.defaults = []
     elif hyper_parameters.optimizer == "Lookahead_RAdam":
         radam = optim.RAdam(parameters, lr=hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay,
     betas=(0.9, 0.999),
