@@ -35,16 +35,16 @@ hyper_parameters:
   random_context: true
   shuffle_data: true
 
-  optimizer: "BB"
-  strategy: "decay"
+  optimizer: "SWA"
+  strategy: "cyclic"
   nesterov: true
   learning_rate: 0.0037
   weight_decay: 0
   decay_gamma: 0.95
-  min_lr: 0.003
-  max_lr: 0.015
-  cycle_len: 300
-  start_from: 2400
+  min_lr: 0.001
+  max_lr: 0.0075
+  cycle_len: 600
+  start_from: 0
 
 dataset:
   name: java-med

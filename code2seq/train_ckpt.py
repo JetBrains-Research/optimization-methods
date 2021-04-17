@@ -99,7 +99,9 @@ def train(config: DictConfig):
     )
 
     trainer.fit(model=model, datamodule=data_module)
-#     trainer.test()
+    if config.hyper_parameters.optimizer == "SWA":
+        model.trainer.optimizers[0].swap_swa_sgd()
+    trainer.test()
 
 
 if __name__ == "__main__":
