@@ -3,24 +3,6 @@ from torch.optim import Optimizer
 
 
 class Nadam(Optimizer):
-    """Implements Nadam algorithm (a variant of Adam based on Nesterov momentum).
-    It has been proposed in `Incorporating Nesterov Momentum into Adam`__.
-    Arguments:
-        params (iterable): iterable of parameters to optimize or dicts defining
-            parameter groups
-        lr (float, optional): learning rate (default: 2e-3)
-        betas (Tuple[float, float], optional): coefficients used for computing
-            running averages of gradient and its square
-        eps (float, optional): term added to the denominator to improve
-            numerical stability (default: 1e-8)
-        weight_decay (float, optional): weight decay (L2 penalty) (default: 0)
-        schedule_decay (float, optional): momentum schedule decay (default: 4e-3)
-    __ http://cs229.stanford.edu/proj2015/054_report.pdf
-    __ http://www.cs.toronto.edu/~fritz/absps/momentum.pdf
-        Originally taken from: https://github.com/pytorch/pytorch/pull/1408
-        NOTE: Has potential issues but does work well on some problems.
-    """
-
     def __init__(self, params, lr=2e-3, betas=(0.9, 0.999), eps=1e-8,
                  weight_decay=0, schedule_decay=4e-3):
         defaults = dict(lr=lr, betas=betas, eps=eps,
@@ -28,11 +10,6 @@ class Nadam(Optimizer):
         super(Nadam, self).__init__(params, defaults)
 
     def step(self, closure=None):
-        """Performs a single optimization step.
-        Arguments:
-            closure (callable, optional): A closure that reevaluates the model
-                and returns the loss.
-        """
         loss = None
         if closure is not None:
             loss = closure()

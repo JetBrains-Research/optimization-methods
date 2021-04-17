@@ -6,7 +6,7 @@ from omegaconf import DictConfig
 from torch.optim import Adam, Optimizer, SGD, Adadelta, Adagrad, Adamax, RMSprop, LBFGS
 from torchcontrib.optim import SWA
 import torch_optimizer as optim
-from optimizer import Nadam, SVRG
+from optimizer import Nadam, SVRG, BB
 from torch.optim.lr_scheduler import _LRScheduler, LambdaLR, CosineAnnealingLR
 from scheduler import MyCyclicLR
 
@@ -30,6 +30,8 @@ def configure_optimizers_alon(
         )
     elif hyper_parameters.optimizer == "Adam":
         optimizer = Adam(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
+    elif hyper_parameters.optimizer == "BB":
+        optimizer = BB(parameters, lr=hyper_parameters.learning_rate, steps=50, beta=0.01, max_lr=0.1, min_lr=0.001)
     elif hyper_parameters.optimizer == "Lookahead":
         adam = Adam(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
         optimizer = optim.Lookahead(adam, k=5, alpha=0.5)
