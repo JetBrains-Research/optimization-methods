@@ -4,7 +4,7 @@ import torch
 from omegaconf import DictConfig
 from torch.optim import Adam, Optimizer, SGD, Adadelta, Adagrad, Adamax, RMSprop, LBFGS, ASGD
 from torchcontrib.optim import SWA
-from optimizer import SVRG, SdLBFGS
+from optimizer import SVRG, SdLBFGS, BB
 import torch_optimizer as optim
 from torch.optim.lr_scheduler import _LRScheduler, LambdaLR
 from scheduler import MyCyclicLR
