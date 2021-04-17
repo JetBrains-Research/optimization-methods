@@ -112,6 +112,9 @@ def configure_optimizers_alon(
     elif hyper_parameters.optimizer == "SVRG":
         optimizer = SVRG(parameters, hyper_parameters.learning_rate, freq=80)
 
+    elif hyper_parameters.optimizer == "BB":
+        optimizer = BB(parameters, lr=hyper_parameters.learning_rate, steps=50, beta=0.01, max_lr=0.1, min_lr=0.001)
+
     else:
         raise ValueError(f"Unknown optimizer name: {hyper_parameters.optimizer}")
 
