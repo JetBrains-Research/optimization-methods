@@ -76,6 +76,13 @@ def configure_optimizers_alon(
     elif hyper_parameters.optimizer == "Adadelta":
         optimizer = Adadelta(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
 
+    elif hyper_parameters.optimizer == "A2GradExp":
+        optimizer = optim.A2GradExp(parameters, lr=hyper_parameters.learning_rate,
+                                    beta=10.0,
+                                    lips=10.0,
+                                    rho=0.5
+                                    )
+
     elif hyper_parameters.optimizer == "Adagrad":
         optimizer = Adagrad(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
 
