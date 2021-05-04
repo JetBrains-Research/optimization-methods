@@ -126,11 +126,12 @@ def configure_optimizers_alon(
         raise ValueError(f"Unknown optimizer name: {hyper_parameters.optimizer}")
 
     if hyper_parameters.strategy == "decay":
-        scheduler = {
-            'scheduler': LambdaLR(optimizer, lr_lambda=lambda epoch: hyper_parameters.lr_decay_gamma ** epoch),
-            'interval': 'epoch',  # or 'epoch'
-            'frequency': 1
-        }
+        scheduler = LambdaLR(optimizer, lr_lambda=lambda epoch: hyper_parameters.lr_decay_gamma ** epoch)
+        # scheduler = {
+        #     'scheduler': LambdaLR(optimizer, lr_lambda=lambda epoch: hyper_parameters.lr_decay_gamma ** epoch),
+        #     'interval': 'epoch',  # or 'epoch'
+        #     'frequency': 1
+        # }
     elif hyper_parameters.strategy == "cyclic":
         scheduler = {
             'scheduler': MyCyclicLR(optimizer, min_lr=hyper_parameters.min_lr, max_lr=hyper_parameters.max_lr,

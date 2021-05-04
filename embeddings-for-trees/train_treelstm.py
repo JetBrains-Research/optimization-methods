@@ -69,8 +69,6 @@ def train_treelstm(config: DictConfig):
     )
 
     trainer.fit(model=model, datamodule=data_module)
-    if config.hyper_parameters.optimizer == "SWA":
-        model.trainer.optimizers[0].swap_swa_sgd()
     trainer.test()
 
 
