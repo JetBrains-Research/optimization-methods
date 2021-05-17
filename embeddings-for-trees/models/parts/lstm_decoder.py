@@ -5,7 +5,7 @@ from omegaconf import DictConfig
 from torch import nn
 
 from models.parts.attention import LuongAttention
-from utils.training import cut_encoded_data, ini_weights_normal, init_weights_const
+from utils.training import cut_encoded_data, init_weights_normal, init_weights_const
 from utils.common import PAD, SOS
 from utils.vocabulary import Vocabulary
 
