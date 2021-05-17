@@ -8,6 +8,7 @@ from optimizer import SVRG, SdLBFGS, BB
 import torch_optimizer as optim
 from torch.optim.lr_scheduler import _LRScheduler, LambdaLR
 from scheduler import MyCyclicLR
+import numpy as np
 
 
 def configure_optimizers_alon(
@@ -173,3 +174,47 @@ def cut_encoded_data(
         attention_mask[i, cur_size:] = mask_value
 
     return batched_contexts, attention_mask
+
+
+def init_weights_normal(m):
+    """Takes in a module and initializes all linear layers with weight
+       values taken from a normal distribution."""
+
+    classname = m.__class__.__name__
+    # for every Linear layer in a model
+    if classname == 'Linear':
+        y = m.in_features
+        # m.weight.data shoud be taken from a normal distribution
+        m.weight.data.normal_(0.0, 1 / np.sqrt(y))
+        # m.bias.data should be 0
+        if m.bias is not None:
+            m.bias.data.fill_(0)
+
+    elif classname == 'LSTM':
+        num_layers = m.num_layers
+        sigma = 1 / np.sqrt(m.hidden_size)
+        for i in range(num_layers):
+            getattr(m, 'weight_ih_l' + str(i)).data.normal_(0.0, sigma)
+            getattr(m, 'weight_hh_l' + str(i)).data.normal_(0.0, sigma)
+            if m.bias:
+                getattr(m, 'bias_ih_l' + str(i)).data.fill_(0)
+                getattr(m, 'bias_hh_l' + str(i)).data.fill_(0)
+
+
+def init_weights_const(m, value=0):
+    if classname == 'Linear':
+        m.weight.data.fill_(value)
+        if m.bias is not None:
+            m.bias.data.fill_(value)
+
+    elif classname == 'LSTM':
+        num_layers = m.num_layers
+        for i in range(num_layers):
+            getattr(m, 'weight_ih_l' + str(i)).data.fill_(value)
+            getattr(m, 'weight_hh_l' + str(i)).data.fill_(value)
+            if m.bias:
+                getattr(m, 'bias_ih_l' + str(i)).data.fill_(value)
+                getattr(m, 'bias_hh_l' + str(i)).data.fill_(value)
+
+    elif classname == 'Embedding':
+        m.weight.data.fill_(value)

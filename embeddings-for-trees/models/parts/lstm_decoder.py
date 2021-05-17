@@ -5,7 +5,7 @@ from omegaconf import DictConfig
 from torch import nn
 
 from models.parts.attention import LuongAttention
-from utils.training import cut_encoded_data
+from utils.training import cut_encoded_data, ini_weights_normal, init_weights_const
 from utils.common import PAD, SOS
 from utils.vocabulary import Vocabulary
 
@@ -39,6 +39,22 @@ class LSTMDecoder(nn.Module):
         self._concat_layer = nn.Linear(config.decoder_size * 2, config.decoder_size, bias=False)
         self._norm = nn.LayerNorm(config.decoder_size)
         self._projection_layer = nn.Linear(config.decoder_size, self._out_size, bias=False)
+        # self.init_weights(how=config.initialization, value=config.init_value)
+
+    def init_weights(self, how=None, value=None):
+        if how == 'normal':
+            init_fn = init_weights_normal
+        elif how == 'const':
+            assert value is not None
+            init_fn = lambda m: init_weights_const(m, value)
+        else:
+            raise ValueError('No such initialization option')
+
+        init_fn(self._target_embedding)
+        init_fn(self._attention.attn)
+        init_fn(self._decoder_lstm)
+        init_fn(self._concat_layer)
+        init_fn(self._projection_layer)
 
     def forward(
         self,

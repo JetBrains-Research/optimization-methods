@@ -5,6 +5,7 @@ from torch import nn
 
 from utils.common import PAD, TOKEN, NODE, TYPE
 from utils.vocabulary import Vocabulary
+from utils.training import init_weights_normal, init_weights_const
 
 
 class NodeEmbedding(nn.Module):
@@ -17,6 +18,13 @@ class NodeEmbedding(nn.Module):
         self._node_embedding = nn.Embedding(
             len(vocabulary.node_to_id), config.embedding_size, padding_idx=vocabulary.node_to_id[PAD]
         )
+        # self.init_weights(how=config.initialization, value=config.init_value)
+
+    def init_weights(self, how=None, value=None):
+        if how == 'const':
+            assert value is not None
+            init_weights_const(self._token_embedding, value)
+            init_weights_const(self._node_embedding, value)
 
     def forward(self, graph: dgl.DGLGraph) -> torch.Tensor:
         # [n nodes; embedding size]

@@ -41,6 +41,12 @@ class TreeLSTM2Seq(LightningModule):
         self.val_outputs_ = []
         self.val = False
         self.swa = (config.hyper_parameters.optimizer == "SWA")
+        self.init_weights(how=config.initialization, value=config.init_value)
+
+    def init_weights(self, how=None, value=None):
+        self._embedding.init_weights(how, value)
+        self._encoder.init_weights(how, value)
+        self._decoder.init_weights(how, value)
 
     @property
     def config(self) -> DictConfig:

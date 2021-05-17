@@ -4,6 +4,7 @@ import dgl
 import torch
 from omegaconf import DictConfig
 from torch import nn
+from utils.training import init_weights_normal, init_weights_const
 
 
 class TreeLSTM(nn.Module):
@@ -22,6 +23,22 @@ class TreeLSTM(nn.Module):
         self._out_linear = nn.Linear(config.encoder_size, config.decoder_size)
         self._norm = nn.LayerNorm(config.decoder_size)
         self._tanh = nn.Tanh()
+        # self.init_weights(how=config.initialization, value=config.init_value)
+
+    def init_weights(self, how=None, value=None):
+        if how == 'normal':
+            init_fn = init_weights_normal
+        elif how == 'const':
+            assert value is not None
+            init_fn = lambda m: init_weights_const(m, value)
+        else:
+            raise ValueError('No such initialization option')
+
+        init_fn(self._W_iou)
+        init_fn(self._U_iou)
+        init_fn(self._W_f)
+        init_fn(self._U_f)
+        init_fn(self._out_linear)
 
     def message_func(self, edges: dgl.udf.EdgeBatch) -> Dict:
         h_f = self._U_f(edges.src["h"])
