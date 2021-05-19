@@ -47,8 +47,10 @@ class LSTMDecoder(nn.Module):
         elif how == 'const':
             assert value is not None
             init_fn = lambda m: init_weights_const(m, value)
+        elif how is None:
+            return
         else:
-            raise ValueError('No such initialization option')
+            raise ValueError(f'There is no {how} initialization option.')
 
         init_fn(self._target_embedding)
         init_fn(self._attention.attn)

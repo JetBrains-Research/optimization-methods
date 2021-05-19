@@ -25,14 +25,16 @@ class TreeLSTM(nn.Module):
         self._tanh = nn.Tanh()
         # self.init_weights(how=config.initialization, value=config.init_value)
 
-    def init_weights(self, how=None, value=None):
+    def init_weights(self, how=0, value=None):
         if how == 'normal':
             init_fn = init_weights_normal
         elif how == 'const':
             assert value is not None
             init_fn = lambda m: init_weights_const(m, value)
+        elif how is None:
+            return
         else:
-            raise ValueError('No such initialization option')
+            raise ValueError(f'There is no {how} initialization option.')
 
         init_fn(self._W_iou)
         init_fn(self._U_iou)
