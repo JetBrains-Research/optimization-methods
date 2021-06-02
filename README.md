@@ -2,9 +2,10 @@
 
 Numerical experiments for the model [embeddings-for-trees](https://github.com/JetBrains-Research/embeddings-for-trees)
 
-Experiments on two random 10% subsets of java-med:
-  * [first](https://wandb.ai/strange_attractor/tree-lstm-java-med-tenth1?workspace=user-strange_attractor) -- [link](https://www.dropbox.com/s/vd043ehhvuix8jy/java-med-tenth1.tar.gz?dl=1) to dataset
-  * [second](https://wandb.ai/strange_attractor/tree-lstm-java-med-tenth2?workspace=user-strange_attractor) -- [link](https://www.dropbox.com/s/n9yc5285n3iwsof/java-med-tenth2.tar.gz?dl=1) to dataset
-  * [final experiments with first subset](https://wandb.ai/strange_attractor/tree-lstm-java-med-10per1-finals?workspace=user-strange_attractor) -- [link](https://www.dropbox.com/s/1ognqa0hawtbhr0/java-med-10per1.tar.gz?dl=1) to dataset
+Experiment results are stored as follows:
+  * [Experiments on random 10% of full java-med](https://wandb.ai/strange_attractor/tree-lstm-java-med-10per1-finals?workspace=user-strange_attractor)
+  * [Quick check of SGD-RAdam rangeing on another 10% random subset](https://wandb.ai/strange_attractor/tree-lstm-java-med-10per2-finals?workspace=user-strange_attractor)
+  * [Experiments on full java-med](https://wandb.ai/strange_attractor/tree-lstm-java-med-10per2-finals?workspace=user-strange_attractor)
+  * [Check of LaRAdam, SGD 10-->25% score improvement](https://wandb.ai/strange_attractor/tree-lstm-java-med-25per-finals?workspace=user-strange_attractor)
   
 Please find model outputs in both tensor and string form [here](https://www.dropbox.com/sh/u0dn37mebrwk99t/AAAYJuKMwb1M_MhTfUnDkQTia?dl=0)  (zip files with corresponding method name).
