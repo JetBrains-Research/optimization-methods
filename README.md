@@ -4,6 +4,7 @@ Numerical experiments for the model [embeddings-for-trees](https://github.com/Je
 
 Experiment results are stored as follows (test set is the same among all datasets):
   * [Experiments on random 10% of full java-med](https://wandb.ai/strange_attractor/tree-lstm-java-med-10per1-finals?workspace=user-strange_attractor)
+  
 	  Global methods:
 	  |    Method			|	BLEU	|	meteor	|	rouge-1	|	rouge-2	|	rouge-l	|
 	  |:-------------------:|:----------|:---------:|:---------:|:---------:|:---------:|
@@ -27,6 +28,7 @@ Experiment results are stored as follows (test set is the same among all dataset
   
   * [Quick check of SGD-RAdam rangeing on another 10% random subset](https://wandb.ai/strange_attractor/tree-lstm-java-med-10per2-finals?workspace=user-strange_attractor)
   * [Experiments on full java-med](https://wandb.ai/strange_attractor/tree-lstm-java-med-asts-finals?workspace=user-strange_attractor)
+  
  	  Global methods:
  	  |    Method			|	BLEU	|	meteor	|	rouge-1	|	rouge-2	|	rouge-l	|
 	  |:-------------------:|:----------|:---------:|:---------:|:---------:|:---------:|
@@ -44,6 +46,7 @@ Experiment results are stored as follows (test set is the same among all dataset
 	
  	
   * [Check of LaRAdam, SGD 10-->25% score improvement](https://wandb.ai/strange_attractor/tree-lstm-java-med-25per-finals?workspace=user-strange_attractor)
+  
   	Global methods (1: columns format is metric/upside to 10% train set):
  	  |    Method			|	BLEU	|	meteor	|	rouge-1	|	rouge-2	|	rouge-l	|
 	  |:-------------------:|:----------|:---------:|:---------:|:---------:|:---------:|
