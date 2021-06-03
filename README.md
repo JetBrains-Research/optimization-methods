@@ -47,11 +47,11 @@ Experiment results are stored as follows (test set is the same among all dataset
  	
   * [Check of LaRAdam, SGD 10-->25% score improvement](https://wandb.ai/strange_attractor/tree-lstm-java-med-25per-finals?workspace=user-strange_attractor)
   
-  	Global methods (1: columns format is metric/upside to 10% train set):
+  	Global methods (1: columns format is metric/upside to 10% train set). Note that for following results different vocabularies for 10% and 25% datasets were used:
  	  |    Method			|	BLEU	|	meteor	|	rouge-1	|	rouge-2	|	rouge-l	|
 	  |:-------------------:|:----------|:---------:|:---------:|:---------:|:---------:|
-	  |SGD					|---		|---		|---		|---		|---		|
-	  |LaRAdam				|---		|---		|---		|---		|---		|
+	  |SGD					|0.3460/24.6%	|0.3043/15.0%		|0.4200/9.4%		|0.1954/22.4%	|0.4324/9.7%		|
+	  |LaRAdam				|0.3917/7.4%		|0.3319/5.3%		|0.4477/3.9	|0.2212/6.3%		|0.2271/4.2%		|
   
 Please find model outputs in both tensor and string form [here](https://www.dropbox.com/sh/u0dn37mebrwk99t/AAAYJuKMwb1M_MhTfUnDkQTia?dl=0)  (zip files with corresponding method name).
 
