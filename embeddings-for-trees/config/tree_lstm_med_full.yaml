@@ -10,11 +10,12 @@ seed: 7
 log_offline: false
 
 # ===== Resuming =====
-resume_checkpoint: null
+resume_checkpoint: "../data/checkpoints/epoch=00-val_loss=14.6014.ckpt"
 
 # ===== Data =====
 data_folder: ../data
 dataset: java-med-asts
+output_dir: "../data/outputs/Adam"
 
 max_labels: 9000
 max_label_parts: 7
@@ -31,7 +32,11 @@ hyper_parameters:
   batch_size: 512
   clip_norm: 5
 
-  optimizer: "Lookahead_RAdam"
+  optimizer: "Adam"
+  start_from: 0
+  cycle_len: 6574
+  min_lr: 0.001
+  max_lr: 0.0074
   nesterov: true
   learning_rate: 0.01
   weight_decay: 0

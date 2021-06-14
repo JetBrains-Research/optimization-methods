@@ -1,4 +1,5 @@
 from typing import Tuple, List, Dict, Union
+import os
 
 import dgl
 import torch
@@ -37,6 +38,8 @@ class TreeLSTM2Seq(LightningModule):
         self._decoder = LSTMDecoder(config, vocabulary)
         self.rouge_metric = ROUGE(2, set([0, 1]))
         self.rouge_metric.reset()
+        if not os.path.exists(config.output_dir):
+            os.mkdir(config.output_dir)
         self.test_outputs_ = []
         self.val_outputs_ = []
         self.val = False
@@ -131,7 +134,7 @@ class TreeLSTM2Seq(LightningModule):
         if test:
             self.test_outputs_.append(prediction.detach().cpu())
         else:
-            self.val_outputs_.append(prediction.detach().cpu())
+           self.val_outputs_.append(prediction.detach().cpu())
 
         statistic = PredictionStatistic(True, self._label_pad_id, self._metric_skip_tokens)
         statistic.update_statistic(labels, prediction)
@@ -166,7 +169,7 @@ class TreeLSTM2Seq(LightningModule):
 
     def validation_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "val")
-        torch.save(self.val_outputs_, f"../data/outputs/{self._config.hyper_parameters.optimizer}_epoch{self.current_epoch}_val_outputs.pkl")
+        torch.save(self.val_outputs_, f"{self._config.output_dir}/{self._config.hyper_parameters.optimizer}_epoch{self.current_epoch}_val_outputs.pkl")
         # files.download(f"{self._config.hyper_parameters.optimizer}_epoch{self.current_epoch}_val_outputs.pkl")
         self.val_outputs_ = []
         print("Validation finished")
@@ -176,5 +179,5 @@ class TreeLSTM2Seq(LightningModule):
 
     def test_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "test")
-        torch.save(self.test_outputs_, f"../data/outputs/{self._config.hyper_parameters.optimizer}_test_outputs.pkl")
+        torch.save(self.test_outputs_, f"{self._config.output_dir}/{self._config.hyper_parameters.optimizer}_test_outputs.pkl")
         # files.download(self.test_outputs_, f"{self._config.hyper_parameters.optimizer}_test_outputs.pkl")
