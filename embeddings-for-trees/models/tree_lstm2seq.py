@@ -7,6 +7,7 @@ from omegaconf import DictConfig
 from pytorch_lightning import LightningModule
 from torch.optim import Optimizer, Adam
 from torch.optim.lr_scheduler import _LRScheduler, LambdaLR
+import torch.nn as nn
 
 from models.parts import NodeEmbedding, LSTMDecoder, TreeLSTM
 from utils.training import configure_optimizers_alon
@@ -14,6 +15,7 @@ from utils.common import PAD, UNK, EOS, SOS
 from utils.metrics import PredictionStatistic
 from utils.vocabulary import Vocabulary
 from allennlp.training.metrics.rouge import ROUGE
+from loss import FocalLoss
 
 import pickle
 # from google.colab import files
@@ -36,7 +38,7 @@ class TreeLSTM2Seq(LightningModule):
         self._embedding = self._get_embedding()
         self._encoder = TreeLSTM(config)
         self._decoder = LSTMDecoder(config, vocabulary)
-        self.rouge_metric = ROUGE(2, set([0, 1]))
+        self.rouge_metric = ROUGE(2, {PAD, UNK, EOS, SOS})
         self.rouge_metric.reset()
         if not os.path.exists(config.output_dir):
             os.mkdir(config.output_dir)
@@ -44,6 +46,14 @@ class TreeLSTM2Seq(LightningModule):
         self.val_outputs_ = []
         self.val = False
         self.swa = (config.hyper_parameters.optimizer == "SWA")
+
+        if config.hyper_parameters.loss == 'cross_entropy':
+            self.criterion = nn.CrossEntropyLoss(reduction='none')
+        elif config.hyper_parameters.loss == 'focal':
+            self.criterion = FocalLoss(gamma=config.hyper_parameters.gamma_focal, reduction='none')
+        else:
+            raise NotImplementedError()
+
         self.init_weights(how=config.initialization, value=config.init_value)
 
     def init_weights(self, how=None, value=None):
@@ -90,7 +100,9 @@ class TreeLSTM2Seq(LightningModule):
         # [batch size; seq length]
         _labels = labels.permute(1, 0)
         # [batch size; seq length]
-        loss = torch.nn.functional.cross_entropy(_logits, _labels, reduction="none")
+
+        loss = self.criterion(_logits, _labels)
+
         # [batch size; seq length]
         mask = _labels != self._vocabulary.label_to_id[PAD]
         # [batch size; seq length]

@@ -15,7 +15,7 @@ resume_checkpoint: null
 # ===== Data =====
 data_folder: ../data
 dataset: java-med-25per
-output_dir: "../data/outputs/LaRAdam_25per"
+output_dir: "../data/outputs/RAdam_focal2_25per"
 
 max_labels: 9000
 max_label_parts: 7
@@ -31,8 +31,10 @@ hyper_parameters:
   patience: 10
   batch_size: 512
   clip_norm: 5
-
-  optimizer: "Lookahead_RAdam"
+  
+  loss: "focal"
+  gamma_focal: 2
+  optimizer: "RAdam"
   nesterov: true
   learning_rate: 0.01
   weight_decay: 0
@@ -40,7 +42,7 @@ hyper_parameters:
   lr_decay_gamma: 0.95
 
 # ===== Training parameters =====
-initialization: null
+initialization: "normal"
 init_value: null
 val_every_epoch: 1
 save_every_epoch: 1
