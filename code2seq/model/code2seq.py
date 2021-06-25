@@ -129,10 +129,10 @@ class Code2Seq(LightningModule):
 
     def validation_step(self, batch: PathContextBatch, batch_idx: int, test=False) -> Dict:  # type: ignore
         # [seq length; batch size; vocab size]
-        if not self.val:
-            print("start validation")
-            self.trainer.optimizers[0].swap_swa_sgd()
-            self.val = True
+#         if not self.val:
+#             print("start validation")
+#             self.trainer.optimizers[0].swap_swa_sgd()
+#             self.val = True
             
         logits = self(batch.contexts, batch.contexts_per_label, batch.labels.shape[0])
         loss = self._calculate_loss(logits, batch.labels)
@@ -179,9 +179,9 @@ class Code2Seq(LightningModule):
 
     def validation_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "val")
-        print("finish validation")
-        self.trainer.optimizers[0].swap_swa_sgd()
-        self.val = False
+#         print("finish validation")
+#         self.trainer.optimizers[0].swap_swa_sgd()
+#         self.val = False
 
     def test_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "test")

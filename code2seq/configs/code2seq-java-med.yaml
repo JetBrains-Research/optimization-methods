@@ -14,10 +14,10 @@ log_offline: false
 resume_from_checkpoint: null
 
 # data keys
-data_folder: /home/dmivilensky/code2seq/code2seq/permanent-data
+data_folder: /home/ubuntu/optimization-methods/code2seq/permanent-data
 vocabulary_name: vocabulary.pkl
-train_holdout: train.1
-val_holdout: val.1
+train_holdout: train.2
+val_holdout: val.2
 test_holdout: test
 
 save_every_epoch: 1
@@ -26,7 +26,7 @@ log_every_epoch: 10
 progress_bar_refresh_rate: 1
 
 hyper_parameters:
-  n_epochs: 4
+  n_epochs: 2
   patience: 10
   batch_size: 512
   test_batch_size: 512
@@ -35,19 +35,15 @@ hyper_parameters:
   random_context: true
   shuffle_data: true
 
-  optimizer: "SWA"
-  strategy: "cyclic"
+  optimizer: "Adam"
+  strategy: "decay"
   nesterov: true
-  learning_rate: 0.0037
+  learning_rate: 0.01
   weight_decay: 0
   decay_gamma: 0.95
-  min_lr: 0.001
-  max_lr: 0.0075
-  cycle_len: 600
-  start_from: 0
 
 dataset:
-  name: java-med
+  name: java-med-practice-2
   target:
     max_parts: 7
     is_wrapped: true
