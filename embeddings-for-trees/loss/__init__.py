@@ -1,2 +1,2 @@
-from focal_loss import FocalLoss
+from .focal_loss import FocalLoss
 
