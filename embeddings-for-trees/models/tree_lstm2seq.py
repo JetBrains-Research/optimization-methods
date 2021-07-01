@@ -38,7 +38,8 @@ class TreeLSTM2Seq(LightningModule):
         self._embedding = self._get_embedding()
         self._encoder = TreeLSTM(config)
         self._decoder = LSTMDecoder(config, vocabulary)
-        self.rouge_metric = ROUGE(2, {PAD, UNK, EOS, SOS})
+        self.rouge_metric = ROUGE(2, {0, 1})  # ROUGE(2, set([vocabulary.label_to_id[i] for i in [PAD, UNK, EOS, SOS]
+                                # if i in vocabulary.label_to_id]))
         self.rouge_metric.reset()
         if not os.path.exists(config.output_dir):
             os.mkdir(config.output_dir)

@@ -13,7 +13,7 @@ log_offline: false
 resume_checkpoint: "../data/checkpoints/epoch=00-val_loss=14.6014.ckpt"
 
 # ===== Data =====
-data_folder: ../data
+data_folder: /home/anton/opt-exps-data/datasets
 dataset: java-med-asts
 output_dir: "../data/outputs/Adam"
 

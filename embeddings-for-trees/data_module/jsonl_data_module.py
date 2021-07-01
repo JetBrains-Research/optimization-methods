@@ -29,11 +29,7 @@ class JsonlDataModule(LightningDataModule):
         "java-med-tenth2": "https://www.dropbox.com/s/n9yc5285n3iwsof/java-med-tenth2.tar.gz?dl=1",
         "java-med-10per1": "https://www.dropbox.com/s/1ognqa0hawtbhr0/java-med-10per1.tar.gz?dl=1",
         "java-med-10per2": "https://www.dropbox.com/s/opl0gqcud1ssm18/java-med-10per2.tar.gz?dl=1",
-<<<<<<< HEAD
         "java-med-25per": "https://www.dropbox.com/s/pgl4jipjjnecetn/java-med-25per.tar.gz?dl=1",
-=======
-        "java-med-25per": "https://www.dropbox.com/s/pgl4jipjjnecetn/java-med-25per.tar.gz?dl=1",
->>>>>>> refs/remotes/origin/prazdnichnykh_experiments
     }
 
     def __init__(self, config: DictConfig):
