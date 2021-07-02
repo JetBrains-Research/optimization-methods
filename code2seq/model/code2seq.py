@@ -18,6 +18,8 @@ from allennlp.training.metrics.rouge import ROUGE
 
 import pickle
 
+DEBUG_REGULARIZER = False
+
 
 class Code2Seq(LightningModule):
     def __init__(self, config: DictConfig, vocabulary: Vocabulary):
@@ -113,19 +115,27 @@ class Code2Seq(LightningModule):
     def training_step(self, batch: PathContextBatch, batch_idx: int) -> Dict:  # type: ignore
         # [seq length; batch size; vocab size]
         logits = self(batch.contexts, batch.contexts_per_label, batch.labels.shape[0], batch.labels)
+        
         loss = self._calculate_loss(logits, batch.labels)
+        real_loss = loss.detach().clone() # without regularization
+        
+        if DEBUG_REGULARIZER:
+            reg_coeff = 1e-5
+            for weights in self.encoder.parameters():
+                loss = loss + reg_coeff * weights.norm(2)
+        
         prediction = logits.argmax(-1)
 
         statistic = PredictionStatistic(True, self._label_pad_id, self._metric_skip_tokens)
         batch_metric = statistic.update_statistic(batch.labels, prediction)
 
-        log: Dict[str, Union[float, torch.Tensor]] = {"train/loss": loss}
+        log: Dict[str, Union[float, torch.Tensor]] = {"train/loss": real_loss}
         for key, value in batch_metric.items():
             log[f"train/{key}"] = value
         self.log_dict(log)
         self.log("f1", batch_metric["f1"], prog_bar=True, logger=False)
 
-        return {"loss": loss, "statistic": statistic}
+        return {"real-loss": real_loss, "loss": loss, "statistic": statistic}
 
     def validation_step(self, batch: PathContextBatch, batch_idx: int, test=False) -> Dict:  # type: ignore
         # [seq length; batch size; vocab size]
@@ -158,7 +168,7 @@ class Code2Seq(LightningModule):
 
     def _shared_epoch_end(self, outputs: List[Dict], group: str):
         with torch.no_grad():
-            mean_loss = torch.stack([out["loss"] for out in outputs]).mean().item()
+            mean_loss = torch.stack([out["real-loss"] if "real-loss" in out else out["loss"] for out in outputs]).mean().item()
             statistic = PredictionStatistic.create_from_list([out["statistic"] for out in outputs])
             epoch_metrics = statistic.get_metric()
             log: Dict[str, Union[float, torch.Tensor]] = {f"{group}/loss": mean_loss}
