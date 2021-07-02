@@ -1,13 +1,11 @@
+code2seq/permanent-data/java-med-practice-2
 .idea/
-code2seq/download_data.sh
 .ipynb_checkpoints/
 tests/
 code2seq/permanent-data/java-med
 LICENSE
 code2seq/lightning_logs/
 LICENSE.md
-scripts/
-setup.py
 test.txt
 .github/
 __pycache__/
