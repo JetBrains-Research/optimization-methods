@@ -31,8 +31,9 @@ hyper_parameters:
   patience: 10
   batch_size: 512
   clip_norm: 5
-
+    
   optimizer: "Adam"
+  loss: "cross_entropy"
   start_from: 0
   cycle_len: 6574
   min_lr: 0.001

@@ -32,6 +32,7 @@ class RLamb(Optimizer):
             eps: float = 1e-8,
             weight_decay: float = 0,
             clamp_value: float = 10,
+            debias: bool = True,
             radam: bool = False,
     ) -> None:
         if lr <= 0.0:
@@ -63,16 +64,17 @@ class RLamb(Optimizer):
                         param['betas'][0] != betas[0]
                         or param['betas'][1] != betas[1]
                 ):
-                    param['buffer'] = [[None, None, None] for _ in range(10)]
+                    param['buffer'] = [[None, None, None, None] for _ in range(10)]
 
         defaults = dict(lr=lr,
                         betas=betas,
                         eps=eps,
                         weight_decay=weight_decay,
-                        buffer=[[None, None, None] for _ in range(10)],
+                        buffer=[[None, None, None, None] for _ in range(10)],
                     )
         self.clamp_value = clamp_value
         self.radam = radam
+        self.debias = debias
 
         super(RLamb, self).__init__(params, defaults)
 
@@ -131,7 +133,7 @@ class RLamb(Optimizer):
                 state['step'] += 1
                 buffered = group['buffer'][int(state['step'] % 10)]
                 if state['step'] == buffered[0]:
-                    N_sma, step_size = buffered[1], buffered[2]
+                    N_sma, bias_correction, rectification_term = buffered[1:]
                 else:
                     buffered[0] = state['step']
                     beta2_t = beta2 ** state['step']
@@ -143,22 +145,29 @@ class RLamb(Optimizer):
 
                     # more conservative since it's an approximated value
                     if N_sma >= 5:
-                        step_size = (
-                                lr
-                                * math.sqrt(
-                            (1 - beta2_t)
-                            * (N_sma - 4)
+
+                        if self.debias:
+                            bias_correction = math.sqrt(1 - beta2_t)
+                            bias_correction /= 1 - beta1 ** state['step']
+                        else:
+                            bias_correction = 1
+
+                        rectification_term = math.sqrt(
+                            (N_sma - 4)
                             / (N_sma_max - 4)
                             * (N_sma - 2)
                             / N_sma
                             * N_sma_max
                             / (N_sma_max - 2)
                         )
-                                / (1 - beta1 ** state['step'])
-                        )
                     else:
-                        step_size = lr / (1 - beta1 ** state['step'])
-                    buffered[2] = step_size
+                        if self.debias:
+                            bias_correction = 1 / (1 - beta1 ** state['step'])
+                        else:
+                            bias_correction = 1
+                        rectification_term = 1
+                    buffered[2] = bias_correction
+                    buffered[3] = rectification_term
 
                 if weight_decay != 0:
                     p_data_fp32.add_(p_data_fp32, alpha=-weight_decay * lr)
@@ -171,17 +180,18 @@ class RLamb(Optimizer):
                     radam_step = exp_avg
 
                 radam_norm = torch.norm(radam_step)
-                if weight_norm == 0 or radam_norm == 0:
-                    trust_ratio = 1
+                if self.radam or weight_norm == 0 or radam_norm == 0:
+                    weight_scale_term = 1
                 else:
-                    trust_ratio = weight_norm / radam_norm
+                    weight_scale_term = (weight_norm / radam_norm).item()
                 state['weight_norm'] = weight_norm
                 state['radam_norm'] = radam_norm
-                state['trust_ratio'] = trust_ratio
-                if self.radam:
-                    trust_ratio = 1
+                state['trust_ratio'] = weight_scale_term
 
-                p_data_fp32.add_(radam_step, alpha=-step_size * trust_ratio)
+                step_size = lr * bias_correction * max(rectification_term, weight_scale_term)
+                print(f"bias_correction: {bias_correction}, rectification_term: {rectification_term}, weight_scale_term: {weight_scale_term}, step_size: {step_size}")
+
+                p_data_fp32.add_(radam_step, alpha=-step_size)
                 p.data.copy_(p_data_fp32)
 
         return loss

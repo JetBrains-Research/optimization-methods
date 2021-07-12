@@ -39,7 +39,7 @@ class LSTMDecoder(nn.Module):
         self._concat_layer = nn.Linear(config.decoder_size * 2, config.decoder_size, bias=False)
         self._norm = nn.LayerNorm(config.decoder_size)
         self._projection_layer = nn.Linear(config.decoder_size, self._out_size, bias=False)
-        # self.init_weights(how=config.initialization, value=config.init_value)
+        self.init_weights(how=config.initialization, value=config.init_value)
 
     def init_weights(self, how=None, value=None):
         if how == 'normal':
