@@ -139,7 +139,7 @@ class TreeLSTM2Seq(LightningModule):
             self.val = True
         labels, graph = batch
         # [seq length; batch size; vocab size]
-        logits = self(graph, labels.shape[0], labels)
+        logits = self(graph, self._config.max_label_parts + 1)  # no labels
         loss = self._calculate_loss(logits, labels)
         prediction = logits.argmax(-1)
         self.rouge_metric(prediction.T, labels.T)
