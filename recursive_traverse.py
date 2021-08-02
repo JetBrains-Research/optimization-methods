@@ -140,7 +140,8 @@ def merge_source_ast():
                                                             .replace('|', '\|')
                                                             .replace('"', '\"')
                                                             .replace("'", "\'")
-                                                            .replace('$', '\$'))
+                                                            .replace('$', '\$')
+                                                            .replace('^', '\^'))
 
                             finally_found = re.search(correct_occurrence, source_code)
 
