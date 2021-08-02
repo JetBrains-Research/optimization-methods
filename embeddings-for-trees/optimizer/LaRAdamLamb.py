@@ -1,5 +1,6 @@
 import math
 from collections import defaultdict
+from itertools import tee
 
 import torch
 from torch.optim.optimizer import Optimizer
@@ -35,10 +36,10 @@ class LaRAdamLamb(Optimizer):
             switch_iter: int = 5000,
             lookahead: bool = True,
     ) -> None:
-
-        radam = RAdam(params, lr=lr, weight_decay=weight_decay, betas=betas, eps=eps)
+        params1, params2 = tee(params)
+        radam = RAdam(params1, lr=lr, weight_decay=weight_decay, betas=betas, eps=eps)
         self.lamb = Lamb(
-            params, lr=lr,
+            params2, lr=lr,
             weight_decay=weight_decay,
             betas=betas,
             eps=eps
@@ -50,8 +51,8 @@ class LaRAdamLamb(Optimizer):
         self.state = defaultdict(dict)
         self.switch_iter = switch_iter
         self.steps = 0
-
-        super(LaRAdamLamb, self).__init__(params, defaults)
+        if lookahead:
+          self.defaults = []
 
     def __setstate__(self, state):
         super(LaRAdamLamb, self).__setstate__(state)
@@ -81,13 +82,15 @@ class LaRAdamLamb(Optimizer):
         return loss
 
     def state_dict(self):
-        return {
-            'optimizer_states': self.optimizer.state_dict(),
-            'steps': self.steps
-        }
+      state_dict = super(LaRAdamLamb, self).state_dict()
+      return {
+          'optimizer_states': state_dict,
+          'steps': self.steps
+      }
 
     def load_state_dict(self, state_dict):
         step = state_dict['steps']
+        super(Lookahead, self).load_state_dict(state_dict['optimizer_states'])
         if step >= self.switch_iter:
             self.optimizer = self.lamb
         self.optimizer.load_state_dict(state_dict['optimizer_states'])
