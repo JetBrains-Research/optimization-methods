@@ -36,3 +36,5 @@ pip3 install tokenizers transformers
 
 wget https://huggingface.co/huggingface/CodeBERTa-small-v1/raw/main/merges.txt
 wget https://huggingface.co/huggingface/CodeBERTa-small-v1/raw/main/vocab.json
+
+pip3 install wandb

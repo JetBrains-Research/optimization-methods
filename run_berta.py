@@ -2,6 +2,8 @@ import os
 import pickle
 from tqdm import tqdm, trange
 
+import wandb
+import numpy as np
 import torch
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader
@@ -63,9 +65,12 @@ def collate(examples):
 
 train_dataloader = DataLoader(train_dataset, batch_size=batch, shuffle=True, collate_fn=collate)
 
+wandb.init(project='CodeBERTa', entity='dmivilensky')
 
 train_iterator = trange(0, 4, desc="Epoch")
 optimizer = torch.optim.Adam(model.parameters())
+iteration = 0
+
 for _ in train_iterator:
     epoch_iterator = tqdm(train_dataloader, desc="Iteration")
     for step, (input_ids, labels) in enumerate(epoch_iterator):
@@ -83,3 +88,38 @@ for _ in train_iterator:
         loss.backward()
         
         optimizer.step()
+
+        if iteration % 100 == 0:
+            wandb.log({"loss": loss})
+        
+        iteration +=1 
+
+    print("=== validation ===")
+    model.eval()
+
+    eval_loss = 0.0
+    eval_steps = 0
+    preds = np.empty((0), dtype=np.int64)
+    out_label_ids = np.empty((0), dtype=np.int64)
+
+    eval_dataloader = DataLoader(eval_dataset, batch_size=batch, collate_fn=collate)
+    for step, (input_ids, labels) in enumerate(tqdm(eval_dataloader, desc="Eval")):
+        with torch.no_grad():
+
+            if cuda:
+                outputs = model(input_ids.to("cuda")).logits
+                loss = model.loss_fn(outputs, labels.to("cuda"))
+            else:
+                outputs = model(input_ids).logits
+                loss = model.loss_fn(outputs, labels)
+            
+            if loss is None:
+                continue
+            
+            eval_loss += loss.mean().item()
+            eval_steps += 1
+    
+    eval_loss = eval_loss / eval_steps
+    print("=== validation: loss ===", eval_loss)
+    wandb.log({"val/loss": eval_loss})
+    model.train()
