@@ -19,6 +19,8 @@ in_len = 80
 out_len = 10
 cuda = True
 
+tokenizer_back = ByteLevelBPETokenizer("vocab.json", "merges.txt",)
+
 tokenizer_input = ByteLevelBPETokenizer("vocab.json", "merges.txt",)
 tokenizer_input._tokenizer.post_processor = BertProcessing(
     ("</s>", tokenizer_input.token_to_id("</s>")
@@ -58,7 +60,7 @@ if cuda:
     model.to("cuda")
 model.train()
 
-batch = 32
+batch = 64
 
 
 def collate(examples):
@@ -75,8 +77,8 @@ train_dataloader = DataLoader(
 
 wandb.init(project='CodeBERTa', entity='dmivilensky')
 
-train_iterator = trange(0, 4, desc="Epoch")
-optimizer = torch.optim.Adam(model.parameters(), lr=0.005)
+train_iterator = trange(0, 5, desc="Epoch")
+optimizer = torch.optim.Adam(model.parameters(), lr=0.0005)
 iteration = 0
 
 for _ in train_iterator:
@@ -97,7 +99,7 @@ for _ in train_iterator:
 
         optimizer.step()
 
-        if iteration % 20 == 0:
+        if iteration % 5 == 0:
             wandb.log({"loss": loss})
 
         iteration += 1
@@ -125,6 +127,13 @@ for _ in train_iterator:
             else:
                 outputs = model(input_ids).logits
                 loss = model.loss_fn(outputs, labels, batch)
+
+            if step == 0:
+                for i in range(3):
+                    print('predict:', tokenizer_back.decode(
+                        outputs.argmax(2)[i].tolist()))
+                    print(' target:', tokenizer_back.decode(labels[i].tolist()))
+                    print()
 
             if loss is None:
                 continue
