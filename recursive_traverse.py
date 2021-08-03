@@ -4,7 +4,7 @@ import shutil
 import json
 import re
 import regex
-
+from tqdm import tqdm
 
 def re_0002(i):
     # split camel case and remove special characters
@@ -92,88 +92,114 @@ def contains_lbrace(ast):
 
 def merge_source_ast():
     for holdout in ['train', 'val', 'test']:
-        print("Processing {holdout} part...")
+        print(f"Processing {holdout} part...")
         with open(f"{DATA_DIR}/prepreprocessed/{holdout}-asts/java/asts.jsonl", 'r') as fin,\
                 open(f"{DATA_DIR}/java-med-source-asts/java-med-source-asts.{holdout}.jsonl", 'w') as fout,\
                 open(f"{DATA_DIR}/prepreprocessed/{holdout}-bad-samples.txt", 'w') as ferr:
-            cur_file_methods_occs = (-1, {})
-            for line in fin:
+            prev_file_name, cur_file_methods_occs = -1, {}
+            for line in tqdm(fin):
                 example = json.loads(line)
                 if not contains_lbrace(example['ast']):  # empty methods filtration
                     continue
                 file_name = example.pop('origFile')
-                method_name = example['label'].replace('$', '\$')  # the only special character allowed in method name
-                if cur_file_methods_occs[0] != file_name:
-                    cur_file_methods_occs = file_name, {}
-                if method_name in cur_file_methods_occs[1]:
-                    cur_file_methods_occs[1][method_name] += 1
+                method_name = example['label']
+                if prev_file_name != file_name:
+                    prev_file_name = file_name
+                    cur_file_methods_occs = {}
+                    all_file_methods = {}
+                if method_name in cur_file_methods_occs:
+                    cur_file_methods_occs[method_name] += 1
                 else:
-                    cur_file_methods_occs[1][method_name] = 0
+                    cur_file_methods_occs[method_name] = 0
                 method_code = ''
                 stack = 0
                 first_found = False
-                with open(file_name, 'r') as fsc:
-                    try:
-                        source_code = ''.join(fsc.readlines())
-                        found = regex.findall(
-                            rf"((?:public|protected|private)\s)?((?:static\s)?(?:final\s)?(?:synchronized\s))?((?:native|strictfp)\s)?([\/\*\w<>\[\]\?,_\. ]+)(?<!new|if|return)(\s+{method_name}"
-                            r"\s*\((?:[^\)]+(?:\(.*?\))?[^\)]*)*\)[\w\s\.,]*\{)", source_code)
-                        if found:
-                            try:
-                                correct_occurrence = found[cur_file_methods_occs[1][method_name]]
-                            except IndexError:
-                                ferr.write(f"{file_name} - {method_name} - wrong methods mapping\n")
+                if not all_file_methods:
+                    with open(file_name, 'r') as fsc:
+                        try:
+                            source_code = ''.join(fsc.readlines())
+                            found = regex.findall(
+                                r"((?:public|protected|private)\s)?"
+                                r"((?:static\s)?(?:final\s)?(?:synchronized\s))?"
+                                r"((?:native|strictfp)\s)?"
+                                r"([\/\*\w<>\[\]\?,_\. ]+)"
+                                r"(?<!new|if|for|while|\s)(\s+)"
+                                r"([a-zA-Z\$_][\w\$]*)"
+                                r"(\s*\((?:(?:[^\(\)]+\([^\(\)]*?\))??[^\(\)]*)*?\)[\w\s\.,@\/]*\{)",
+                                source_code)
+                            if not found:
+                                ferr.write(f"No methods found in file {file_name}\n")
+                                print(f"No methods found in file {file_name}")
                                 continue
+                            for method in found:
+                                mn = method[5]
+                                occ = (''.join(method)
+                                            .replace('\\', '\\\\')
+                                            .replace('[', '\[')
+                                            .replace(']', '\]')
+                                            .replace('(', '\(')
+                                            .replace(')', '\)')
+                                            .replace('{', '\{')
+                                            .replace('}', '\}')
+                                            .replace('.', '\.')
+                                            .replace('?', '\?')
+                                            .replace('*', '\*')
+                                            .replace('+', '\+')
+                                            .replace('|', '\|')
+                                            .replace('"', '\"')
+                                            .replace("'", "\'")
+                                            .replace('$', '\$')
+                                            .replace('^', '\^'))
+                                if mn in all_file_methods:
+                                    all_file_methods[mn].append(occ)
+                                else:
+                                    all_file_methods[mn] = [occ]
+                        except UnicodeDecodeError:
+                            ferr.write(f"{file_name} - {method_name} - file decoding error\n")
+                            print(f"{file_name} - {method_name} - file decoding error")
+                            continue
+                if method_name not in all_file_methods:
+                    ferr.write(f"No {method_name} method in {file_name}\n")
+                    print(f"No {method_name} method in {file_name}")
+                    return
+                try:
+                    correct_occurrence = all_file_methods[method_name][cur_file_methods_occs[method_name]]
+                except IndexError:
+                    ferr.write(f"{file_name} - {method_name} - wrong methods mapping\n")
+                    print(f"{file_name} - {method_name} - wrong methods mapping")
+                    print(all_file_methods)
+                    continue
 
-                            correct_occurrence = (''.join(correct_occurrence)
-                                                            .replace('\\', '\\\\')
-                                                            .replace('[', '\[')
-                                                            .replace(']', '\]')
-                                                            .replace('(', '\(')
-                                                            .replace(')', '\)')
-                                                            .replace('{', '\{')
-                                                            .replace('}', '\}')
-                                                            .replace('.', '\.')
-                                                            .replace('?', '\?')
-                                                            .replace('*', '\*')
-                                                            .replace('+', '\+')
-                                                            .replace('|', '\|')
-                                                            .replace('"', '\"')
-                                                            .replace("'", "\'")
-                                                            .replace('$', '\$')
-                                                            .replace('^', '\^')
-                                                            .replace('\\$', '\$'))  # in case of double screening in method_name
+                finally_found = re.search(correct_occurrence, source_code)
 
-                            finally_found = re.search(correct_occurrence, source_code)
+                if not finally_found:
+                    ferr.write(f"{file_name} - {method_name} - secondary search error\n")
+                    print(f"{file_name} - {method_name} - secondary search error")
+                    continue
 
-                            try:
-                                start_pos = finally_found.start()
-                            except AttributeError:
-                                ferr.write(f"{file_name} - {method_name} - secondary error\n")
-                                continue
+                start_pos = finally_found.start()
 
-                            sc_lines = source_code[start_pos:].split('\n')
-                            for line in sc_lines:
-                                if line == '':
-                                    continue
-                                method_code += (line.strip('\n ').replace(method_name, 'xxxmethodnamexxx') + ' ')
-                                for brace in re.findall(r'[{}]', line):
-                                    first_found = True
-                                    if brace == '{':
-                                        stack += 1
-                                    else:
-                                        stack -= 1
-                                if first_found and stack == 0:
-                                    break
-                    except UnicodeDecodeError:
-                        ferr.write(f"{file_name} - file decodeing error")
+                sc_lines = source_code[start_pos:].split('\n')
+                for line in sc_lines:
+                    if line == '':
                         continue
+                    method_code += (line.strip('\n ').replace(method_name, 'xxxmethodnamexxx') + ' ')
+                    for brace in re.findall(r'[{}]', line):
+                        first_found = True
+                        if brace == '{':
+                            stack += 1
+                        else:
+                            stack -= 1
+                    if first_found and stack == 0:
+                        break
+
                 method_code = re_0001_.sub(re_0002, method_code).lower().strip()
                 method_code = re.sub(r'\s+', '|', method_code)
                 # print(file_name, method_name, method_code, sep='\n')
                 # return
                 if method_code == '':
-                    ferr.write(f"{file_name} - {method_name}\n")
+                    ferr.write(f"{file_name} - {method_name} is somehow empty\n")
+                    print(f"{file_name} - {method_name} is somehow empty")
                     continue
                 example['label'] = normalize_label(method_name)
                 example['SOURCE'] = method_code
@@ -185,7 +211,7 @@ def merge_source_ast():
 
 
 if __name__ == '__main__':
-    preprocessor = DataPreprocessor()
-    preprocessor.preprocess()
+    # preprocessor = DataPreprocessor()
+    # preprocessor.preprocess()
     merge_source_ast()
     # print(normalize_label("is4Very_Empty21"))
