@@ -1,12 +1,14 @@
 import os
 import pickle
 from tqdm import tqdm, trange
+import argparse
 
 import wandb
 import numpy as np
 import torch
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader
+import torch_optimizer as optim
 
 from tokenizers.implementations.byte_level_bpe import ByteLevelBPETokenizer
 from tokenizers.processors import BertProcessing
@@ -77,8 +79,50 @@ train_dataloader = DataLoader(
 
 wandb.init(project='CodeBERTa', entity='dmivilensky')
 
+parser = argparse.ArgumentParser(description='Train CodeBERTa.')
+parser.add_argument('optimizer', type=str,
+    help='Method to use for optimization.')
+args = parser.parse_args()
+
+optimizer = args.optimizer
+lr = 0.01
+decay_gamma = 0.95
+
 train_iterator = trange(0, 5, desc="Epoch")
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
+if optimizer == "SGD":
+    optimizer = torch.optim.SGD(model.parameters(), lr)
+elif optimizer == "LaSGD":
+    sgd = torch.optim.SGD(model.parameters(), lr)
+    optimizer = optim.Lookahead(sgd, k=5, alpha=0.5)
+    optimizer.defaults = []
+elif optimizer == "Adam":
+    optimizer = torch.optim.Adam(model.parameters(), lr)
+elif optimizer == "LaAdam":
+    adam = torch.optim.Adam(model.parameters(), lr)
+    optimizer = optim.Lookahead(adam, k=5, alpha=0.5)
+    optimizer.defaults = []
+elif optimizer == "Lamb":
+    optimizer = optim.Lamb(model.parameters(), lr,
+                           betas=(0.9, 0.999), eps=1e-8)
+elif optimizer == "LaLamb":
+    lamb = optim.Lamb(model.parameters(), lr,
+                      betas=(0.9, 0.999), eps=1e-8)
+    optimizer = optim.Lookahead(lamb, k=5, alpha=0.5)
+    optimizer.defaults = []
+elif optimizer == "RAdam":
+    optimizer = optim.RAdam(model.parameters(), lr,
+                            betas=(0.9, 0.999), eps=1e-8)
+elif optimizer == "LaRAdam":
+    radam = optim.RAdam(model.parameters(), lr,
+                        betas=(0.9, 0.999), eps=1e-8)
+    optimizer = optim.Lookahead(radam, k=5, alpha=0.5)
+    optimizer.defaults = []
+else:
+    raise ValueError(f"Unknown optimizer name: {optimizer}")
+
+scheduler = torch.optim.lr_scheduler.LambdaLR(
+    optimizer, lr_lambda=lambda epoch: decay_gamma ** epoch)
 iteration = 0
 
 for _ in train_iterator:
@@ -104,8 +148,13 @@ for _ in train_iterator:
 
         iteration += 1
 
-    os.makedirs("./models/CodeBERTa-docstrings", exist_ok=True)
-    with open('./models/CodeBERTa-docstrings/' + 'checkpoint_' + str(iteration) + '.pickle', 'wb') as f:
+    scheduler.step()
+
+    os.makedirs("./models/CodeBERTa-docstrings/" + optimizer, exist_ok=True)
+    with open(
+        './models/CodeBERTa-docstrings/' + optimizer +
+        '/checkpoint_' + str(iteration) + '.pickle', 'wb'
+    ) as f:
         pickle.dump(model, f)
 
     print("=== validation ===")
@@ -132,7 +181,8 @@ for _ in train_iterator:
                 for i in range(3):
                     print('predict:', tokenizer_back.decode(
                         outputs.argmax(2)[i].tolist()))
-                    print(' target:', tokenizer_back.decode(labels[i].tolist()))
+                    print(' target:', tokenizer_back.decode(
+                        labels[i].tolist()))
                     print()
 
             if loss is None:
