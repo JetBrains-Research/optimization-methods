@@ -78,7 +78,7 @@ train_dataloader = DataLoader(
 wandb.init(project='CodeBERTa', entity='dmivilensky')
 
 train_iterator = trange(0, 5, desc="Epoch")
-optimizer = torch.optim.Adam(model.parameters(), lr=0.0005)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 iteration = 0
 
 for _ in train_iterator:

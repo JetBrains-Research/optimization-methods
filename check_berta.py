@@ -17,7 +17,7 @@ model = None
 with open('./models/CodeBERTa-docstrings/' + 'checkpoint_' + str(iteration) + '.pickle', 'rb') as f:
     model = pickle.load(f).cpu()
 
-batch = 32
+batch = 64
 
 
 def collate(examples):
