@@ -161,7 +161,7 @@ def merge_source_ast():
                 if method_name not in all_file_methods:
                     ferr.write(f"No {method_name} method in {file_name}\n")
                     print(f"No {method_name} method in {file_name}")
-                    return
+                    continue
                 try:
                     correct_occurrence = all_file_methods[method_name][cur_file_methods_occs[method_name]]
                 except IndexError:
