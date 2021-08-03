@@ -102,7 +102,7 @@ def merge_source_ast():
                 if not contains_lbrace(example['ast']):  # empty methods filtration
                     continue
                 file_name = example.pop('origFile')
-                method_name = example['label']
+                method_name = example['label'].replace('$', '\$')  # the only special character allowed in method name
                 if cur_file_methods_occs[0] != file_name:
                     cur_file_methods_occs = file_name, {}
                 if method_name in cur_file_methods_occs[1]:
@@ -141,7 +141,8 @@ def merge_source_ast():
                                                             .replace('"', '\"')
                                                             .replace("'", "\'")
                                                             .replace('$', '\$')
-                                                            .replace('^', '\^'))
+                                                            .replace('^', '\^')
+                                                            .replace('\\$', '\$'))  # in case of double screening in method_name
 
                             finally_found = re.search(correct_occurrence, source_code)
 
@@ -165,7 +166,8 @@ def merge_source_ast():
                                 if first_found and stack == 0:
                                     break
                     except UnicodeDecodeError:
-                        pass
+                        ferr.write(f"{file_name} - file decodeing error")
+                        continue
                 method_code = re_0001_.sub(re_0002, method_code).lower().strip()
                 method_code = re.sub(r'\s+', '|', method_code)
                 # print(file_name, method_name, method_code, sep='\n')
