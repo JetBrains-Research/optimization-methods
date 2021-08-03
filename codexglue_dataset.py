@@ -10,7 +10,7 @@ class CodeXGLUEDataset(Dataset):
         tokenizer_input, tokenizer_output,
         split: str = "train", 
         mode: str = "lang-id", 
-        langs: list = ["java", "python"]
+        langs: list = ["python"]
     ):
         self.examples = []
 
