@@ -62,7 +62,7 @@ class LaRAdamLamb(Optimizer):
         corrected_state_dict = dict()
         corrected_state_dict['param_groups'] = starter_state_dict['param_groups']
         if self.lookahead:
-            corrected_state_dict['state'] = starter_state_dict['slow_state']
+            corrected_state_dict['state'] = starter_state_dict['fast_state']
         else:
             corrected_state_dict['state'] = starter_state_dict['state']
         self.optimizer = self.lamb
