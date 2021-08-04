@@ -14,7 +14,7 @@ out_len = 10
 iteration = 7869
 model = None
 
-with open('./models/CodeBERTa-docstrings/' + 'checkpoint_' + str(iteration) + '.pickle', 'rb') as f:
+with open('./models/CodeBERTa-docstrings/Adam/' + 'checkpoint_' + str(iteration) + '.pickle', 'rb') as f:
     model = pickle.load(f).cpu()
 
 batch = 64

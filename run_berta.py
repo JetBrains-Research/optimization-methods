@@ -84,42 +84,41 @@ parser.add_argument('optimizer', type=str,
     help='Method to use for optimization.')
 args = parser.parse_args()
 
-optimizer = args.optimizer
-lr = 0.01
+lr = 0.0005
 decay_gamma = 0.95
 
 train_iterator = trange(0, 5, desc="Epoch")
 
-if optimizer == "SGD":
+if args.optimizer == "SGD":
     optimizer = torch.optim.SGD(model.parameters(), lr)
-elif optimizer == "LaSGD":
+elif args.optimizer == "LaSGD":
     sgd = torch.optim.SGD(model.parameters(), lr)
     optimizer = optim.Lookahead(sgd, k=5, alpha=0.5)
     optimizer.defaults = []
-elif optimizer == "Adam":
+elif args.optimizer == "Adam":
     optimizer = torch.optim.Adam(model.parameters(), lr)
-elif optimizer == "LaAdam":
+elif args.optimizer == "LaAdam":
     adam = torch.optim.Adam(model.parameters(), lr)
     optimizer = optim.Lookahead(adam, k=5, alpha=0.5)
     optimizer.defaults = []
-elif optimizer == "Lamb":
+elif args.optimizer == "Lamb":
     optimizer = optim.Lamb(model.parameters(), lr,
                            betas=(0.9, 0.999), eps=1e-8)
-elif optimizer == "LaLamb":
+elif args.optimizer == "LaLamb":
     lamb = optim.Lamb(model.parameters(), lr,
                       betas=(0.9, 0.999), eps=1e-8)
     optimizer = optim.Lookahead(lamb, k=5, alpha=0.5)
     optimizer.defaults = []
-elif optimizer == "RAdam":
+elif args.optimizer == "RAdam":
     optimizer = optim.RAdam(model.parameters(), lr,
                             betas=(0.9, 0.999), eps=1e-8)
-elif optimizer == "LaRAdam":
+elif args.optimizer == "LaRAdam":
     radam = optim.RAdam(model.parameters(), lr,
                         betas=(0.9, 0.999), eps=1e-8)
     optimizer = optim.Lookahead(radam, k=5, alpha=0.5)
     optimizer.defaults = []
 else:
-    raise ValueError(f"Unknown optimizer name: {optimizer}")
+    raise ValueError(f"Unknown optimizer name: {args.optimizer}")
 
 scheduler = torch.optim.lr_scheduler.LambdaLR(
     optimizer, lr_lambda=lambda epoch: decay_gamma ** epoch)
@@ -150,9 +149,9 @@ for _ in train_iterator:
 
     scheduler.step()
 
-    os.makedirs("./models/CodeBERTa-docstrings/" + optimizer, exist_ok=True)
+    os.makedirs("./models/CodeBERTa-docstrings/" + args.optimizer, exist_ok=True)
     with open(
-        './models/CodeBERTa-docstrings/' + optimizer +
+        './models/CodeBERTa-docstrings/' + args.optimizer +
         '/checkpoint_' + str(iteration) + '.pickle', 'wb'
     ) as f:
         pickle.dump(model, f)
