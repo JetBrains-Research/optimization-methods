@@ -1,20 +1,15 @@
-import json
-import pickle
-import itertools
+# Copyright 2021 Dmitry Vilensky-Pasechnyuk
+
 from collections import defaultdict
 import numpy as np
 
-from nltk import pos_tag
-from nltk.corpus import wordnet as wn
-from nltk.stem.wordnet import WordNetLemmatizer
-from nltk.stem import PorterStemmer
-
 from nltk.translate.meteor_score import single_meteor_score
 from nltk.translate.bleu_score import corpus_bleu, sentence_bleu
+from nltk.translate.chrf_score import corpus_chrf, sentence_chrf
 from rouge import Rouge
+import chrFpp
 from bert_score import score as bert_score
 
-from scipy.stats import wilcoxon, mannwhitneyu
 from time import perf_counter
 
 
@@ -93,6 +88,35 @@ class Metrics:
             },
             'score': {
                 'bleu': corpus_bleu([[ref] for ref in self.refs], self.hyps)
+            }
+        }
+    
+    def chrF(self):
+        scores = []
+
+        for hyp, ref in zip(self.hyps, self.refs):
+            scores.append(sentence_chrf([ref], hyp))
+
+        return {
+            'scores': {
+                'chrF': np.array(scores)
+            },
+            'score': {
+                'chrF': corpus_chrf([[ref] for ref in self.refs], self.hyps)
+            }
+        }
+    
+    def chrFplusplus(self):
+        scores = []
+        for hyp, ref in zip(self.hyps, self.refs):
+            scores.append(100*chrFpp.computeChrF(ref, hyp, nworder=2, ncorder=6, beta=2)[1])
+
+        return {
+            'scores': {
+                'chrFpp': np.array(scores)
+            },
+            'score': {
+                'chrFpp': np.mean(scores)
             }
         }
 
