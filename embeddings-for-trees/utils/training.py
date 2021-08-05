@@ -5,7 +5,7 @@ import torch
 from omegaconf import DictConfig
 from torch.optim import Adam, Optimizer, SGD, Adadelta, Adagrad, Adamax, RMSprop, LBFGS, ASGD
 from torchcontrib.optim import SWA
-from optimizer import SVRG, SdLBFGS, BB, RLamb, LaRAdamLamb
+from optimizer import SVRG, SdLBFGS, BB, RLamb, LaRAdamLamb, KFACOptimizer
 import torch_optimizer as optim
 from torch.optim.lr_scheduler import _LRScheduler, LambdaLR
 from scheduler import MyCyclicLR
@@ -130,6 +130,11 @@ def configure_optimizers_alon(
 
     elif hyper_parameters.optimizer == "LBFGS":
         optimizer = LBFGS(parameters, hyper_parameters.learning_rate)
+
+    elif hyper_parameters.optimizer == "KFAC":
+        optimizer = KFACOptimizer(parameters,
+                                  lr=hyper_parameters.learning_rate,
+                                  weight_decay=hyper_parameters.weight_decay)
 
     elif hyper_parameters.optimizer == "SdLBFGS":
         optimizer = SdLBFGS(parameters, lr=hyper_parameters.learning_rate, lr_decay=hyper_parameters.lr_decay,

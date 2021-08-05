@@ -3,6 +3,7 @@ from .sdlbfgs import SdLBFGS
 from .bb import BB
 from .RLamb import RLamb
 from .LaRAdamLamb import LaRAdamLamb
+from .kfac import KFACOptimizer
 
 
 __all__ = [
@@ -10,5 +11,6 @@ __all__ = [
     "SdLBFGS"
     "BB",
     "RLamb",
-    "LaRAdamLamb"
+    "LaRAdamLamb",
+    "KFACOptimizer"
 ]
