@@ -167,7 +167,7 @@ def merge_source_ast():
                 except IndexError:
                     ferr.write(f"{file_name} - {method_name} - wrong methods mapping\n")
                     print(f"{file_name} - {method_name} - wrong methods mapping")
-                    print(all_file_methods)
+                    # print(all_file_methods)
                     continue
 
                 finally_found = re.search(correct_occurrence, source_code)
