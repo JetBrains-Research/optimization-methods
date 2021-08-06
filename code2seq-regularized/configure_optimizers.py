@@ -68,7 +68,7 @@ def configure_optimizers(hyper_parameters: DictConfig, parameters: Iterable[torc
     elif hyper_parameters.strategy == "cyclic":
         scheduler = {
             'scheduler': CyclicLR(optimizer, min_lr=hyper_parameters.min_lr, max_lr=hyper_parameters.max_lr,
-                                  cycle_len=hyper_parameters.cycle_len, start_from=hyper_parameters.start_from, swa=True), Ï
+                                  cycle_len=hyper_parameters.cycle_len, start_from=hyper_parameters.start_from, swa=True),
             'interval': 'step',
             'frequency': 1
         }
@@ -76,34 +76,3 @@ def configure_optimizers(hyper_parameters: DictConfig, parameters: Iterable[torc
         raise ValueError('No such learning rate strategy')
 
     return [optimizer], [scheduler]
-
-
-def segment_sizes_to_slices(sizes: List) -> List:
-    cum_sums = numpy.cumsum(sizes)
-    start_of_segments = numpy.append([0], cum_sums[:-1])
-    return [slice(start, end) for start, end in zip(start_of_segments, cum_sums)]
-
-
-def cut_encoded_contexts(
-    encoded_contexts: torch.Tensor, contexts_per_label: List[int], mask_value: float = -1e9
-) -> Tuple[torch.Tensor, torch.Tensor]:
-    """Cut encoded contexts into batches
-
-    :param encoded_contexts: [n contexts; units]
-    :param contexts_per_label: [batch size]
-    :param mask_value:
-    :return: [batch size; max context len; units], [batch size; max context len]
-    """
-    batch_size = len(contexts_per_label)
-    max_context_len = max(contexts_per_label)
-
-    batched_contexts = encoded_contexts.new_zeros(
-        (batch_size, max_context_len, encoded_contexts.shape[-1]))
-    attention_mask = encoded_contexts.new_zeros((batch_size, max_context_len))
-
-    context_slices = segment_sizes_to_slices(contexts_per_label)
-    for i, (cur_slice, cur_size) in enumerate(zip(context_slices, contexts_per_label)):
-        batched_contexts[i, :cur_size] = encoded_contexts[cur_slice]
-        attention_mask[i, cur_size:] = mask_value
-
-    return batched_contexts, attention_mask

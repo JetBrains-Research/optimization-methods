@@ -10,7 +10,7 @@ from torch.optim.lr_scheduler import _LRScheduler
 from code2seq.dataset import PathContextBatch
 from code2seq.model.modules import PathEncoder, PathDecoder
 from code2seq.utils.metrics import PredictionStatistic
-from configure_optimizers import configure_optimizers
+from .configure_optimizers import configure_optimizers
 from code2seq.utils.vocabulary import Vocabulary, SOS, PAD, UNK, EOS
 
 
