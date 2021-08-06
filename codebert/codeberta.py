@@ -1,3 +1,5 @@
+# Copyright 2021 Dmitry Vilensky-Pasechnyuk
+
 from torch.nn import Module
 from transformers import RobertaModel, OpenAIGPTConfig, OpenAIGPTLMHeadModel, RobertaConfig
 import torch.nn.functional as F
@@ -8,13 +10,14 @@ class CodeBERTa(Module):
         super(CodeBERTa, self).__init__()
 
         if roberta_pretrained:
-            self.encoder = RobertaModel.from_pretrained("huggingface/CodeBERTa-small-v1")
+            self.encoder = RobertaModel.from_pretrained(
+                "huggingface/CodeBERTa-small-v1")
             decoder_config = OpenAIGPTConfig(vocab_size=52000)
             self.decoder = OpenAIGPTLMHeadModel(decoder_config)
         else:
             encoder_config = RobertaConfig(
                 vocab_size=52000,
-                hidden_size=192, num_hidden_layers=5, num_attention_heads=3, 
+                hidden_size=192, num_hidden_layers=5, num_attention_heads=3,
                 intermediate_size=768, max_position_embeddings=256)
             self.encoder = RobertaModel(encoder_config)
             decoder_config = OpenAIGPTConfig(

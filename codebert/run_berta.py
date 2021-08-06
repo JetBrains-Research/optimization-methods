@@ -13,8 +13,8 @@ import torch_optimizer as optim
 from tokenizers.implementations.byte_level_bpe import ByteLevelBPETokenizer
 from tokenizers.processors import BertProcessing
 
-from codexglue_dataset import CodeXGLUEDataset
-from codeberta import CodeBERTa
+from . import codexglue_dataset
+from . import codeberta
 
 
 in_len = 80
@@ -45,9 +45,9 @@ if os.path.isfile(f'train_dataset_{in_len}_{out_len}.pickle'):
     with open(f'eval_dataset_{in_len}_{out_len}.pickle', 'rb') as f:
         eval_dataset = pickle.load(f)
 else:
-    train_dataset = CodeXGLUEDataset(
+    train_dataset = codexglue_dataset.CodeXGLUEDataset(
         tokenizer_input, tokenizer_output, split="train", mode="docstring")
-    eval_dataset = CodeXGLUEDataset(
+    eval_dataset = codexglue_dataset.CodeXGLUEDataset(
         tokenizer_input, tokenizer_output, split="test", mode="docstring")
 
     with open(f'train_dataset_{in_len}_{out_len}.pickle', 'wb') as f:
@@ -57,7 +57,7 @@ else:
         pickle.dump(eval_dataset, f)
 
 
-model = CodeBERTa()
+model = codeberta.CodeBERTa()
 if cuda:
     model.to("cuda")
 model.train()
@@ -81,7 +81,7 @@ wandb.init(project='CodeBERTa', entity='dmivilensky')
 
 parser = argparse.ArgumentParser(description='Train CodeBERTa.')
 parser.add_argument('optimizer', type=str,
-    help='Method to use for optimization.')
+                    help='Method to use for optimization.')
 args = parser.parse_args()
 
 lr = 0.0005
@@ -149,7 +149,8 @@ for _ in train_iterator:
 
     scheduler.step()
 
-    os.makedirs("./models/CodeBERTa-docstrings/" + args.optimizer, exist_ok=True)
+    os.makedirs("./models/CodeBERTa-docstrings/" +
+                args.optimizer, exist_ok=True)
     with open(
         './models/CodeBERTa-docstrings/' + args.optimizer +
         '/checkpoint_' + str(iteration) + '.pickle', 'wb'

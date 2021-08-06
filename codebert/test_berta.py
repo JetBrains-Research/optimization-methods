@@ -8,8 +8,7 @@ from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader
 
 from tokenizers.implementations.byte_level_bpe import ByteLevelBPETokenizer
-
-from metrics import Metrics
+import textmetric
 
 
 def get_checkpoint_model(filename):
@@ -90,7 +89,7 @@ for filename in os.listdir(path):
         eval_dataset, batch_size=batch, collate_fn=collate)
 
     hyps, refs = get_hyps_refs(eval_dataloader, model, tokenizer)
-    res_metrics = Metrics(hyps, refs)
+    res_metrics = statmetric.Metrics(hyps, refs)
     test_metrics = res_metrics.get_statistics(with_symbolic=True, bert=True)
 
     os.makedirs(path + 'stats/', exist_ok=True)

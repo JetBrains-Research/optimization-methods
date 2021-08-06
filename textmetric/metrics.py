@@ -7,7 +7,7 @@ from nltk.translate.meteor_score import single_meteor_score
 from nltk.translate.bleu_score import corpus_bleu, sentence_bleu
 from nltk.translate.chrf_score import corpus_chrf, sentence_chrf
 from rouge import Rouge
-import chrFpp
+from . import chrFpp
 from bert_score import score as bert_score
 
 from time import perf_counter
