@@ -1,19 +1,19 @@
-from typing import List, Tuple, Iterable
+from typing import Iterable
 
-import numpy
 import torch
 from omegaconf import DictConfig
-from torch.optim import Optimizer, SGD, Adam
+from torch.optim import SGD, Adam
 from torch_optimizer import Lamb, RAdam, Lookahead
 
 from know_how_optimizer import BB
-from know_how_optimizer.lr_sheduler import CyclicLR
+from know_how_optimizer.lr_scheduler import CyclicLR
 
-from torch.optim.lr_scheduler import _LRScheduler, LambdaLR
+from torch.optim.lr_scheduler import LambdaLR
 
 
-def configure_optimizers(hyper_parameters: DictConfig, parameters: Iterable[torch.Tensor]) -> Tuple[List[Optimizer], List[_LRScheduler]]:
-    optimizer: Optimizer
+def configure_optimizers(hyper_parameters: DictConfig, parameters: Iterable[torch.Tensor]):
+    optimizer = SGD(parameters, hyper_parameters.learning_rate,
+                    weight_decay=hyper_parameters.weight_decay)
 
     if hyper_parameters.optimizer == "SGD":
         optimizer = SGD(parameters, hyper_parameters.learning_rate,
@@ -68,7 +68,8 @@ def configure_optimizers(hyper_parameters: DictConfig, parameters: Iterable[torc
     elif hyper_parameters.strategy == "cyclic":
         scheduler = {
             'scheduler': CyclicLR(optimizer, min_lr=hyper_parameters.min_lr, max_lr=hyper_parameters.max_lr,
-                                  cycle_len=hyper_parameters.cycle_len, start_from=hyper_parameters.start_from, swa=True),
+                                  cycle_len=hyper_parameters.cycle_len, start_from=hyper_parameters.start_from,
+                                  swa=True),
             'interval': 'step',
             'frequency': 1
         }

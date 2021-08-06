@@ -1,8 +1,8 @@
-from torch.optim.lr_scheduler import _LRScheduler
 from torch.optim import Optimizer
+import warnings
 
 
-class CyclicLR(_LRScheduler):
+class CyclicLR:
     def __init__(self, optimizer, min_lr, max_lr, cycle_len, gamma=1., last_epoch=-1, verbose=False, start_from=None, swa=False):
 
         # Attach optimizer
@@ -28,7 +28,7 @@ class CyclicLR(_LRScheduler):
 
         self.gamma = gamma
 
-        super(MyCyclicLR, self).__init__(optimizer, last_epoch, verbose)
+        super(CyclicLR, self).__init__(optimizer, last_epoch, verbose)
 
     def _format_param(self, name, optimizer, param):
         """Return correctly formatted lr/momentum for each param group."""
@@ -65,10 +65,10 @@ class CyclicLR(_LRScheduler):
         lrs = []
         for min_lr, max_lr in zip(self.min_lrs, self.max_lrs):
             lr = (1 - t) * max_lr + t * min_lr
-#             if swa and iteration < self.start_from:
-#                  lr = max_lr * self.gamma**(iteration // self.cycle_len)
-#             else:
-#                  lr = (1 - t) * (self.gamma**(self.start_from // self.cycle_len) if iteration >= self.start_from else 1) * max_lr + t * min_lr
+            # if swa and iteration < self.start_from:
+            #      lr = max_lr * self.gamma**(iteration // self.cycle_len)
+            # else:
+            #      lr = (1 - t) * (self.gamma**(self.start_from // self.cycle_len) if iteration >= self.start_from else 1) * max_lr + t * min_lr
             lrs.append(lr)
 
         return lrs
