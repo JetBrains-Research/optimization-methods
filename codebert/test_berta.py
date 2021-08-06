@@ -89,7 +89,7 @@ for filename in os.listdir(path):
         eval_dataset, batch_size=batch, collate_fn=collate)
 
     hyps, refs = get_hyps_refs(eval_dataloader, model, tokenizer)
-    res_metrics = statmetric.Metrics(hyps, refs)
+    res_metrics = textmetric.Metrics(hyps, refs)
     test_metrics = res_metrics.get_statistics(with_symbolic=True, bert=True)
 
     os.makedirs(path + 'stats/', exist_ok=True)
