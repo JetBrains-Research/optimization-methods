@@ -11,8 +11,7 @@ from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader
 import torch_optimizer as optim
 
-from tokenizers.implementations.byte_level_bpe import ByteLevelBPETokenizer
-from tokenizers.processors import BertProcessing
+from tokenizers import Tokenizer
 
 from codexglue_dataset import CodeXGLUEDocstringDataset
 from codeberta import CodeBERTa

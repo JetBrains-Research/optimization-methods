@@ -10,9 +10,15 @@ import os
 import pandas as pd
 import itertools
 
-texts_name = "aggregated_texts_code.txt"
+parser = argparse.ArgumentParser(description='Train tokenizer.')
+parser.add_argument('vocab_size', type=int,
+                    help='Size of vocabulary for tokenizer.')
+args = parser.parse_args()
 
-if not os.path.isfile(texts_name):
+texts_name = "aggregated_texts_code.txt"
+name = f"small_tokenizer_{args.vocab_size}_clear.json"
+
+if not (os.path.isfile(texts_name) or os.path.isfile(name)):
     print('Process dataset...')
 
     file_content = []
@@ -22,7 +28,7 @@ if not os.path.isfile(texts_name):
         for language in ["python"]:
             src_files += list(
                 Path(os.getcwd() +
-                     "/../dataset/").glob(f"{language}/{split}.jsonl")
+                     "/dataset/").glob(f"{language}/{split}.jsonl")
             )
 
     for src_file in src_files:
@@ -36,13 +42,6 @@ if not os.path.isfile(texts_name):
     textfile.close()
 
     print('Text database generated.')
-
-parser = argparse.ArgumentParser(description='Train tokenizer.')
-parser.add_argument('vocab_size', type=int,
-                    help='Size of vocabulary for tokenizer.')
-args = parser.parse_args()
-
-name = f"small_tokenizer_{args.vocab_size}_clear.json"
 
 if not os.path.isfile(name):
     tokenizer = Tokenizer(BPE(unk_token="<unk>"))
