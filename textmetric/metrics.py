@@ -7,7 +7,7 @@ from nltk.translate.meteor_score import single_meteor_score
 from nltk.translate.bleu_score import corpus_bleu, sentence_bleu
 from nltk.translate.chrf_score import corpus_chrf, sentence_chrf
 from rouge import Rouge
-from . import chrFpp
+import chrFpp
 from bert_score import score as bert_score
 
 from time import perf_counter
@@ -38,8 +38,10 @@ class Metrics:
         return result
 
     def bert(self):
+        # TODO: add a proper scaling
         (P, R, F), hashname = bert_score(
             self.hyps, self.refs, lang="en", return_hash=True)
+        
         return {
             'scores': {
                 'bert-P': P.cpu().detach().numpy(),
@@ -69,6 +71,7 @@ class Metrics:
 
     def bleu(self):
 
+        # TODO: there are in fact the standard weights of BLEU, isn't it?
         def bleu_weights(l):
             length = len(l)
             if length >= 4:
@@ -106,19 +109,17 @@ class Metrics:
             }
         }
     
-    def chrFplusplus(self):
-        scores = []
-        for hyp, ref in zip(self.hyps, self.refs):
-            scores.append(100*chrFpp.computeChrF(ref, hyp, nworder=2, ncorder=6, beta=2)[1])
+    # def chrFplusplus(self):
+    #     raise NotImplementedError()
 
-        return {
-            'scores': {
-                'chrFpp': np.array(scores)
-            },
-            'score': {
-                'chrFpp': np.mean(scores)
-            }
-        }
+    # def precision(self):
+    #     raise NotImplementedError()
+
+    # def recall(self):
+    #     raise NotImplementedError()
+
+    # def f1(self):
+    #     raise NotImplementedError()
 
     def symb_rouge_l(self):
         rouge = Rouge(metrics=['rouge-l'])

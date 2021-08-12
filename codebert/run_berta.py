@@ -1,3 +1,4 @@
+import random
 import os
 import pickle
 from tqdm import tqdm, trange
@@ -13,56 +14,59 @@ import torch_optimizer as optim
 from tokenizers.implementations.byte_level_bpe import ByteLevelBPETokenizer
 from tokenizers.processors import BertProcessing
 
-from . import codexglue_dataset
-from . import codeberta
+from codexglue_dataset import CodeXGLUEDocstringDataset
+from codeberta import CodeBERTa
+
+
+torch.manual_seed(7)
+random.seed(7)
+np.random.seed(7)
 
 
 in_len = 80
-out_len = 10
+out_len = 16
+vocab_size = 10_000
+log_wandb = True
 cuda = True
+tokenizer_name = f"small_tokenizer_{vocab_size}_clear.json"
+dataset_postfix = f'dataset_new_{in_len}_{out_len}_clear.pickle'
 
-tokenizer_back = ByteLevelBPETokenizer("vocab.json", "merges.txt",)
 
-tokenizer_input = ByteLevelBPETokenizer("vocab.json", "merges.txt",)
-tokenizer_input._tokenizer.post_processor = BertProcessing(
-    ("</s>", tokenizer_input.token_to_id("</s>")
-     ), ("<s>", tokenizer_input.token_to_id("<s>")),
-)
+tokenizer = Tokenizer.from_file(tokenizer_name)
+
+tokenizer_input = Tokenizer.from_file(tokenizer_name)
 tokenizer_input.enable_truncation(max_length=in_len)
 
-tokenizer_output = ByteLevelBPETokenizer("vocab.json", "merges.txt",)
-tokenizer_output._tokenizer.post_processor = BertProcessing(
-    ("</s>", tokenizer_output.token_to_id("</s>")
-     ), ("<s>", tokenizer_output.token_to_id("<s>")),
-)
+tokenizer_output = Tokenizer.from_file(tokenizer_name)
 tokenizer_output.enable_truncation(max_length=out_len)
 
 
-if os.path.isfile(f'train_dataset_{in_len}_{out_len}.pickle'):
-    with open(f'train_dataset_{in_len}_{out_len}.pickle', 'rb') as f:
+if os.path.isfile('train_' + dataset_postfix):
+    with open('train' + dataset_postfix, 'rb') as f:
         train_dataset = pickle.load(f)
 
-    with open(f'eval_dataset_{in_len}_{out_len}.pickle', 'rb') as f:
+    with open('eval' + dataset_postfix, 'rb') as f:
         eval_dataset = pickle.load(f)
 else:
-    train_dataset = codexglue_dataset.CodeXGLUEDataset(
-        tokenizer_input, tokenizer_output, split="train", mode="docstring")
-    eval_dataset = codexglue_dataset.CodeXGLUEDataset(
-        tokenizer_input, tokenizer_output, split="test", mode="docstring")
+    train_dataset = CodeXGLUEDocstringDataset(
+        tokenizer_input, tokenizer_output, split="train")
+    eval_dataset = CodeXGLUEDocstringDataset(
+        tokenizer_input, tokenizer_output, split="test")
 
-    with open(f'train_dataset_{in_len}_{out_len}.pickle', 'wb') as f:
+    with open('train' + dataset_postfix, 'wb') as f:
         pickle.dump(train_dataset, f)
 
-    with open(f'eval_dataset_{in_len}_{out_len}.pickle', 'wb') as f:
+    with open('eval' + dataset_postfix, 'wb') as f:
         pickle.dump(eval_dataset, f)
 
 
-model = codeberta.CodeBERTa()
+model = CodeBERTa(hidden_size=64, context_size=in_len,
+                  max_position_embeddings=256, vocab_size=vocab_size)
 if cuda:
     model.to("cuda")
 model.train()
 
-batch = 64
+batch = 512
 
 
 def collate(examples):
@@ -77,17 +81,19 @@ def collate(examples):
 train_dataloader = DataLoader(
     train_dataset, batch_size=batch, shuffle=True, collate_fn=collate)
 
-wandb.init(project='CodeBERTa', entity='dmivilensky')
+if log_wandb:
+    wandb.init(project='CodeBERTa-same', entity='dmivilensky')
 
 parser = argparse.ArgumentParser(description='Train CodeBERTa.')
 parser.add_argument('optimizer', type=str,
                     help='Method to use for optimization.')
 args = parser.parse_args()
 
-lr = 0.0005
+lr = 0.001
 decay_gamma = 0.95
+warmup_delay = 0
 
-train_iterator = trange(0, 5, desc="Epoch")
+train_iterator = trange(0, 10, desc="Epoch")
 
 if args.optimizer == "SGD":
     optimizer = torch.optim.SGD(model.parameters(), lr)
@@ -102,7 +108,17 @@ elif args.optimizer == "LaAdam":
     optimizer = optim.Lookahead(adam, k=5, alpha=0.5)
     optimizer.defaults = []
 elif args.optimizer == "Lamb":
-    optimizer = optim.Lamb(model.parameters(), lr,
+    input_ids, labels = next(iter(train_dataloader))
+    model.loss_fn(model(input_ids.to("cuda")).logits,
+                  labels.to("cuda"), batch).backward()
+    grad_norm = 0.0
+    for p in model.parameters():
+        if p.grad is not None:
+            param_norm = p.grad.data.norm(2)
+            grad_norm += param_norm.item() ** 2
+    grad_norm = grad_norm ** (1. / 2)
+    print('grad_norm', grad_norm)
+    optimizer = optim.Lamb(model.parameters(), grad_norm*lr,
                            betas=(0.9, 0.999), eps=1e-8)
 elif args.optimizer == "LaLamb":
     lamb = optim.Lamb(model.parameters(), lr,
@@ -142,17 +158,21 @@ for _ in train_iterator:
 
         optimizer.step()
 
-        if iteration % 5 == 0:
+        if log_wandb and iteration % 5 == 0:
             wandb.log({"loss": loss})
+
+        if warmup_delay != 0 and args.optimizer == "Lamb" and iteration == warmup_delay:
+            for group in optimizer.param_groups:
+                group['lr'] = lr
 
         iteration += 1
 
     scheduler.step()
 
-    os.makedirs("./models/CodeBERTa-docstrings/" +
+    os.makedirs("./models/CodeBERTa-docstrings-new/" +
                 args.optimizer, exist_ok=True)
     with open(
-        './models/CodeBERTa-docstrings/' + args.optimizer +
+        './models/CodeBERTa-docstrings-new/' + args.optimizer +
         '/checkpoint_' + str(iteration) + '.pickle', 'wb'
     ) as f:
         pickle.dump(model, f)
@@ -179,10 +199,10 @@ for _ in train_iterator:
 
             if step == 0:
                 for i in range(3):
-                    print('predict:', tokenizer_back.decode(
-                        outputs.argmax(2)[i].tolist()))
-                    print(' target:', tokenizer_back.decode(
-                        labels[i].tolist()))
+                    print('predict:', ''.join(tokenizer.decode(outputs.argmax(
+                        2)[i].tolist()).split(" "))[1:].replace('\u0120', ' '))
+                    print(' target:', ''.join(tokenizer.decode(
+                        labels[i].tolist()).split(" "))[1:].replace('\u0120', ' '))
                     print()
 
             if loss is None:
@@ -193,5 +213,6 @@ for _ in train_iterator:
 
     eval_loss = eval_loss / eval_steps
     print("=== validation: loss ===", eval_loss)
-    wandb.log({"val/loss": eval_loss})
+    if log_wandb:
+        wandb.log({"val/loss": eval_loss})
     model.train()

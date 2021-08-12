@@ -7,7 +7,7 @@ import itertools
 from torch.utils.data.dataset import Dataset
 
 
-class CodeXGLUEDataset(Dataset):
+class CodeXGLUEDocstringDataset(Dataset):
     def __init__(
         self,
         tokenizer_input, tokenizer_output,
@@ -27,27 +27,24 @@ class CodeXGLUEDataset(Dataset):
         for src_file in src_files:
             df = pd.read_json(src_file, orient='records', lines=True)
 
-            if mode == "lang-id":
-                label_idx = langs.index(src_file.parents[0].name)
+            code = list(map(lambda x: x.ids,
+                            tokenizer_input.encode_batch(
+                                list(map(
+                                    lambda x: " ".join(x),
+                                    df["code_tokens"].tolist()
+                                ))
+                            )))
 
-                self.examples += list(zip(
-                    map(lambda x: x.ids,
-                        tokenizer_input.encode_batch(df["code"].tolist())),
-                    itertools.repeat(label_idx)
-                ))
+            docstring = list(map(lambda x: x.ids,
+                                 tokenizer_output.encode_batch(
+                                     list(map(
+                                         lambda x: " ".join(itertools.takewhile(
+                                             lambda token: token != ".", x)),
+                                         df["docstring_tokens"].tolist()
+                                     ))
+                                 )))
 
-            elif mode == "docstring":
-                self.examples += list(zip(
-                    map(lambda x: x.ids,
-                        tokenizer_input.encode_batch(df["code"].tolist())),
-                    map(lambda x: x.ids,
-                        tokenizer_output.encode_batch(
-                            list(map(
-                                lambda x: " ".join(x),
-                                df["docstring_tokens"].tolist()
-                            ))
-                        ))
-                ))
+            self.examples += list(zip(code, docstring))
 
             print("Ready", src_file)
 
