@@ -35,7 +35,8 @@ hyper_parameters:
   random_context: true
   shuffle_data: true
 
-  optimizer: "Adam"
+  optimizer: "SGD"
+  strategy: "decay"
   nesterov: true
   learning_rate: 0.01
   weight_decay: 0
@@ -61,14 +62,14 @@ dataset:
 
 encoder:
   embedding_size: 128
-  rnn_size: 64
+  rnn_size: 86
   use_bi_rnn: true
   embedding_dropout: 0.25
   rnn_num_layers: 1
   rnn_dropout: 0.5
 
 decoder:
-  decoder_size: 120
+  decoder_size: 28
   embedding_size: 128
   num_decoder_layers: 1
   rnn_dropout: 0.5

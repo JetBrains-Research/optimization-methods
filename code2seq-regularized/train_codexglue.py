@@ -3,7 +3,7 @@ from os.path import join
 import hydra
 import torch
 from code2seq.dataset import PathContextDataModule
-from code2seq.model import Code2Seq
+from code2seq_standard import Code2Seq
 from code2seq.utils.vocabulary import Vocabulary
 from omegaconf import DictConfig
 from pytorch_lightning import Trainer
@@ -23,7 +23,7 @@ def train(config: DictConfig):
     wandb_logger = WandbLogger(
         project=f"code2seq-{config.name}", log_model=True, offline=config.log_offline
     )
-    wandb_logger.watch(model)
+    wandb_logger.watch(model, log_freq=5)
 
     gpu = [0] if torch.cuda.is_available() else None
     trainer = Trainer(max_epochs=config.hyper_parameters.n_epochs,

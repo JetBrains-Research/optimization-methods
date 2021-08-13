@@ -5,13 +5,13 @@ from omegaconf import DictConfig
 from torch.optim import SGD, Adam
 from torch_optimizer import Lamb, RAdam, Lookahead
 
-from know_how_optimizer import BB
-from know_how_optimizer.lr_scheduler import CyclicLR
+# from know_how_optimizer import BB
+# from know_how_optimizer.lr_scheduler import CyclicLR
 
 from torch.optim.lr_scheduler import LambdaLR
 
 
-def configure_optimizers(hyper_parameters: DictConfig, parameters: Iterable[torch.Tensor]):
+def configure_optimizers_custom(hyper_parameters: DictConfig, parameters: Iterable[torch.Tensor]):
     optimizer = SGD(parameters, hyper_parameters.learning_rate,
                     weight_decay=hyper_parameters.weight_decay)
 
@@ -55,9 +55,9 @@ def configure_optimizers(hyper_parameters: DictConfig, parameters: Iterable[torc
         optimizer = Lookahead(radam, k=5, alpha=0.5)
         optimizer.defaults = []
 
-    elif hyper_parameters.optimizer == "BB":
-        optimizer = BB(parameters, lr=hyper_parameters.learning_rate,
-                       steps=50, beta=0.01, max_lr=0.1, min_lr=0.001)
+    # elif hyper_parameters.optimizer == "BB":
+    #     optimizer = BB(parameters, lr=hyper_parameters.learning_rate,
+    #                    steps=50, beta=0.01, max_lr=0.1, min_lr=0.001)
 
     if hyper_parameters.strategy == "decay":
         scheduler = {
@@ -65,14 +65,14 @@ def configure_optimizers(hyper_parameters: DictConfig, parameters: Iterable[torc
             'interval': 'epoch',
             'frequency': 1
         }
-    elif hyper_parameters.strategy == "cyclic":
-        scheduler = {
-            'scheduler': CyclicLR(optimizer, min_lr=hyper_parameters.min_lr, max_lr=hyper_parameters.max_lr,
-                                  cycle_len=hyper_parameters.cycle_len, start_from=hyper_parameters.start_from,
-                                  swa=True),
-            'interval': 'step',
-            'frequency': 1
-        }
+    # elif hyper_parameters.strategy == "cyclic":
+    #     scheduler = {
+    #         'scheduler': CyclicLR(optimizer, min_lr=hyper_parameters.min_lr, max_lr=hyper_parameters.max_lr,
+    #                               cycle_len=hyper_parameters.cycle_len, start_from=hyper_parameters.start_from,
+    #                               swa=True),
+    #         'interval': 'step',
+    #         'frequency': 1
+    #     }
     else:
         raise ValueError('No such learning rate strategy')
 
