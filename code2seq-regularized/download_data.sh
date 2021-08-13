@@ -109,6 +109,15 @@ then
   else
     echo "Dataset $DATASET_NAME already exists"
   fi
+elif [ "$DATASET_NAME" == "codexglue-docstrings-py" ]
+then
+  echo "Downloading dataset $DATASET_NAME"
+  wget -O $DATA_DIR/codexglue-paths.zip "https://www.dropbox.com/sh/dl/6e59rx5jiqqf159/AADuJwiMEIkc62wJ1udYvk8Ua/codexglue-paths?dl=1"
+  unzip $DATA_DIR/codexglue-paths.zip -d $DATA_DIR
+  rm $DATA_DIR/codexglue-docstrings-java.tar.gz
+  tar -xvzf $DATA_DIR/codexglue-docstrings-py.tar.gz -C data/
+  rm $DATA_DIR/codexglue-docstrings-py.tar.gz
+  rm $DATA_DIR/codexglue-paths.zip
 elif [ "$DATASET_NAME" == "poj_104" ]
 then
   sh "$POJ_DOWNLOAD_SCRIPT" "$TRAIN_SPLIT_PART" "$TEST_SPLIT_PART" "$VAL_SPLIT_PART" "$DEV" "$ASTMINER_PATH" "$SPLIT_SCRIPT" "$LOAD_SPLITTED"

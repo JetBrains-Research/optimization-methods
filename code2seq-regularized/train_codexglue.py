@@ -11,7 +11,7 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger
 
 
-@hydra.main(config_path="configs", config_name="codexglue")
+@hydra.main(config_path="configs", config_name="codexglue-docstrings-py")
 def train(config: DictConfig):
     vocabulary_path = join(
         config.data_folder, config.dataset.name, config.vocabulary_name)

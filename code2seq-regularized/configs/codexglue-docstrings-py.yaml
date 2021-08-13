@@ -5,7 +5,7 @@ hydra:
   job_logging: null
   hydra_logging: null
 
-name: codexglue
+name: codexglue-docstrings-py
 
 seed: 7
 num_workers: 2
@@ -42,7 +42,7 @@ hyper_parameters:
   decay_gamma: 0.95
 
 dataset:
-  name: codexglue
+  name: codexglue-docstrings-py
   target:
     max_parts: 7
     is_wrapped: true
@@ -61,14 +61,14 @@ dataset:
 
 encoder:
   embedding_size: 128
-  rnn_size: 128
+  rnn_size: 64
   use_bi_rnn: true
   embedding_dropout: 0.25
   rnn_num_layers: 1
   rnn_dropout: 0.5
 
 decoder:
-  decoder_size: 320
+  decoder_size: 120
   embedding_size: 128
   num_decoder_layers: 1
   rnn_dropout: 0.5
