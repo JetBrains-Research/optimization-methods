@@ -34,5 +34,5 @@ cd ..
 
 pip3 install -r requirements.txt
 
-wget https://huggingface.co/huggingface/CodeBERTa-small-v1/raw/main/merges.txt
-wget https://huggingface.co/huggingface/CodeBERTa-small-v1/raw/main/vocab.json
+# wget https://huggingface.co/huggingface/CodeBERTa-small-v1/raw/main/merges.txt
+# wget https://huggingface.co/huggingface/CodeBERTa-small-v1/raw/main/vocab.json

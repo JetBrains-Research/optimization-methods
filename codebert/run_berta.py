@@ -47,6 +47,7 @@ if os.path.isfile('train_' + dataset_postfix):
     with open('eval' + dataset_postfix, 'rb') as f:
         eval_dataset = pickle.load(f)
 else:
+    print('Process dataset...')
     train_dataset = CodeXGLUEDocstringDataset(
         tokenizer_input, tokenizer_output, split="train")
     eval_dataset = CodeXGLUEDocstringDataset(
@@ -57,6 +58,8 @@ else:
 
     with open('eval' + dataset_postfix, 'wb') as f:
         pickle.dump(eval_dataset, f)
+
+    print('Dataset instances prepared and saved.')
 
 
 model = CodeBERTa(hidden_size=64, context_size=in_len,
