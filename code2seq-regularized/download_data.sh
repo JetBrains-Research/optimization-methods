@@ -105,6 +105,7 @@ then
     fi
     echo "Unzip dataset"
     tar -xvzf $DATA_DIR/"$DATASET_NAME"-preprocessed.tar.gz -C data/
+    rm $DATA_DIR/"$DATASET_NAME"-preprocessed.tar.gz
   else
     echo "Dataset $DATASET_NAME already exists"
   fi

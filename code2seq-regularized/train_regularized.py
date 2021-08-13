@@ -12,7 +12,7 @@ from pytorch_lightning.loggers import WandbLogger
 from .regularizer import ProximalRegularizer
 
 
-@hydra.main(config_path="configs", config_name="code2seq-java-med-ten")
+@hydra.main(config_path="configs", config_name="java-med-train:10-val:5")
 def train(config: DictConfig):
     vocabulary_path = join(
         config.data_folder, config.dataset.name, config.vocabulary_name)
@@ -26,7 +26,7 @@ def train(config: DictConfig):
     data_module = PathContextDataModule(config, vocabulary)
 
     wandb_logger = WandbLogger(
-        project=f"{config.name}", log_model=True, offline=config.log_offline
+        project=f"code2seq-regularized-{config.name}", log_model=True, offline=config.log_offline
     )
     wandb_logger.watch(model)
 

@@ -25,17 +25,25 @@ def _counter_to_dict(values: Counter, n_most_common: int = None, additional_valu
 
 
 def _counters_to_vocab(config: Dict, counters: Dict[str, TypeCounter[str]]) -> Vocabulary:
-    additional_tokens = [SOS, EOS, PAD, UNK] if config["token"]["is_wrapped"] else [PAD, UNK]
-    token_to_id = _counter_to_dict(counters["token"], config["token"]["vocabulary_size"], additional_tokens)
-    additional_targets = [SOS, EOS, PAD, UNK] if config["target"]["is_wrapped"] else [PAD, UNK]
-    label_to_id = _counter_to_dict(counters["target"], config["target"]["vocabulary_size"], additional_targets)
-    additional_nodes = [SOS, EOS, PAD, UNK] if config["path"]["is_wrapped"] else [PAD, UNK]
-    node_to_id = _counter_to_dict(counters["path"], config["path"]["vocabulary_size"], additional_nodes)
+    additional_tokens = [SOS, EOS, PAD,
+                         UNK] if config["token"]["is_wrapped"] else [PAD, UNK]
+    token_to_id = _counter_to_dict(
+        counters["token"], config["token"]["vocabulary_size"], additional_tokens)
+    additional_targets = [SOS, EOS, PAD,
+                          UNK] if config["target"]["is_wrapped"] else [PAD, UNK]
+    label_to_id = _counter_to_dict(
+        counters["target"], config["target"]["vocabulary_size"], additional_targets)
+    additional_nodes = [SOS, EOS, PAD,
+                        UNK] if config["path"]["is_wrapped"] else [PAD, UNK]
+    node_to_id = _counter_to_dict(
+        counters["path"], config["path"]["vocabulary_size"], additional_nodes)
 
     vocabulary = Vocabulary(token_to_id, node_to_id, label_to_id)
     if "type" in counters:
-        additional_types = [SOS, EOS, PAD, UNK] if config["type"]["is_wrapped"] else [PAD, UNK]
-        vocabulary.type_to_id = _counter_to_dict(counters["type"], config["type"]["vocabulary_size"], additional_types)
+        additional_types = [SOS, EOS, PAD,
+                            UNK] if config["type"]["is_wrapped"] else [PAD, UNK]
+        vocabulary.type_to_id = _counter_to_dict(
+            counters["type"], config["type"]["vocabulary_size"], additional_types)
     return vocabulary
 
 
@@ -56,13 +64,16 @@ def parse_path_context(config: Dict, path_context: List[str]) -> Dict[str, List[
 
 
 def collect_vocabulary(config: Dict[str, Any], train_holdout: str) -> Vocabulary:
-    counters: Dict[str, TypeCounter[str]] = {k: Counter() for k in ["target", "token", "path", "type"] if k in config}
+    counters: Dict[str, TypeCounter[str]] = {
+        k: Counter() for k in ["target", "token", "path", "type"] if k in config}
     with open(train_holdout, "r") as train_file:
         for line in tqdm(train_file, total=count_lines_in_file(train_holdout)):
             label, *path_contexts = line.split()
-            counters["target"].update(parse_token(label, config["target"]["is_splitted"]))
+            counters["target"].update(parse_token(
+                label, config["target"]["is_splitted"]))
             for path_context in path_contexts:
-                parsed_context = parse_path_context(config, path_context.split(","))
+                parsed_context = parse_path_context(
+                    config, path_context.split(","))
                 for key, value in parsed_context.items():
                     counters[key].update(value)
     return _counters_to_vocab(config, counters)
@@ -77,11 +88,12 @@ def convert_vocabulary(config: Dict, original_vocabulary_path: str) -> Vocabular
     return _counters_to_vocab(config, counters)
 
 
-@hydra.main(config_path="./configs", config_name="code2seq-java-med-ten")
+@hydra.main(config_path="./configs", config_name="java-med-train:10-val:5")
 def preprocess(config: DictConfig):
     dataset_directory = join(config.data_folder, config.dataset.name)
     possible_dict = join(dataset_directory, f"{config.dataset.name}.dict.c2s")
-    train_holdout = join(dataset_directory, f"{config.dataset.name}.{config.train_holdout}.c2s")
+    train_holdout = join(
+        dataset_directory, f"{config.dataset.name}.{config.train_holdout}.c2s")
     dict_data_config = OmegaConf.to_container(config.dataset, True)
     if not isinstance(dict_data_config, dict):
         raise ValueError

@@ -1,1 +1,2 @@
-data/code2seq-java-med-ten
+data/java-med
+data/java-med-train:10-val:5
