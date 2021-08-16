@@ -3,3 +3,4 @@ data/java-med-train:10-val:5
 wandb
 data/codexglue-docstrings-py
 __pycache__
+code2seq-codexglue-docstrings-py
