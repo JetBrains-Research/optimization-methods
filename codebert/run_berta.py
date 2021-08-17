@@ -40,7 +40,7 @@ tokenizer_output = Tokenizer.from_file(tokenizer_name)
 tokenizer_output.enable_truncation(max_length=out_len)
 
 
-if os.path.isfile('train_' + dataset_postfix):
+if os.path.isfile('train' + dataset_postfix):
     with open('train' + dataset_postfix, 'rb') as f:
         train_dataset = pickle.load(f)
 
@@ -84,7 +84,7 @@ train_dataloader = DataLoader(
     train_dataset, batch_size=batch, shuffle=True, collate_fn=collate)
 
 if log_wandb:
-    wandb.init(project='CodeBERTa-same', entity='dmivilensky')
+    wandb.init(project='CodeBERTa-final', entity='dmivilensky')
 
 parser = argparse.ArgumentParser(description='Train CodeBERTa.')
 parser.add_argument('optimizer', type=str,
@@ -123,7 +123,17 @@ elif args.optimizer == "Lamb":
     optimizer = optim.Lamb(model.parameters(), grad_norm*lr,
                            betas=(0.9, 0.999), eps=1e-8)
 elif args.optimizer == "LaLamb":
-    lamb = optim.Lamb(model.parameters(), lr,
+    input_ids, labels = next(iter(train_dataloader))
+    model.loss_fn(model(input_ids.to("cuda")).logits,
+                  labels.to("cuda"), batch).backward()
+    grad_norm = 0.0
+    for p in model.parameters():
+        if p.grad is not None:
+            param_norm = p.grad.data.norm(2)
+            grad_norm += param_norm.item() ** 2
+    grad_norm = grad_norm ** (1. / 2)
+    print('grad_norm', grad_norm)
+    lamb = optim.Lamb(model.parameters(), grad_norm*lr,
                       betas=(0.9, 0.999), eps=1e-8)
     optimizer = optim.Lookahead(lamb, k=5, alpha=0.5)
     optimizer.defaults = []
@@ -163,7 +173,7 @@ for _ in train_iterator:
         if log_wandb and iteration % 5 == 0:
             wandb.log({"loss": loss})
 
-        if warmup_delay != 0 and args.optimizer == "Lamb" and iteration == warmup_delay:
+        if warmup_delay != 0 and args.optimizer in ["Lamb", "LaLamb"] and iteration == warmup_delay:
             for group in optimizer.param_groups:
                 group['lr'] = lr
 
