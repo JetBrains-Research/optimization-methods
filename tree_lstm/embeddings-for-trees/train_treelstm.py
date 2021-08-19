@@ -10,6 +10,7 @@ from data_module.jsonl_data_module import JsonlDataModule
 from models import TreeLSTM2Seq, TypedTreeLSTM2Seq
 from utils.callbacks import UploadCheckpointCallback, PrintEpochResultCallback
 from utils.common import filter_warnings, print_config
+from utils.training import calc_grad_norm
 
 
 @hydra.main(config_path="config", config_name="tree_lstm_small")
@@ -28,6 +29,12 @@ def train_treelstm(config: DictConfig):
         model = TypedTreeLSTM2Seq(config, data_module.vocabulary)
     else:
         model = TreeLSTM2Seq(config, data_module.vocabulary)
+
+    if config.hyper_parameters.scale_lr:
+        assert config.hyper_parameters in ['Lamb', 'Lookahead_Lamb'], 'Use lr scaling only for (La)Lamb'
+        model.init_grad_norm = calc_grad_norm(model, next(iter(data_module.train_dataloader())))
+    else:
+        model.init_grad_norm = 1.
 
     # define logger
     wandb_logger = WandbLogger(project=f"tree-lstm-{config.dataset}", log_model=False, offline=config.log_offline)

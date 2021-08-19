@@ -55,6 +55,9 @@ class TreeLSTM2Seq(LightningModule):
         else:
             raise NotImplementedError()
 
+        #for lamb lr init
+        self.init_grad_norm = None
+
         self.init_weights(how=config.initialization, value=config.init_value)
 
     def init_weights(self, how=None, value=None):
@@ -76,7 +79,7 @@ class TreeLSTM2Seq(LightningModule):
     # ========== Main PyTorch-Lightning hooks ==========
 
     def configure_optimizers(self) -> Tuple[List[Optimizer], List[_LRScheduler]]:
-        return configure_optimizers_alon(self._config.hyper_parameters, self.parameters())
+        return configure_optimizers_alon(self._config.hyper_parameters, self.parameters(), self.init_grad_norm)
 
     def forward(  # type: ignore
         self,
