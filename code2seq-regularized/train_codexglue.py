@@ -21,7 +21,7 @@ def train(config: DictConfig):
     data_module = PathContextDataModule(config, vocabulary)
 
     wandb_logger = WandbLogger(
-        project=f"code2seq-{config.name}", log_model=True, offline=config.log_offline
+        project=f"code2seq-{config.name}-final", log_model=True, offline=config.log_offline
     )
     wandb_logger.watch(model, log_freq=5)
 

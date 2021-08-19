@@ -26,7 +26,7 @@ log_every_epoch: 10
 progress_bar_refresh_rate: 1
 
 hyper_parameters:
-  n_epochs: 5
+  n_epochs: 10
   patience: 10
   batch_size: 512
   test_batch_size: 512
@@ -35,7 +35,7 @@ hyper_parameters:
   random_context: true
   shuffle_data: true
 
-  optimizer: "SGD"
+  optimizer: "RAdam"
   strategy: "decay"
   nesterov: true
   learning_rate: 0.01
@@ -45,7 +45,7 @@ hyper_parameters:
 dataset:
   name: codexglue-docstrings-py
   target:
-    max_parts: 7
+    max_parts: 15
     is_wrapped: true
     is_splitted: true
     vocabulary_size: 27000
@@ -62,16 +62,16 @@ dataset:
 
 encoder:
   embedding_size: 128
-  rnn_size: 86
+  rnn_size: 60
   use_bi_rnn: true
   embedding_dropout: 0.25
   rnn_num_layers: 1
   rnn_dropout: 0.5
 
 decoder:
-  decoder_size: 28
+  decoder_size: 5
   embedding_size: 128
-  num_decoder_layers: 1
+  num_decoder_layers: 2
   rnn_dropout: 0.5
   teacher_forcing: 1
   beam_width: 0

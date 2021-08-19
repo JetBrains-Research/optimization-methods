@@ -1,2 +1,7 @@
 codebert/dataset
+codebert/models
+codebert/wandb
+codebert/eval*
+codebert/train*
+codebert/__pycache__
 .gitignore
