@@ -31,7 +31,7 @@ def train_treelstm(config: DictConfig):
         model = TreeLSTM2Seq(config, data_module.vocabulary)
 
     if config.hyper_parameters.scale_lr:
-        assert config.hyper_parameters in ['Lamb', 'Lookahead_Lamb'], 'Use lr scaling only for (La)Lamb'
+        assert config.hyper_parameters.optimizer in ['Lamb', 'Lookahead_Lamb'], 'Use lr scaling only for (La)Lamb'
         model.init_grad_norm = calc_grad_norm(model, next(iter(data_module.train_dataloader())))
     else:
         model.init_grad_norm = 1.
