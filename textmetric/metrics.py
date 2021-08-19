@@ -24,8 +24,9 @@ from collections import defaultdict
 import numpy as np
 
 from nltk.translate.meteor_score import single_meteor_score
-from nltk.translate.bleu_score import corpus_bleu, sentence_bleu, SmoothingFunction
-from nltk.translate.chrf_score import corpus_chrf, sentence_chrf
+from sacrebleu import corpus_bleu, sentence_bleu
+from sacrebleu import corpus_chrf, sentence_chrf
+from sacrebleu import corpus_ter, sentence_ter
 from rouge import Rouge
 from bert_score import score as bert_score
 
@@ -133,56 +134,34 @@ class Metrics:
 
     def bleu(self) -> dict:
         """
-        Evaluates the BLEU metric with the modified weights. The key difference with
-        the standard implementation are the suitable weights for the one-token sentences,
-        which are frequent in a code summarization tasks:
-
-        >>> np.asscalar(Metrics(['one-token'], ['one-token']).bleu()['scores']['bleu'])
-        1.0
+        Evaluates the BLEU metric.
         """
-
-        def bleu_weights(l: str) -> tuple:
-            length = len(l)
-            if length >= 4:
-                return (0.25, 0.25, 0.25, 0.25)
-            elif length >= 2:
-                wt = [1 / (length-1) for _ in range(length-1)]
-            else:
-                wt = [1., 0., 0., 0.]
-            wt.extend([0 for _ in range(4-length)])
-            return tuple(wt)
-
         scores = []
 
         for hyp, ref in zip(self.hyps, self.refs):
-            scores.append(sentence_bleu([ref], hyp, weights=bleu_weights(ref)))
+            scores.append(sentence_bleu(hyp, [ref]).score)
 
         return {
             'scores': {
                 'bleu': np.array(scores)
             },
             'score': {
-                'bleu': corpus_bleu([[ref] for ref in self.refs], self.hyps),
-                # Here we calculate average sentence-wise scores to take into account the modified weights
-                'avg_bleu': np.mean(scores)
+                'bleu': corpus_bleu(self.hyps, [self.refs]).score
             }
         }
-
-    def bleu_smoothed(self) -> dict:
+    
+    def ter(self) -> dict:
         scores = []
-        # Method 5 is the best according to https://sarahfakhoury.com/2021-FSE-Summarization-Metrics.pdf
-        smoothing = SmoothingFunction().method5
 
         for hyp, ref in zip(self.hyps, self.refs):
-            scores.append(sentence_bleu(
-                [ref], hyp, smoothing_function=smoothing))
+            scores.append(sentence_ter(hyp, [ref]).score)
 
         return {
             'scores': {
-                'bleu_smoothed': np.array(scores)
+                'ter': np.array(scores)
             },
             'score': {
-                'bleu_smoothed': corpus_bleu([[ref] for ref in self.refs], self.hyps, smoothing_function=smoothing)
+                'ter': corpus_ter(self.hyps, [self.refs]).score
             }
         }
 
@@ -190,14 +169,29 @@ class Metrics:
         scores = []
 
         for hyp, ref in zip(self.hyps, self.refs):
-            scores.append(sentence_chrf([ref], hyp))
+            scores.append(sentence_chrf(hyp, [ref]).score)
 
         return {
             'scores': {
                 'chrF': np.array(scores)
             },
             'score': {
-                'chrF': corpus_chrf([[ref] for ref in self.refs], self.hyps)
+                'chrF': corpus_chrf(self.hyps, [self.refs]).score
+            }
+        }
+
+    def chrFpp(self) -> dict:
+        scores = []
+
+        for hyp, ref in zip(self.hyps, self.refs):
+            scores.append(sentence_chrf(hyp, [ref], word_order=2).score)
+
+        return {
+            'scores': {
+                'chrFpp': np.array(scores)
+            },
+            'score': {
+                'chrFpp': corpus_chrf(self.hyps, [self.refs], word_order=2).score
             }
         }
 
@@ -332,5 +326,7 @@ def calculate_one_token_metrics(true_positive: int, false_positive: int, false_n
 
 
 if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
+    print(Metrics(['one two three four', 'one two three five'], ['one due three five', 'one two three four']).rouge())
+    
+    # import doctest
+    # doctest.testmod()
