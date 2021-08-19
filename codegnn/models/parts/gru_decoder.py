@@ -2,7 +2,6 @@ from typing import Tuple
 
 import torch
 from torch import nn
-import torch.nn.functional as F
 from omegaconf import DictConfig
 from models.parts import LuongAttention
 from utils.common import PAD, SOS
@@ -49,8 +48,9 @@ class GRUDecoder(nn.Module):
         output = sc_enc.new_zeros((output_length, batch_size, self._out_size))
         #[batch_size]
         current_input = sc_enc.new_full((batch_size,), self._sos_token, dtype=torch.long)
+        output[0:, :, self._sos_token] = 1
         h_prev = initial_state
-        for step in range(output_length):
+        for step in range(1, output_length):
             current_output, h_prev = self.decoder_step(current_input, h_prev, (sc_enc, ast_enc))
             output[step] = current_output
             if target_sequence is not None and torch.rand(1) < self._teacher_forcing:
@@ -67,7 +67,6 @@ class GRUDecoder(nn.Module):
             batched_context: Tuple[torch.Tensor, torch.Tensor]  # [batch_size, source_len, hidden_size], [batch_size, n_nodes, hidden_size]
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         sc_enc, ast_enc = batched_context
-        batch_size = sc_enc.size(0)
 
         embedded = self._target_embedding(input_tokens).unsqueeze(1)
 

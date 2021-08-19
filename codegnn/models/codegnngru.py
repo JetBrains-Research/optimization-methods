@@ -9,8 +9,8 @@ from torch.optim.lr_scheduler import _LRScheduler
 from pytorch_lightning import LightningModule
 from omegaconf import DictConfig
 
-from models.parts import GCNLayer, GRUDecoder
-from utils.common import PAD, SOS, EOS, TOKEN, NODE
+from models.parts import GRUDecoder, LeClairGRUDecoder, GNNEncoder
+from utils.common import PAD, SOS, EOS
 from utils.training import configure_optimizers_alon
 from utils.vocabulary import Vocabulary
 from utils.metrics import PredictionStatistic
@@ -50,14 +50,10 @@ class CodeGNNGRU(LightningModule):
             batch_first=True,
         )
 
-        gcn_layers = [GCNLayer(config.embedding_size, config.gcn_hidden_size)]
-        gcn_layers.extend(
-            [GCNLayer(config.gcn_hidden_size, config.gcn_hidden_size) for _ in range(config.num_hops - 1)]
-        )
-        self.gcn_layers = nn.ModuleList(gcn_layers)
+        self.gnn_encoder = GNNEncoder(config)
 
         self.ast_rnn_enc = nn.GRU(
-            config.gcn_hidden_size,
+            config.gnn_encoder.hidden_size,
             config.hidden_size,
             config.encoder_num_layers,
             dropout=config.rnn_dropout if config.encoder_num_layers > 1 else 0,
@@ -65,7 +61,12 @@ class CodeGNNGRU(LightningModule):
         )
 
         #Decoder
-        self.decoder = GRUDecoder(config, vocabulary)
+        if config.decoder_type == 'simple_decoder':
+            self.decoder = GRUDecoder(config, vocabulary)
+        elif config.deocoder_type == 'leclair_decoder':
+            self.decoder = LeClairGRUDecoder(config, vocabulary)
+        else:
+            raise NotImplementedError()
 
         # saving predictions
         if not os.path.exists(config.output_dir):
@@ -101,9 +102,7 @@ class CodeGNNGRU(LightningModule):
         ast_node_emb = self.node_embedding(ast_nodes) + self.token_embedding(ast_node_tokens).sum(2)  # no second term in original implementation, but why not
 
         sc_enc, sc_h = self.source_code_enc(sc_emb)
-        ast_enc = ast_node_emb
-        for i in range(self._config.num_hops):
-            ast_enc = self.gcn_layers[i](ast_enc, ast_edges)
+        ast_enc = self.gnn_encoder(ast_node_emb, ast_edges)
         ast_enc, _ = self.ast_rnn_enc(ast_enc, sc_h)
 
         output_logits = self.decoder(
@@ -114,20 +113,6 @@ class CodeGNNGRU(LightningModule):
             target
         )
 
-        # target_emb = self.target_embedding(target)
-        # dec_out, _ = self.decoder(target_emb, h_0=sc_h)
-        #
-        # sc_attn = F.softmax(torch.bmm(sc_enc, dec_out.transpose(1, 2)), dim=-1)
-        # sc_context = torch.bmm(sc_attn, sc_enc)
-        #
-        # ast_attn = F.softmax(torch.bmm(ast_enc, dec_out.transpose(1, 2)), dim=-1)
-        # ast_context = torch.bmm(ast_attn, ast_enc)
-        #
-        # context = torch.cat((sc_context, dec_out, ast_context), dim=1)
-        #
-        # out = F.relu(self.tdd(context))
-        #
-        # return self.linear(out.view(batch_size, -1))
         return output_logits
 
     def _calculate_loss(self, logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
@@ -153,7 +138,7 @@ class CodeGNNGRU(LightningModule):
         source_code, ast_nodes, ast_node_tokens, ast_edges, labels = batch
         logits = self(source_code, ast_nodes, ast_node_tokens, ast_edges, labels)
         labels = batch[-1]
-        loss = self._calculate_loss(logits, labels)
+        loss = self._calculate_loss(logits[1:], labels[1:])
         prediction = logits.argmax(-1)
 
         statistic = PredictionStatistic(True, self._label_pad_id, self._metric_skip_tokens)
@@ -179,7 +164,7 @@ class CodeGNNGRU(LightningModule):
         source_code, ast_nodes, ast_node_tokens, ast_edges, labels = batch
         logits = self(source_code, ast_nodes, ast_node_tokens, ast_edges)
         labels = batch[-1]
-        loss = self._calculate_loss(logits, labels)
+        loss = self._calculate_loss(logits[1:], labels[1:])
         prediction = logits.argmax(-1)
 
         if test:

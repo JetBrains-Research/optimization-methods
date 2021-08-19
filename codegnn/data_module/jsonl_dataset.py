@@ -7,7 +7,7 @@ import torch
 from omegaconf import DictConfig
 from torch.utils.data import Dataset
 
-from utils.common import LABEL, AST, SOURCE, CHILDREN, TOKEN, PAD, NODE, SEPARATOR, UNK, SOS, EOS, SPLIT_FIELDS
+from utils.common import LABEL, AST, SOURCE, CHILDREN, TOKEN, PAD, NODE, SEPARATOR, UNK, SOS, EOS
 from utils.vocabulary import Vocabulary
 
 class JsonlSourceASTDataset(Dataset):

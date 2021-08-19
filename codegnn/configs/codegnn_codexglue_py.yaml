@@ -13,9 +13,9 @@ log_offline: false
 resume_checkpoint: null
 
 # ===== Data =====
-data_folder: data  # /home/anton/CodeSearchNet/dataset/CodeXGLUE-source-code-asts
-dataset: codexglue-docstrings-java
-output_dir: data/outputs  # /home/anton/CodeSearchNet/dataset/CodeXGLUE-source-code-asts/outputs/SGD
+data_folder: data  #/home/anton/CodeSearchNet/dataset/CodeXGLUE-source-code-asts
+dataset: codexglue-docstrings-py
+output_dir: data/outputs  # /home/anton/CodeSearchNet/dataset/CodeXGLUE-source-code-asts/outputs/gat-sgd
 
 max_labels: 9000
 max_label_parts: 15
@@ -26,7 +26,7 @@ max_source_parts: 100
 
 # ===== Hyperparameters =====
 hyper_parameters:
-  n_epochs: 10
+  n_epochs: 5
   patience: 10
   batch_size: 512
   clip_norm: 5
@@ -56,18 +56,20 @@ decoder_type: simple_decoder  # leclair_decoder
 teacher_forcing: 1
 embedding_size: 128
 hidden_size: 256
-gcn_hidden_size: 128
 encoder_num_layers: 1
 decoder_num_layers: 1
 rnn_dropout: 0.5
 
-gnn_encoder_type: 'gcn'
-gcn_encoder:
+gnn_encoder:
+  type: "gcn"
+  n_heads: 1
+  hidden_size: 128
+  leaky_relu_negative_slope: 0.2
+  dropout: 0.5
   use_bias: True
-  norm: False
+  norm: True
   residual: False
   rnn_cell: none  # gru / lstm
   normalization_layer: none  # layer_norm / batch_norm (TODO)
-
-num_hops: 5
+  num_hops: 5
 

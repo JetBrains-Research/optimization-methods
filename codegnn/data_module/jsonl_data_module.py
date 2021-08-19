@@ -18,8 +18,8 @@ class JsonlDataModule(LightningDataModule):
     _test = "test"
 
     _known_datasets = {
-        "codexglue-docstrings-java": "https://www.dropbox.com/s/n742vvm8c9maqcf/codexglue-docstrings-java.tar.gz?dl=1",
-        "codexglue-docstrings-py": "https://www.dropbox.com/s/5kd0gqmbwca7z3x/codexglue-docstrings-py.tar.gz?dl=1",
+        "codexglue-docstrings-java": "https://www.dropbox.com/s/ohiofvwv5654m1v/codexglue-docstrings-java.tar.gz?dl=1",
+        "codexglue-docstrings-py": "https://www.dropbox.com/s/nzejvu3xuy2ds23/codexglue-docstrings-py.tar.gz?dl=1",
     }
 
     def __init__(self, config: DictConfig):
