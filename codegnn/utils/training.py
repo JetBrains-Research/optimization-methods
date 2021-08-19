@@ -6,18 +6,36 @@ from torchcontrib.optim import SWA
 from optimizer import SVRG, SdLBFGS, BB, RLamb
 import torch_optimizer as optim
 from torch.optim.lr_scheduler import _LRScheduler, LambdaLR
+from pytorch_lightning import LightningModule
 from scheduler import MyCyclicLR
+from math import sqrt
+
+
+def calc_grad_norm(model, batch):
+    logits = model(*batch)
+    labels = batch[-1]
+    model._calculate_loss(logits[1:], labels[1:]).backward()
+    grad_norm = 0.0
+    for p in model.parameters():
+        if p.grad is not None:
+            param_norm = p.grad.data.norm(2)
+            grad_norm += param_norm.item() ** 2
+    grad_norm = sqrt(grad_norm)
+    print('GRAD NORM:', grad_norm)
+    return grad_norm
 
 
 def configure_optimizers_alon(
-        hyper_parameters: DictConfig, parameters: Iterable[torch.Tensor]
+        hyper_parameters: DictConfig, parameters: Iterable[torch.Tensor], init_grad_norm: float = 1.
 ) -> Tuple[List[Optimizer], List[_LRScheduler]]:
     """Create optimizers like in original Alon work
     https://github.com/tech-srl/code2seq/blob/a01076ef649d298e5f90ac2ce1f6a42f4ff49cc2/model.py#L386-L397
     :param hyper_parameters: hyper parameters
     :param parameters: model parameters for optimization
+    :param init_grad_norm: norm of gradient calculated on the first train batch
     :return: list of optimizers and schedulers
     """
+    assert init_grad_norm is not None
     optimizer: Optimizer
     if hyper_parameters.optimizer == "Momentum":
         # using the same momentum value as in original realization by Alon
@@ -72,6 +90,16 @@ def configure_optimizers_alon(
         optimizer = optim.Lookahead(radam, k=5, alpha=0.5)
         optimizer.defaults = []
 
+    elif hyper_parameters.optimizer == "Lookahead_Lamb":
+        lamb = optim.Lamb(
+            parameters, lr=hyper_parameters.learning_rate * init_grad_norm,
+            weight_decay=hyper_parameters.weight_decay,
+            betas=(0.9, 0.999),
+            eps=1e-8
+        )
+        optimizer = optim.Lookahead(lamb, k=5, alpha=0.5)
+        optimizer.defaults = []
+
     elif hyper_parameters.optimizer == "Adadelta":
         optimizer = Adadelta(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
 
@@ -101,7 +129,7 @@ def configure_optimizers_alon(
 
     elif hyper_parameters.optimizer == "Lamb":
         optimizer = optim.Lamb(
-            parameters, lr=hyper_parameters.learning_rate,
+            parameters, lr=hyper_parameters.learning_rate * init_grad_norm,
             weight_decay=hyper_parameters.weight_decay,
             betas=(0.9, 0.999),
             eps=1e-8

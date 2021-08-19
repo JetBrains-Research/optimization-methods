@@ -78,6 +78,9 @@ class CodeGNNGRU(LightningModule):
         #SWA
         self.swa = (config.hyper_parameters.optimizer == "SWA")
 
+        #for lamb lr init
+        self.init_grad_norm = None
+
     @property
     def config(self) -> DictConfig:
         return self._config
@@ -87,7 +90,7 @@ class CodeGNNGRU(LightningModule):
         return self._vocabulary
 
     def configure_optimizers(self) -> Tuple[List[Optimizer], List[_LRScheduler]]:
-        return configure_optimizers_alon(self._config.hyper_parameters, self.parameters())
+        return configure_optimizers_alon(self._config.hyper_parameters, self.parameters(), self.init_grad_norm)
 
     def forward(
             self,
@@ -137,7 +140,6 @@ class CodeGNNGRU(LightningModule):
     ) -> Dict:
         source_code, ast_nodes, ast_node_tokens, ast_edges, labels = batch
         logits = self(source_code, ast_nodes, ast_node_tokens, ast_edges, labels)
-        labels = batch[-1]
         loss = self._calculate_loss(logits[1:], labels[1:])
         prediction = logits.argmax(-1)
 
@@ -163,7 +165,6 @@ class CodeGNNGRU(LightningModule):
             self.val = True
         source_code, ast_nodes, ast_node_tokens, ast_edges, labels = batch
         logits = self(source_code, ast_nodes, ast_node_tokens, ast_edges)
-        labels = batch[-1]
         loss = self._calculate_loss(logits[1:], labels[1:])
         prediction = logits.argmax(-1)
 
