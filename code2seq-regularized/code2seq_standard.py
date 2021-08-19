@@ -25,6 +25,7 @@ class Code2Seq(LightningModule):
             vocabulary.label_to_id[i] for i in [PAD, UNK, EOS, SOS] if i in vocabulary.label_to_id
         ]
         self._label_pad_id = vocabulary.label_to_id[PAD]
+        self.swa = (config.hyper_parameters.optimizer == "SWA")
 
         if SOS not in vocabulary.label_to_id:
             raise ValueError(f"Can't find SOS token in label to id vocabulary")
@@ -117,6 +118,11 @@ class Code2Seq(LightningModule):
 
     def validation_step(self, batch: PathContextBatch, batch_idx: int) -> Dict:  # type: ignore
         # [seq length; batch size; vocab size]
+        if self.swa and not self.val:
+            print("Validation starts")
+            self.trainer.optimizers[0].swap_swa_sgd()
+            self.val = True
+
         logits = self(batch.contexts, batch.contexts_per_label,
                       batch.labels.shape[0])
         loss = self._calculate_loss(logits, batch.labels)
@@ -152,6 +158,9 @@ class Code2Seq(LightningModule):
 
     def validation_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "val")
+        if self.swa:
+            self.trainer.optimizers[0].swap_swa_sgd()
+            self.val = False
 
     def test_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "test")

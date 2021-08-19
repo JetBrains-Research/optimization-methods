@@ -1,11 +1,10 @@
 from torch.optim import Optimizer
+from torch.optim.lr_scheduler import _LRScheduler
 import warnings
 
 
-class CyclicLR:
+class CyclicLR(_LRScheduler):
     def __init__(self, optimizer, min_lr, max_lr, cycle_len, gamma=1., last_epoch=-1, verbose=False, start_from=None, swa=False):
-
-        # Attach optimizer
         if not isinstance(optimizer, Optimizer):
             raise TypeError('{} is not an Optimizer'.format(
                 type(optimizer).__name__))
@@ -13,18 +12,10 @@ class CyclicLR:
         self.swa = swa
 
         self.max_lrs = self._format_param('max_lr', optimizer, max_lr)
-        # if last_epoch == -1:
-        #     for lr, group in zip(max_lrs, optimizer.param_groups):
-        #         group['lr'] = lr
 
         self.cycle_len = cycle_len
         self.start_from = start_from if start_from is not None else 0
         self.min_lrs = self._format_param('min_lr', optimizer, min_lr)
-
-        # step_size_up = float(step_size_up)
-        # step_size_down = float(step_size_down) if step_size_down is not None else step_size_up
-        # self.total_size = step_size_up + step_size_down
-        # self.step_ratio = step_size_up / self.total_size
 
         self.gamma = gamma
 
@@ -43,7 +34,6 @@ class CyclicLR:
     def get_lr(self):
         """Calculates the learning rate at batch index. This function treats
         `self.last_epoch` as the last batch index.
-
         If `self.cycle_momentum` is ``True``, this function has a side effect of
         updating the optimizer's momentum.
         """
@@ -56,19 +46,18 @@ class CyclicLR:
 
         t = ((iteration - self.start_from) %
              self.cycle_len + 1) / self.cycle_len
+
         if iteration < self.start_from:
             t = 0
-        if self.swa and t == 1:
-            print("update swa")
+        if self.swa and t == 1.:
+            print("update_swa")
             self.optimizer.update_swa()
 
         lrs = []
         for min_lr, max_lr in zip(self.min_lrs, self.max_lrs):
-            lr = (1 - t) * max_lr + t * min_lr
-            # if swa and iteration < self.start_from:
-            #      lr = max_lr * self.gamma**(iteration // self.cycle_len)
-            # else:
-            #      lr = (1 - t) * (self.gamma**(self.start_from // self.cycle_len) if iteration >= self.start_from else 1) * max_lr + t * min_lr
+            if self.swa and iteration < self.start_from:
+                lr = max_lr * self.gamma**(iteration // self.cycle_len)
+            else:
+                lr = (1 - t) * (self.gamma**(self.start_from // self.cycle_len)
+                                if iteration >= self.start_from else 1) * max_lr + t * min_lr
             lrs.append(lr)
-
-        return lrs

@@ -43,7 +43,7 @@ class ProximalRegularizer(EncoderDecoderRegularizer):
         super().__init__(geometry, model)
         self.only_penalty = only_penalty
         self.coeff = coeff
-        self.prox_point = [torch.cat([0.0 * x.view(-1) for x in part.parameters()])
+        self.prox_point = [torch.cat([torch.zeros_like(x.view(-1)) for x in part.parameters()])
                            for part in self.model]
 
     def __call__(self, loss, _iter):
@@ -93,7 +93,8 @@ class CatalystRegularizer(EncoderDecoderRegularizer):
             self.prev_point = [torch.cat([x.view(-1) for x in part.parameters()])
                                for part in self.model]
 
-            alpha_new = np.min(np.roots([1, self.alpha**2 - self.q, -self.alpha**2])).real
+            alpha_new = np.min(
+                np.roots([1, self.alpha**2 - self.q, -self.alpha**2])).real
             beta = self.alpha * (1 - self.alpha) / (self.alpha**2 + alpha_new)
             self.alpha = alpha_new
             self.prox_point = [torch.cat([x.view(-1) + beta * (x.view(-1) - prev_point[i]) for i, x in enumerate(part.parameters())])

@@ -130,49 +130,43 @@ class RegularizedCode2Seq(LightningModule):
 
         return {"real-loss": cross_entropy_loss, "loss": loss, "statistic": statistic}
 
+    def validation_step(self, batch: PathContextBatch, batch_idx: int) -> Dict:  # type: ignore
+        # [seq length; batch size; vocab size]
+        logits = self(batch.contexts, batch.contexts_per_label,
+                      batch.labels.shape[0])
+        loss = self._calculate_loss(logits, batch.labels)
+        prediction = logits.argmax(-1)
 
-def validation_step(self, batch: PathContextBatch, batch_idx: int) -> Dict:  # type: ignore
-    # [seq length; batch size; vocab size]
-    logits = self(batch.contexts, batch.contexts_per_label,
-                  batch.labels.shape[0])
-    loss = self._calculate_loss(logits, batch.labels)
-    prediction = logits.argmax(-1)
+        statistic = PredictionStatistic(
+            True, self._label_pad_id, self._metric_skip_tokens)
+        statistic.update_statistic(batch.labels, prediction)
 
-    statistic = PredictionStatistic(
-        True, self._label_pad_id, self._metric_skip_tokens)
-    statistic.update_statistic(batch.labels, prediction)
+        return {"loss": loss, "statistic": statistic}
 
-    return {"loss": loss, "statistic": statistic}
+    def test_step(self, batch: PathContextBatch, batch_idx: int) -> Dict:  # type: ignore
+        return self.validation_step(batch, batch_idx)
 
+    # ========== On epoch end ==========
 
-def test_step(self, batch: PathContextBatch, batch_idx: int) -> Dict:  # type: ignore
-    return self.validation_step(batch, batch_idx)
+    def _shared_epoch_end(self, outputs: List[Dict], group: str):
+        with torch.no_grad():
+            mean_loss = torch.stack(
+                [out["real-loss"] if "real-loss" in out else out["loss"] for out in outputs]).mean().item()
+            statistic = PredictionStatistic.create_from_list(
+                [out["statistic"] for out in outputs])
+            epoch_metrics = statistic.get_metric()
+            log: Dict[str, Union[float, torch.Tensor]] = {
+                f"{group}/loss": mean_loss}
+            for key, value in epoch_metrics.items():
+                log[f"{group}/{key}"] = value
+            self.log_dict(log)
+            self.log(f"{group}_loss", mean_loss)
 
+    def training_epoch_end(self, outputs: List[Dict]):
+        self._shared_epoch_end(outputs, "train")
 
-# ========== On epoch end ==========
+    def validation_epoch_end(self, outputs: List[Dict]):
+        self._shared_epoch_end(outputs, "val")
 
-def _shared_epoch_end(self, outputs: List[Dict], group: str):
-    with torch.no_grad():
-        mean_loss = torch.stack(
-            [out["real-loss"] if "real-loss" in out else out["loss"] for out in outputs]).mean().item()
-        statistic = PredictionStatistic.create_from_list(
-            [out["statistic"] for out in outputs])
-        epoch_metrics = statistic.get_metric()
-        log: Dict[str, Union[float, torch.Tensor]] = {
-            f"{group}/loss": mean_loss}
-        for key, value in epoch_metrics.items():
-            log[f"{group}/{key}"] = value
-        self.log_dict(log)
-        self.log(f"{group}_loss", mean_loss)
-
-
-def training_epoch_end(self, outputs: List[Dict]):
-    self._shared_epoch_end(outputs, "train")
-
-
-def validation_epoch_end(self, outputs: List[Dict]):
-    self._shared_epoch_end(outputs, "val")
-
-
-def test_epoch_end(self, outputs: List[Dict]):
-    self._shared_epoch_end(outputs, "test")
+    def test_epoch_end(self, outputs: List[Dict]):
+        self._shared_epoch_end(outputs, "test")
