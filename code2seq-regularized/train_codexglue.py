@@ -17,8 +17,8 @@ def train(config: DictConfig):
         config.data_folder, config.dataset.name, config.vocabulary_name)
     vocabulary = Vocabulary.load_vocabulary(vocabulary_path)
 
-    model = Code2Seq(config, vocabulary)
     data_module = PathContextDataModule(config, vocabulary)
+    model = Code2Seq(config, vocabulary, next(iter(data_module.train_dataloader())))
 
     wandb_logger = WandbLogger(
         project=f"code2seq-{config.name}-final", log_model=True, offline=config.log_offline

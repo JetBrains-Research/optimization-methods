@@ -1,5 +1,6 @@
 from typing import Dict, List, Union, Tuple
 
+import os
 import torch
 import torch.nn.functional as F
 from omegaconf import DictConfig
@@ -12,10 +13,11 @@ from code2seq.model.modules import PathEncoder, PathDecoder
 from code2seq.utils.metrics import PredictionStatistic
 from configure_optimizers import configure_optimizers_custom
 from code2seq.utils.vocabulary import Vocabulary, SOS, PAD, UNK, EOS
+from code2seq.dataset.data_classes import PathContextBatch
 
 
 class Code2Seq(LightningModule):
-    def __init__(self, config: DictConfig, vocabulary: Vocabulary):
+    def __init__(self, config: DictConfig, vocabulary: Vocabulary, sample: PathContextBatch = None):
         super().__init__()
         self._config = config
         self._vocabulary = vocabulary
@@ -31,6 +33,14 @@ class Code2Seq(LightningModule):
             raise ValueError(f"Can't find SOS token in label to id vocabulary")
         self.encoder = self._get_encoder()
         self.decoder = self._get_decoder()
+
+        self._test_outputs = []
+
+        if sample is not None:
+            logits = self(sample.contexts, sample.contexts_per_label, sample.labels.shape[0], sample.labels)
+            loss = self._calculate_loss(logits, sample.labels)
+            loss.backward()
+            print('pushed through')
 
     @property
     def config(self) -> DictConfig:
@@ -116,7 +126,7 @@ class Code2Seq(LightningModule):
 
         return {"loss": loss, "statistic": statistic}
 
-    def validation_step(self, batch: PathContextBatch, batch_idx: int) -> Dict:  # type: ignore
+    def validation_step(self, batch: PathContextBatch, batch_idx: int, test=False) -> Dict:  # type: ignore
         # [seq length; batch size; vocab size]
         if self.swa and not self.val:
             print("Validation starts")
@@ -132,10 +142,13 @@ class Code2Seq(LightningModule):
             True, self._label_pad_id, self._metric_skip_tokens)
         statistic.update_statistic(batch.labels, prediction)
 
+        if test:
+            self._test_outputs.append(prediction.detach().cpu())
+
         return {"loss": loss, "statistic": statistic}
 
     def test_step(self, batch: PathContextBatch, batch_idx: int) -> Dict:  # type: ignore
-        return self.validation_step(batch, batch_idx)
+        return self.validation_step(batch, batch_idx, test=True)
 
     # ========== On epoch end ==========
 
@@ -164,3 +177,5 @@ class Code2Seq(LightningModule):
 
     def test_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "test")
+        os.makedirs("./outputs", exist_ok=True)
+        torch.save(self.test_outputs_, f"./outputs/{self._config.hyper_parameters.optimizer}_test_outputs.pkl")

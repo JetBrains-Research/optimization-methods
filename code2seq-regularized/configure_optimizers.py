@@ -11,7 +11,7 @@ from torch_optimizer import Lamb, RAdam, Lookahead
 from torch.optim.lr_scheduler import LambdaLR
 
 
-def configure_optimizers_custom(hyper_parameters: DictConfig, parameters: Iterable[torch.Tensor]):
+def configure_optimizers_custom(hyper_parameters: DictConfig, parameters: Iterable[torch.Tensor], fast_lr_lamb: bool = True):
     optimizer = SGD(parameters, hyper_parameters.learning_rate,
                     weight_decay=hyper_parameters.weight_decay)
 
@@ -36,11 +36,33 @@ def configure_optimizers_custom(hyper_parameters: DictConfig, parameters: Iterab
         optimizer.defaults = []
 
     elif hyper_parameters.optimizer == "Lamb":
-        optimizer = Lamb(parameters, lr=hyper_parameters.learning_rate,
+        if fast_lr_lamb:
+            grad_norm = 0.0
+            for p in parameters:
+                if p.grad is not None:
+                    param_norm = p.grad.data.norm(2)
+                    grad_norm += param_norm.item() ** 2
+            grad_norm = grad_norm ** (1. / 2)
+            print('grad_norm', grad_norm)
+        else:
+            grad_norm = 1.0
+        
+        optimizer = Lamb(parameters, lr=grad_norm * hyper_parameters.learning_rate,
                          weight_decay=hyper_parameters.weight_decay)
 
     elif hyper_parameters.optimizer == "LaLamb":
-        lamb = Lamb(parameters, lr=hyper_parameters.learning_rate,
+        if fast_lr_lamb:
+            grad_norm = 0.0
+            for p in parameters:
+                if p.grad is not None:
+                    param_norm = p.grad.data.norm(2)
+                    grad_norm += param_norm.item() ** 2
+            grad_norm = grad_norm ** (1. / 2)
+            print('grad_norm', grad_norm)
+        else:
+            grad_norm = 1.0
+        
+        lamb = Lamb(parameters, lr=grad_norm * hyper_parameters.learning_rate,
                     weight_decay=hyper_parameters.weight_decay)
         optimizer = Lookahead(lamb, k=5, alpha=0.5)
         optimizer.defaults = []
