@@ -5,16 +5,10 @@ import torch
 from omegaconf import DictConfig
 from pytorch_lightning import Trainer, seed_everything
 
-from dataset import PathContextDataModule, TypedPathContextDataModule
+from code2seq.dataset import PathContextDataModule, TypedPathContextDataModule
 from code2seq_standard import Code2Seq
-from utils.vocabulary import Vocabulary
+from code2seq.utils.vocabulary import Vocabulary
 
-
-def load_code2seq(
-    checkpoint_path: str, config: DictConfig, vocabulary: Vocabulary
-) -> Tuple[Code2Seq, PathContextDataModule]:
-    
-    return model, data_module
 
 def test(checkpoint_path: str, data_folder: str = None, batch_size: int = None):
     checkpoint = torch.load(checkpoint_path, map_location=torch.device("cpu"))

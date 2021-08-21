@@ -35,7 +35,7 @@ hyper_parameters:
   random_context: true
   shuffle_data: true
 
-  optimizer: "Lamb"
+  optimizer: "LaLamb"
   strategy: "decay"
   nesterov: true
   learning_rate: 0.01

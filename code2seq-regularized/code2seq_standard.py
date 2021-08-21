@@ -178,4 +178,4 @@ class Code2Seq(LightningModule):
     def test_epoch_end(self, outputs: List[Dict]):
         self._shared_epoch_end(outputs, "test")
         os.makedirs("./outputs", exist_ok=True)
-        torch.save(self.test_outputs_, f"./outputs/{self._config.hyper_parameters.optimizer}_test_outputs.pkl")
+        torch.save(self._test_outputs, f"./outputs/{self._config.hyper_parameters.optimizer}_test_outputs.pkl")
