@@ -29,6 +29,8 @@ cuda = True
 tokenizer_name = f"small_tokenizer_{vocab_size}_clear.json"
 dataset_postfix = f'dataset_new_{in_len}_{out_len}_clear.pickle'
 
+long_perspective = True
+
 tokenizer = Tokenizer.from_file(tokenizer_name)
 
 if os.path.isfile('eval' + dataset_postfix):
@@ -91,7 +93,12 @@ for step, (input_ids, labels) in enumerate(tqdm(eval_dataloader, desc="Eval")):
                     hyps.append(hyp)
                     refs.append(ref)
 
+if long_perspective:
+    dirs = 'outputs_long'
+else:
+    dirs = 'outputs'
+
 print('Ready', args.checkpoint.split("/")[-2])
-os.makedirs("./outputs", exist_ok=True)
-with open("./outputs/" + args.checkpoint.split("/")[-2] + "_test_outputs.pkl", 'wb') as f:
-    pickle.dump(model, f)
+os.makedirs("./" + dirs, exist_ok=True)
+with open("./" + dirs + "/" + args.checkpoint.split("/")[-2] + "_test_outputs.pkl", 'wb') as f:
+    pickle.dump((hyps, refs), f)
