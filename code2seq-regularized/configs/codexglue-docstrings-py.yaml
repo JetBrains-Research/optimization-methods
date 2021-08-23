@@ -1,0 +1,77 @@
+hydra:
+  run:
+    dir: .
+  output_subdir: null
+  job_logging: null
+  hydra_logging: null
+
+name: codexglue-docstrings-py
+
+seed: 7
+num_workers: 2
+log_offline: false
+
+resume_from_checkpoint: null
+
+# data keys
+data_folder: ./data
+vocabulary_name: vocabulary.pkl
+train_holdout: train
+val_holdout: val
+test_holdout: test
+
+save_every_epoch: 1
+val_every_epoch: 1
+log_every_epoch: 1
+progress_bar_refresh_rate: 1
+
+hyper_parameters:
+  n_epochs: 5
+  patience: 10
+  batch_size: 512
+  test_batch_size: 512
+  clip_norm: 5
+  max_context: 200
+  random_context: true
+  shuffle_data: true
+
+  optimizer: "LaLamb"
+  strategy: "decay"
+  nesterov: true
+  learning_rate: 0.01
+  weight_decay: 0
+  decay_gamma: 0.95
+
+dataset:
+  name: codexglue-docstrings-py
+  target:
+    max_parts: 15
+    is_wrapped: true
+    is_splitted: true
+    vocabulary_size: 27000
+  token:
+    max_parts: 5
+    is_wrapped: false
+    is_splitted: true
+    vocabulary_size: 190000
+  path:
+    max_parts: 9
+    is_wrapped: false
+    is_splitted: true
+    vocabulary_size: null
+
+encoder:
+  embedding_size: 128
+  rnn_size: 60
+  use_bi_rnn: true
+  embedding_dropout: 0.25
+  rnn_num_layers: 1
+  rnn_dropout: 0.5
+
+decoder:
+  decoder_size: 5
+  embedding_size: 128
+  num_decoder_layers: 2
+  rnn_dropout: 0.5
+  teacher_forcing: 1
+  beam_width: 0

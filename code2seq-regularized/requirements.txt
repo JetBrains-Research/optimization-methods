@@ -1,0 +1,10 @@
+code2seq==0.0.3
+torch==1.9.0
+torch-optimizer==0.1.0
+tqdm==4.58.0
+numpy==1.21.1
+pytorch-lightning==1.1.7
+wandb==0.10.20
+mypy==0.812
+hydra-core==1.0.6
+omegaconf==2.0.6
