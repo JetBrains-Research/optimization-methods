@@ -6,3 +6,5 @@ codebert/train*
 codebert/__pycache__
 textmetric/__pycache__
 .gitignore
+github*
+codebert/*
