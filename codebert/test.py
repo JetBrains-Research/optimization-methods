@@ -24,24 +24,29 @@ np.random.seed(7)
 
 in_len = 80
 out_len = 16
-vocab_size = 10_000
+vocab_size = 10000
 cuda = True
-tokenizer_name = f"small_tokenizer_{vocab_size}_clear.json"
-dataset_postfix = f'dataset_new_{in_len}_{out_len}_clear.pickle'
+lang = "java"
+tokenizer_name = f"tokenizer_{lang}_{vocab_size}.json"
+dataset_postfix = f'dataset_{lang}_in={in_len}_out={out_len}.pickle'
 
-long_perspective = True
+long_perspective = False
+if long_perspective:
+    dirs = f'outputs-codexglue-{lang}-long'
+else:
+    dirs = f'outputs-codexglue-{lang}'
 
 tokenizer = Tokenizer.from_file(tokenizer_name)
 
-if os.path.isfile('eval' + dataset_postfix):
-    with open('eval' + dataset_postfix, 'rb') as f:
+if os.path.isfile('eval_' + dataset_postfix):
+    with open('eval_' + dataset_postfix, 'rb') as f:
         eval_dataset = pickle.load(f)
 else:
     print('Process dataset...')
     eval_dataset = CodeXGLUEDocstringDataset(
-        tokenizer_input, tokenizer_output, split="test")
+        tokenizer_input, tokenizer_output, langs=[lang], split="test")
 
-    with open('eval' + dataset_postfix, 'wb') as f:
+    with open('eval_' + dataset_postfix, 'wb') as f:
         pickle.dump(eval_dataset, f)
 
     print('Dataset instances prepared and saved.')
@@ -81,22 +86,16 @@ for step, (input_ids, labels) in enumerate(tqdm(eval_dataloader, desc="Eval")):
         else:
             outputs = model(input_ids).logits
 
-        if step == 0:
-            for i in range(batch):
-                hyp = ''.join(tokenizer.decode(outputs.argmax(2)[i].tolist()).split(" "))[1:].replace('\u0120', ' ')
-                ref = ''.join(tokenizer.decode(labels[i].tolist()).split(" "))[1:].replace('\u0120', ' ')
+        for i in range(len(labels)):
+            hyp = ''.join(tokenizer.decode(outputs.argmax(2)[i].tolist()).split(" "))[1:].replace('\u0120', ' ')
+            ref = ''.join(tokenizer.decode(labels[i].tolist()).split(" "))[1:].replace('\u0120', ' ')
                 
-                if len(ref.strip()) > 0:
-                    if len(hyp.strip()) == 0:
-                        hyp = ['xxx']
+            if len(ref.strip()) > 0:
+                if len(hyp.strip()) == 0:
+                    hyp = 'xxx'
                 
-                    hyps.append(hyp)
-                    refs.append(ref)
-
-if long_perspective:
-    dirs = 'outputs_long'
-else:
-    dirs = 'outputs'
+                hyps.append(hyp)
+                refs.append(ref)
 
 print('Ready', args.checkpoint.split("/")[-2])
 os.makedirs("./" + dirs, exist_ok=True)

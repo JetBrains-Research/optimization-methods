@@ -31,6 +31,7 @@ vocab_size = 10000
 log_wandb = True
 cuda = True
 lang = "java"
+epochs = 5
 tokenizer_name = f"tokenizer_{lang}_{vocab_size}.json"
 dataset_postfix = f'dataset_{lang}_in={in_len}_out={out_len}.pickle'
 
@@ -53,9 +54,9 @@ if os.path.isfile('train_' + dataset_postfix):
 else:
     print('Process dataset...')
     train_dataset = CodeXGLUEDocstringDataset(
-        tokenizer_input, tokenizer_output, split="train")
+        tokenizer_input, tokenizer_output, langs=[lang], split="train")
     eval_dataset = CodeXGLUEDocstringDataset(
-        tokenizer_input, tokenizer_output, split="test")
+        tokenizer_input, tokenizer_output, langs=[lang], split="test")
 
     with open('train_' + dataset_postfix, 'wb') as f:
         pickle.dump(train_dataset, f)
@@ -99,7 +100,7 @@ lr = 0.001
 decay_gamma = 0.95
 warmup_delay = 0
 
-train_iterator = trange(0, 10, desc="Epoch")
+train_iterator = trange(0, epochs, desc="Epoch")
 
 if args.optimizer == "SGD":
     optimizer = torch.optim.SGD(model.parameters(), lr)

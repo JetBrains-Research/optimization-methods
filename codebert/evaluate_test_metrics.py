@@ -26,11 +26,12 @@ def get_hyps_refs(predict_file="./outputs/SGD_test_outputs.pkl"):
     return hyps, refs
 
 
+lang = "python"
 long_perspective = True
 if long_perspective:
-    dirs = 'outputs_long'
+    dirs = f'outputs-codexglue-{lang}-long'
 else:
-    dirs = 'outputs'
+    dirs = f'outputs-codexglue-{lang}'
 
 global_methods = [
     ('SGD', './' + dirs + '/SGD_test_outputs.pkl'),
