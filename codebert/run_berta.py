@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# Copyright 2021 Dmitry Vilensky-Pasechnyuk
+
 import random
 import os
 import pickle
@@ -24,11 +27,12 @@ np.random.seed(7)
 
 in_len = 80
 out_len = 16
-vocab_size = 10_000
+vocab_size = 10000
 log_wandb = True
 cuda = True
-tokenizer_name = f"small_tokenizer_{vocab_size}_clear.json"
-dataset_postfix = f'dataset_new_{in_len}_{out_len}_clear.pickle'
+lang = "java"
+tokenizer_name = f"tokenizer_{lang}_{vocab_size}.json"
+dataset_postfix = f'dataset_{lang}_in={in_len}_out={out_len}.pickle'
 
 
 tokenizer = Tokenizer.from_file(tokenizer_name)
@@ -40,11 +44,11 @@ tokenizer_output = Tokenizer.from_file(tokenizer_name)
 tokenizer_output.enable_truncation(max_length=out_len)
 
 
-if os.path.isfile('train' + dataset_postfix):
-    with open('train' + dataset_postfix, 'rb') as f:
+if os.path.isfile('train_' + dataset_postfix):
+    with open('train_' + dataset_postfix, 'rb') as f:
         train_dataset = pickle.load(f)
 
-    with open('eval' + dataset_postfix, 'rb') as f:
+    with open('eval_' + dataset_postfix, 'rb') as f:
         eval_dataset = pickle.load(f)
 else:
     print('Process dataset...')
@@ -53,10 +57,10 @@ else:
     eval_dataset = CodeXGLUEDocstringDataset(
         tokenizer_input, tokenizer_output, split="test")
 
-    with open('train' + dataset_postfix, 'wb') as f:
+    with open('train_' + dataset_postfix, 'wb') as f:
         pickle.dump(train_dataset, f)
 
-    with open('eval' + dataset_postfix, 'wb') as f:
+    with open('eval_' + dataset_postfix, 'wb') as f:
         pickle.dump(eval_dataset, f)
 
     print('Dataset instances prepared and saved.')
@@ -84,7 +88,7 @@ train_dataloader = DataLoader(
     train_dataset, batch_size=batch, shuffle=True, collate_fn=collate)
 
 if log_wandb:
-    wandb.init(project='CodeBERTa-final', entity='dmivilensky')
+    wandb.init(project=f'CodeBERTa-{lang}', entity='dmivilensky')
 
 parser = argparse.ArgumentParser(description='Train CodeBERTa.')
 parser.add_argument('optimizer', type=str,
@@ -181,10 +185,10 @@ for _ in train_iterator:
 
     scheduler.step()
 
-    os.makedirs("./models/CodeBERTa-docstrings-new/" +
+    os.makedirs(f"./models/codexglue-{lang}/" +
                 args.optimizer, exist_ok=True)
     with open(
-        './models/CodeBERTa-docstrings-new/' + args.optimizer +
+        f'./models/codexglue-{lang}/' + args.optimizer +
         '/checkpoint_' + str(iteration) + '.pickle', 'wb'
     ) as f:
         pickle.dump(model, f)

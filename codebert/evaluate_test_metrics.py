@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# Copyright 2021 Dmitry Vilensky-Pasechnyuk
+
 import os
 import pickle
 import itertools
@@ -13,7 +16,7 @@ from time import perf_counter
 
 def get_hyps_refs(predict_file="./outputs/SGD_test_outputs.pkl"):
     start = perf_counter()
-    
+
     with open(predict_file, 'rb') as f:
         hyps, refs = pickle.load(f)
 
@@ -56,7 +59,7 @@ else:
         hyps, refs = get_hyps_refs(predict_file=path)
         metrics = Metrics(hyps, refs)
         global_methods_report[method] = metrics.get_statistics(
-            stats={'bleu', 'rouge', 'chrF', 'chrFpp', 'prec_rec_f1'}, 
+            stats={'bleu', 'rouge', 'chrF', 'chrFpp', 'prec_rec_f1'},
             verbose=True, with_symbolic=True, bert=True)
         print(method, global_methods_report[method])
 
