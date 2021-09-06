@@ -19,7 +19,7 @@ class CodeBERTa(Module):
             num_hidden_layers = int(
                 np.ceil(np.log(hidden_size + 0.) / np.log(3 + 0.)))
             intermediate_size = 4 * hidden_size
-            num_attention_heads = hidden_size // 64
+            num_attention_heads = max(2, hidden_size // 64)
 
             encoder_config = RobertaConfig(
                 vocab_size=vocab_size,
@@ -28,7 +28,9 @@ class CodeBERTa(Module):
             self.encoder = RobertaModel(encoder_config)
             decoder_config = OpenAIGPTConfig(
                 vocab_size=vocab_size, n_ctx=context_size, n_positions=context_size,
-                n_embd=hidden_size, n_head=2, n_layer=2)
+                n_embd=hidden_size, n_head=4, n_layer=6)  # for small batch
+                # n_embd=hidden_size, n_head=4, n_layer=4)  # for big model now
+                # n_embd=hidden_size, n_head=2, n_layer=2)  # was for small config
             self.decoder = OpenAIGPTLMHeadModel(decoder_config)
 
         print('ENC', '%.1E' % self.encoder.num_parameters())

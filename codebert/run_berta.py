@@ -17,6 +17,7 @@ import torch_optimizer as optim
 from tokenizers import Tokenizer
 
 from codexglue_dataset import CodeXGLUEDocstringDataset
+from javamed_dataset import JavaMedMethodNameDataset
 from codeberta import CodeBERTa
 
 
@@ -26,14 +27,21 @@ np.random.seed(7)
 
 
 in_len = 80
-out_len = 16
-vocab_size = 10000
+
+
+out_len = 16  # for codexglue
+# out_len = 7  # for java-med
+
+vocab_size = 2000
 log_wandb = True
 cuda = True
-lang = "java"
+
+lang = "python"
+# lang = "java-med"
+
 epochs = 5
 tokenizer_name = f"tokenizer_{lang}_{vocab_size}.json"
-dataset_postfix = f'dataset_{lang}_in={in_len}_out={out_len}.pickle'
+dataset_postfix = f'dataset_{lang}_in={in_len}_out={out_len}_vocab={vocab_size}.pickle'
 
 
 tokenizer = Tokenizer.from_file(tokenizer_name)
@@ -53,10 +61,16 @@ if os.path.isfile('train_' + dataset_postfix):
         eval_dataset = pickle.load(f)
 else:
     print('Process dataset...')
-    train_dataset = CodeXGLUEDocstringDataset(
-        tokenizer_input, tokenizer_output, langs=[lang], split="train")
-    eval_dataset = CodeXGLUEDocstringDataset(
-        tokenizer_input, tokenizer_output, langs=[lang], split="test")
+    if lang == "java-med":
+        train_dataset = JavaMedMethodNameDataset(
+            tokenizer_input, tokenizer_output, split="train")
+        eval_dataset = JavaMedMethodNameDataset(
+            tokenizer_input, tokenizer_output, split="val")
+    else:
+        train_dataset = CodeXGLUEDocstringDataset(
+            tokenizer_input, tokenizer_output, langs=[lang], split="train")
+        eval_dataset = CodeXGLUEDocstringDataset(
+            tokenizer_input, tokenizer_output, langs=[lang], split="test")
 
     with open('train_' + dataset_postfix, 'wb') as f:
         pickle.dump(train_dataset, f)
@@ -67,13 +81,19 @@ else:
     print('Dataset instances prepared and saved.')
 
 
-model = CodeBERTa(hidden_size=64, context_size=in_len,
-                  max_position_embeddings=256, vocab_size=vocab_size)
+# model = CodeBERTa(hidden_size=64, context_size=in_len,
+#                   max_position_embeddings=256, vocab_size=vocab_size)  # for small model
+model = CodeBERTa(hidden_size=384, context_size=in_len,
+                  max_position_embeddings=512, vocab_size=vocab_size)  # small batch
+# model = CodeBERTa(hidden_size=240, context_size=in_len,
+#                   max_position_embeddings=512, vocab_size=vocab_size)  # 2000
+# model = CodeBERTa(hidden_size=160, context_size=in_len,
+#                   max_position_embeddings=512, vocab_size=vocab_size)  # 5000
 if cuda:
     model.to("cuda")
 model.train()
 
-batch = 512
+batch = 256
 
 
 def collate(examples):
@@ -89,7 +109,7 @@ train_dataloader = DataLoader(
     train_dataset, batch_size=batch, shuffle=True, collate_fn=collate)
 
 if log_wandb:
-    wandb.init(project=f'CodeBERTa-{lang}', entity='dmivilensky')
+    wandb.init(project=f'CodeBERTa-{lang}-big-{vocab_size}', entity='dmivilensky')
 
 parser = argparse.ArgumentParser(description='Train CodeBERTa.')
 parser.add_argument('optimizer', type=str,
