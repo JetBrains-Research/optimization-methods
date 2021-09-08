@@ -6,6 +6,7 @@ import os
 import pickle
 from tqdm import tqdm, trange
 import argparse
+import itertools
 
 import wandb
 import numpy as np
@@ -26,13 +27,13 @@ random.seed(7)
 np.random.seed(7)
 
 
-in_len = 80
+in_len = 160
 
 
 out_len = 16  # for codexglue
 # out_len = 7  # for java-med
 
-vocab_size = 2000
+vocab_size = 1000
 log_wandb = True
 cuda = True
 
@@ -81,19 +82,13 @@ else:
     print('Dataset instances prepared and saved.')
 
 
-# model = CodeBERTa(hidden_size=64, context_size=in_len,
-#                   max_position_embeddings=256, vocab_size=vocab_size)  # for small model
-model = CodeBERTa(hidden_size=384, context_size=in_len,
-                  max_position_embeddings=512, vocab_size=vocab_size)  # small batch
-# model = CodeBERTa(hidden_size=240, context_size=in_len,
-#                   max_position_embeddings=512, vocab_size=vocab_size)  # 2000
-# model = CodeBERTa(hidden_size=160, context_size=in_len,
-#                   max_position_embeddings=512, vocab_size=vocab_size)  # 5000
+model = CodeBERTa(hidden_size=140, context_size=in_len,
+                  max_position_embeddings=512, vocab_size=vocab_size)
 if cuda:
     model.to("cuda")
 model.train()
 
-batch = 256
+batch = 512
 
 
 def collate(examples):
@@ -109,7 +104,7 @@ train_dataloader = DataLoader(
     train_dataset, batch_size=batch, shuffle=True, collate_fn=collate)
 
 if log_wandb:
-    wandb.init(project=f'CodeBERTa-{lang}-big-{vocab_size}', entity='dmivilensky')
+    wandb.init(project=f'CodeBERTa-tests', entity='dmivilensky')
 
 parser = argparse.ArgumentParser(description='Train CodeBERTa.')
 parser.add_argument('optimizer', type=str,
@@ -188,6 +183,14 @@ for _ in train_iterator:
         else:
             outputs = model(input_ids).logits
             loss = model.loss_fn(outputs, labels, batch)
+        
+        if step % 20 == 0:
+            for i in range(5):
+                out_correct = list(itertools.takewhile(lambda x: x != 3, outputs.argmax(2)[i].tolist()))[:out_len]
+                print('predict:', ''.join(tokenizer.decode(out_correct).split(" "))[1:].replace('\u0120', ' '))
+                print(' target:', ''.join(tokenizer.decode(
+                    labels[i].tolist()).split(" "))[1:].replace('\u0120', ' '))
+                print()
 
         if loss is None:
             continue
@@ -235,9 +238,9 @@ for _ in train_iterator:
                 loss = model.loss_fn(outputs, labels, batch)
 
             if step == 0:
-                for i in range(3):
-                    print('predict:', ''.join(tokenizer.decode(outputs.argmax(
-                        2)[i].tolist()).split(" "))[1:].replace('\u0120', ' '))
+                for i in range(10):
+                    out_correct = list(itertools.takewhile(lambda x: x != 3, outputs.argmax(2)[i].tolist()))[:out_len]
+                    print('predict:', ''.join(tokenizer.decode(out_correct).split(" "))[1:].replace('\u0120', ' '))
                     print(' target:', ''.join(tokenizer.decode(
                         labels[i].tolist()).split(" "))[1:].replace('\u0120', ' '))
                     print()
