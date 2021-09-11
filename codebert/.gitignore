@@ -8,7 +8,9 @@ merges.txt
 vocab.json
 berta_fine_tune.ipynb
 deprecated
-aggregated_texts_code.txt
+aggregated_texts*
 evaldataset*
 traindataset*
 github*
+tokenizer*
+models*

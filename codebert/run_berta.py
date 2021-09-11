@@ -82,7 +82,7 @@ else:
     print('Dataset instances prepared and saved.')
 
 
-model = CodeBERTa(hidden_size=140, context_size=in_len,
+model = CodeBERTa(hidden_size=120, context_size=in_len,
                   max_position_embeddings=512, vocab_size=vocab_size)
 if cuda:
     model.to("cuda")
