@@ -3,3 +3,4 @@ textmetric
 github*
 codebert/models/codexglue-python/Adam*
 codebert/tokenizer_python*
+codebert/tokenizer*
