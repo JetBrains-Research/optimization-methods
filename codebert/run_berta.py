@@ -16,6 +16,7 @@ from torch.utils.data import DataLoader
 import torch_optimizer as optim
 
 from tokenizers import Tokenizer
+from transformers import get_linear_schedule_with_warmup
 
 from codexglue_dataset import CodeXGLUEDocstringDataset
 from javamed_dataset import JavaMedMethodNameDataset
@@ -82,7 +83,7 @@ else:
     print('Dataset instances prepared and saved.')
 
 
-model = CodeBERTa(hidden_size=120, context_size=in_len,
+model = CodeBERTa(hidden_size=160, context_size=in_len,
                   max_position_embeddings=512, vocab_size=vocab_size)
 if cuda:
     model.to("cuda")
@@ -111,7 +112,7 @@ parser.add_argument('optimizer', type=str,
                     help='Method to use for optimization.')
 args = parser.parse_args()
 
-lr = 0.001
+lr = 0.004
 decay_gamma = 0.95
 warmup_delay = 0
 
@@ -168,8 +169,9 @@ elif args.optimizer == "LaRAdam":
 else:
     raise ValueError(f"Unknown optimizer name: {args.optimizer}")
 
-scheduler = torch.optim.lr_scheduler.LambdaLR(
-    optimizer, lr_lambda=lambda epoch: decay_gamma ** epoch)
+# scheduler = torch.optim.lr_scheduler.LambdaLR(
+#     optimizer, lr_lambda=lambda epoch: decay_gamma ** epoch)
+scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=20, num_training_steps=492*epochs)
 iteration = 0
 
 for _ in train_iterator:
@@ -177,16 +179,20 @@ for _ in train_iterator:
     for step, (input_ids, labels) in enumerate(epoch_iterator):
         optimizer.zero_grad()
 
-        if cuda:
-            outputs = model(input_ids.to("cuda")).logits
-            loss = model.loss_fn(outputs, labels.to("cuda"), batch)
-        else:
-            outputs = model(input_ids).logits
-            loss = model.loss_fn(outputs, labels, batch)
-        
+        try:
+            if cuda:
+                fw = model(input_ids.to("cuda"), labels.to("cuda"))
+                # outputs, loss = fw.logits, fw.loss
+                loss = model.loss_fn(outputs, labels.to("cuda"), batch)
+            else:
+                outputs = model(input_ids, labels).logits
+                loss = model.loss_fn(outputs, labels, batch)
+        except:
+            continue
+
         if step % 20 == 0:
             for i in range(5):
-                out_correct = list(itertools.takewhile(lambda x: x != 3, outputs.argmax(2)[i].tolist()))[:out_len]
+                out_correct = list(itertools.takewhile(lambda x: x != 3, outputs.argmax(2)[i].tolist()))
                 print('predict:', ''.join(tokenizer.decode(out_correct).split(" "))[1:].replace('\u0120', ' '))
                 print(' target:', ''.join(tokenizer.decode(
                     labels[i].tolist()).split(" "))[1:].replace('\u0120', ' '))
@@ -207,7 +213,7 @@ for _ in train_iterator:
 
         iteration += 1
 
-    scheduler.step()
+        scheduler.step()
 
     os.makedirs(f"./models/codexglue-{lang}/" +
                 args.optimizer, exist_ok=True)
@@ -230,12 +236,17 @@ for _ in train_iterator:
     for step, (input_ids, labels) in enumerate(tqdm(eval_dataloader, desc="Eval")):
         with torch.no_grad():
 
-            if cuda:
-                outputs = model(input_ids.to("cuda")).logits
-                loss = model.loss_fn(outputs, labels.to("cuda"), batch)
-            else:
-                outputs = model(input_ids).logits
-                loss = model.loss_fn(outputs, labels, batch)
+            try:
+                if cuda:
+                    fw = model(input_ids.to("cuda"), labels.to("cuda"))
+                    outputs, loss = fw.logits, fw.loss
+                    # outputs = model(input_ids.to("cuda"), labels.to("cuda")).logits
+                    loss = model.loss_fn(outputs, labels.to("cuda"), batch)
+                else:
+                    outputs = model(input_ids, labels).logits
+                    loss = model.loss_fn(outputs, labels, batch)
+            except:
+                continue
 
             if step == 0:
                 for i in range(10):
