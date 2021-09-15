@@ -3,7 +3,7 @@ import torch
 from omegaconf import DictConfig
 from torch.optim import Adam, Optimizer, SGD, Adadelta, Adagrad, Adamax, RMSprop, LBFGS, ASGD
 from torchcontrib.optim import SWA
-from optimizer import SVRG, SdLBFGS, BB, RLamb
+from optimizer import SVRG, SdLBFGS, BB, RLamb, Nadam
 import torch_optimizer as optim
 from torch.optim.lr_scheduler import _LRScheduler, LambdaLR
 from pytorch_lightning import LightningModule
@@ -46,6 +46,50 @@ def configure_optimizers_alon(
             nesterov=hyper_parameters.nesterov,
             weight_decay=hyper_parameters.weight_decay,
         )
+    elif hyper_parameters.optimizer == "Nadam":
+        optimizer = Nadam(parameters, lr=hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
+
+    elif hyper_parameters.optimizer == "AdaBound":
+        optimizer = optim.AdaBound(parameters, lr=hyper_parameters.learning_rate,
+                                   weight_decay=hyper_parameters.weight_decay,
+                                   betas=(0.9, 0.999),
+                                   final_lr=0.1,
+                                   gamma=1e-3,
+                                   eps=1e-8,
+                                   amsbound=False)
+
+    elif hyper_parameters.optimizer == "Yogi":
+        optimizer = optim.Yogi(parameters, lr=hyper_parameters.learning_rate,
+                               weight_decay=hyper_parameters.weight_decay,
+                               betas=(0.9, 0.999),
+                               eps=1e-3,
+                               initial_accumulator=1e-6)
+
+    elif hyper_parameters.optimizer == "Apollo":
+        optimizer = optim.Apollo(parameters, lr=hyper_parameters.learning_rate,
+                                 weight_decay=hyper_parameters.weight_decay,
+                                 beta=0.9,
+                                 eps=1e-4,
+                                 warmup=0,
+                                 init_lr=0.01
+                                 )
+
+    elif hyper_parameters.optimizer == "DiffGrad":
+        optimizer = optim.DiffGrad(parameters, lr=hyper_parameters.learning_rate,
+                                   weight_decay=hyper_parameters.weight_decay,
+                                   betas=(0.9, 0.999),
+                                   eps=1e-8
+                                   )
+
+    elif hyper_parameters.optimizer == "NovoGrad":
+        optimizer = optim.NovoGrad(parameters, lr=hyper_parameters.learning_rate,
+                                   weight_decay=hyper_parameters.weight_decay,
+                                   betas=(0.9, 0.999),
+                                   eps=1e-8,
+                                   grad_averaging=False,
+                                   amsgrad=False
+                                   )
+
     elif hyper_parameters.optimizer == "SWA":
         base_opt = SGD(
             parameters,
