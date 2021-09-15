@@ -5,7 +5,7 @@ from torch.optim import Adam, Optimizer, SGD, Adadelta, Adagrad, Adamax, RMSprop
 from torchcontrib.optim import SWA
 from optimizer import SVRG, SdLBFGS, BB, RLamb, Nadam
 import torch_optimizer as optim
-from torch.optim.lr_scheduler import _LRScheduler, LambdaLR
+from torch.optim.lr_scheduler import _LRScheduler, LambdaLR, ReduceLROnPlateau
 from pytorch_lightning import LightningModule
 from scheduler import MyCyclicLR
 from math import sqrt
@@ -211,6 +211,14 @@ def configure_optimizers_alon(
         #     'interval': 'epoch',  # or 'epoch'
         #     'frequency': 1
         # }
+    elif hyper_parameters.strategy == "reduce_on_plateau":
+        lr_scheduler = ReduceLROnPlateau(optimizer, factor=0.95, patience=50)
+        scheduler = {
+           'scheduler': lr_scheduler,
+           'reduce_on_plateau': True,
+           'interval': 'step',
+           'monitor': 'train/loss',
+        }
     elif hyper_parameters.strategy == "cyclic":
         scheduler = {
             'scheduler': MyCyclicLR(optimizer, min_lr=hyper_parameters.min_lr, max_lr=hyper_parameters.max_lr,
