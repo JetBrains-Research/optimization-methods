@@ -83,7 +83,7 @@ else:
     print('Dataset instances prepared and saved.')
 
 
-model = CodeBERTa(hidden_size=160, context_size=in_len,
+model = CodeBERTa(hidden_size=130, context_size=in_len,
                   max_position_embeddings=512, vocab_size=vocab_size)
 if cuda:
     model.to("cuda")
@@ -182,7 +182,7 @@ for _ in train_iterator:
         try:
             if cuda:
                 fw = model(input_ids.to("cuda"), labels.to("cuda"))
-                # outputs, loss = fw.logits, fw.loss
+                outputs = fw.logits
                 loss = model.loss_fn(outputs, labels.to("cuda"), batch)
             else:
                 outputs = model(input_ids, labels).logits
@@ -197,6 +197,7 @@ for _ in train_iterator:
                 print(' target:', ''.join(tokenizer.decode(
                     labels[i].tolist()).split(" "))[1:].replace('\u0120', ' '))
                 print()
+            break
 
         if loss is None:
             continue
@@ -235,18 +236,20 @@ for _ in train_iterator:
         eval_dataset, batch_size=batch, collate_fn=collate)
     for step, (input_ids, labels) in enumerate(tqdm(eval_dataloader, desc="Eval")):
         with torch.no_grad():
+            outputs = None
+            start = labels.to("cuda")*0
 
-            try:
+            for i in range(out_len):
                 if cuda:
-                    fw = model(input_ids.to("cuda"), labels.to("cuda"))
-                    outputs, loss = fw.logits, fw.loss
-                    # outputs = model(input_ids.to("cuda"), labels.to("cuda")).logits
-                    loss = model.loss_fn(outputs, labels.to("cuda"), batch)
-                else:
-                    outputs = model(input_ids, labels).logits
-                    loss = model.loss_fn(outputs, labels, batch)
-            except:
-                continue
+                    fw = model(input_ids.to("cuda"), start)
+                    start[:, i] = labels.to("cuda")[:, i]
+                    
+                    if outputs is None:
+                        outputs = fw.logits[:, 0].unsqueeze(0)
+                    else:
+                        outputs = torch.cat([outputs, fw.logits[:, i].unsqueeze(0)], dim=0)
+
+            loss = model.loss_fn(outputs, labels.to("cuda"), batch)
 
             if step == 0:
                 for i in range(10):
