@@ -66,16 +66,20 @@ class CodeBERTa(Module):
             print('total', '%.1E' %
                 (self.encoder.num_parameters() + self.decoder.num_parameters()))
 
-    def forward(self, x, l):
+    def forward(self, x, l, decoder_attention_mask=None):
         # embed = self.encoder(x).last_hidden_state
         # out = self.decoder(inputs_embeds=embed)
-        return self.model(input_ids=x, decoder_input_ids=l, labels=l)
+        if decoder_attention_mask is None:
+            return self.model(input_ids=x, decoder_input_ids=l, labels=l)
+        else:
+            return self.model(input_ids=x, decoder_input_ids=l*decoder_attention_mask, labels=l, decoder_attention_mask=decoder_attention_mask)
 
     @staticmethod
     def loss_fn(outputs, targets, batch):
         outputs = outputs.permute(0, 2, 1)
-        if outputs.shape[0] != targets.shape[0] or outputs.shape[0] * targets.shape[0] == 0:
-            return None
+        targets = targets.permute(0, 1)
+        # if outputs.shape[0] != targets.shape[0] or outputs.shape[0] * targets.shape[0] == 0:
+        #     return None
 
         loss = F.cross_entropy(outputs, targets, reduction="none")
         mask = targets != 1
