@@ -3,17 +3,18 @@ import torch
 from omegaconf import DictConfig
 from torch.optim import Adam, Optimizer, SGD, Adadelta, Adagrad, Adamax, RMSprop, LBFGS, ASGD
 from torchcontrib.optim import SWA
-from optimizer import SVRG, SdLBFGS, BB, RLamb, LaRAdamLamb, KFACOptimizer
+from optimizer import SVRG, SdLBFGS, BB, RLamb, Nadam
 import torch_optimizer as optim
 from torch.optim.lr_scheduler import _LRScheduler, LambdaLR, ReduceLROnPlateau
+from pytorch_lightning import LightningModule
 from scheduler import MyCyclicLR
 from math import sqrt
 
 
 def calc_grad_norm(model, batch):
-    labels, graph = batch
-    logits = model(graph, labels.shape[0], labels)
-    model._calculate_loss(logits, labels).backward()
+    logits = model(*batch)
+    labels = batch[-1]
+    model._calculate_loss(logits[1:], labels[1:]).backward()
     grad_norm = 0.0
     for p in model.parameters():
         if p.grad is not None:
@@ -152,13 +153,19 @@ def configure_optimizers_alon(
         optimizer = optim.Lookahead(yogi, k=5, alpha=0.5)
         optimizer.defaults = []
 
-    elif hyper_parameters.optimizer == "Loookahead_DiffGrad":
+    elif hyper_parameters.optimizer == "Lookahead_DiffGrad":
         diffgrad = optim.DiffGrad(parameters, lr=hyper_parameters.learning_rate,
                                    weight_decay=hyper_parameters.weight_decay,
                                    betas=(0.9, 0.999),
                                    eps=1e-8
                                    )
-        optimizer = optim.Lokahead(diffgrad, k=5, alpha=0.5)
+        optimizer = optim.Lookahead(diffgrad, k=5, alpha=0.5)
+        optimizer.defaults = []
+
+    elif hyper_parameters.optimizer == "Lookahead_Adamax":
+        adamax = Adamax(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
+        optimizer = optim.Lookahead(adamax, k=5, alpha=0.5)
+        optimizer.defaults = []
 
     elif hyper_parameters.optimizer == "Adadelta":
         optimizer = Adadelta(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
