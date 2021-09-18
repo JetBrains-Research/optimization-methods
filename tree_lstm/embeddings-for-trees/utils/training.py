@@ -3,18 +3,17 @@ import torch
 from omegaconf import DictConfig
 from torch.optim import Adam, Optimizer, SGD, Adadelta, Adagrad, Adamax, RMSprop, LBFGS, ASGD
 from torchcontrib.optim import SWA
-from optimizer import SVRG, SdLBFGS, BB, RLamb, Nadam
+from optimizer import SVRG, SdLBFGS, BB, RLamb, LaRAdamLamb, KFACOptimizer
 import torch_optimizer as optim
 from torch.optim.lr_scheduler import _LRScheduler, LambdaLR, ReduceLROnPlateau
-from pytorch_lightning import LightningModule
 from scheduler import MyCyclicLR
 from math import sqrt
 
 
 def calc_grad_norm(model, batch):
-    logits = model(*batch)
-    labels = batch[-1]
-    model._calculate_loss(logits[1:], labels[1:]).backward()
+    labels, graph = batch
+    logits = model(graph, labels.shape[0], labels)
+    model._calculate_loss(logits, labels).backward()
     grad_norm = 0.0
     for p in model.parameters():
         if p.grad is not None:
