@@ -34,7 +34,14 @@ in_len = 160
 out_len = 16  # for codexglue
 # out_len = 7  # for java-med
 
-vocab_size = 1000
+parser = argparse.ArgumentParser(description='Train CodeBERTa.')
+parser.add_argument('optimizer', type=str,
+                    help='Method to use for optimization.')
+parser.add_argument('vocab', type=int, default=10000,
+                    help='Vocabulary size.')
+args = parser.parse_args()
+
+vocab_size = args.vocab
 log_wandb = True
 cuda = True
 
@@ -83,21 +90,15 @@ else:
     print('Dataset instances prepared and saved.')
 
 
-model = CodeBERTa(hidden_size=100, context_size=in_len,
+model = CodeBERTa(hidden_size=150, out_context_size=out_len,
                   max_position_embeddings=512, vocab_size=vocab_size)
 if cuda:
     model.to("cuda")
 model.train()
 
-batch = 64
-
+batch = 2**6
 
 def collate(examples):
-    # data = pad_sequence([torch.tensor(x[0]) for x in examples] + [torch.tensor(x[1])
-    #                     for x in examples], batch_first=True, padding_value=1)
-    # input_ids = data[:batch]
-    # labels = data[batch:]
-
     input_ids = pad_sequence([torch.tensor(x[0]) for x in examples], batch_first=True, padding_value=1)
     labels = pad_sequence([torch.tensor(x[1]) for x in examples], batch_first=True, padding_value=1)
 
@@ -108,12 +109,7 @@ train_dataloader = DataLoader(
     train_dataset, batch_size=batch, shuffle=True, collate_fn=collate)
 
 if log_wandb:
-    wandb.init(project=f'CodeBERTa-tests', entity='dmivilensky')
-
-parser = argparse.ArgumentParser(description='Train CodeBERTa.')
-parser.add_argument('optimizer', type=str,
-                    help='Method to use for optimization.')
-args = parser.parse_args()
+    wandb.init(project=f'codeberta-pythonxglue', entity='dmivilensky')
 
 lr = 0.004
 decay_gamma = 0.95
@@ -174,40 +170,30 @@ else:
 
 # scheduler = torch.optim.lr_scheduler.LambdaLR(
 #     optimizer, lr_lambda=lambda epoch: decay_gamma ** epoch)
-scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=20, num_training_steps=492*epochs)
+scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=20, num_training_steps=len(train_dataloader)*epochs)
+print(len(train_dataloader), 'x', epochs, "total steps")
 iteration = 0
 
-accum = 512 / batch
-print(accum)
+accum = 512 // batch
+print(accum, "accumulation rounds")
 
 model.zero_grad()
 for _ in train_iterator:
     epoch_iterator = tqdm(train_dataloader, desc="Iteration")
     for step, (input_ids, labels) in enumerate(epoch_iterator):
+        outputs = None
 
-        if True:
-            outputs = None
-
-            for i in range(out_len):
-                if cuda:
-                    decoder_attention_mask = torch.where(torch.range(0, out_len-1) < i, torch.ones_like(labels), torch.zeros_like(labels))
-                    decoder_attention_mask = decoder_attention_mask.to("cuda")
+        for i in range(out_len):
+            if cuda:
+                decoder_attention_mask = torch.where(torch.arange(0, out_len) < i, torch.ones_like(labels), torch.zeros_like(labels))
+                decoder_attention_mask = decoder_attention_mask.to("cuda")
                     
-                    fw = model(input_ids.to("cuda"), labels.to("cuda"), decoder_attention_mask)
+                fw = model(input_ids.to("cuda"), labels.to("cuda"), decoder_attention_mask)
 
-                    if outputs is None:
-                        outputs = fw.logits[:, 0].unsqueeze(0)
-                    else:
-                        outputs = torch.cat([outputs, fw.logits[:, i].unsqueeze(0)], dim=0)
-                # if cuda:
-                #     fw = model(input_ids.to("cuda"), labels.to("cuda"))
-                #     outputs = fw.logits
-                #     loss = model.loss_fn(outputs, labels.to("cuda"), batch)
-                # else:
-                #     outputs = model(input_ids, labels).logits
-                #     loss = model.loss_fn(outputs, labels, batch)
-        # except:
-        #     continue
+                if outputs is None:
+                    outputs = fw.logits[:, 0].unsqueeze(0)
+                else:
+                    outputs = torch.cat([outputs, fw.logits[:, i].unsqueeze(0)], dim=0)
     
         outputs = outputs.permute(1, 0, 2)
         loss = model.loss_fn(outputs, labels.to("cuda"), batch)
@@ -221,8 +207,6 @@ for _ in train_iterator:
                     labels[i].tolist()).split(" "))[1:].replace('\u0120', ' '))
                 print()
 
-        if loss is None:
-            continue
         loss.backward()
 
         if (step + 1) % accum == 0:
@@ -260,34 +244,30 @@ for _ in train_iterator:
         eval_dataset, batch_size=batch, collate_fn=collate)
     for step, (input_ids, labels) in enumerate(tqdm(eval_dataloader, desc="Eval")):
         with torch.no_grad():
-            try:
-                outputs = None
+            outputs = None
 
-                for i in range(out_len):
-                    if cuda:
-                        decoder_attention_mask = torch.where(torch.range(0, out_len-1) < i, torch.ones_like(labels), torch.zeros_like(labels))
-                        decoder_attention_mask = decoder_attention_mask.to("cuda")
-                        fw = model(input_ids.to("cuda"), labels.to("cuda"), decoder_attention_mask)
+            for i in range(min(labels.shape[1], out_len)):
+                if cuda:
+                    decoder_attention_mask = torch.where(torch.arange(0, min(labels.shape[1], out_len)) < i, torch.ones_like(labels), torch.zeros_like(labels))
+                    decoder_attention_mask = decoder_attention_mask.to("cuda")
+                    fw = model(input_ids.to("cuda"), labels.to("cuda"), decoder_attention_mask)
 
-                        if outputs is None:
-                            outputs = fw.logits[:, 0].unsqueeze(0)
-                        else:
-                            outputs = torch.cat([outputs, fw.logits[:, i].unsqueeze(0)], dim=0)
-            except:
-                continue
+                    if outputs is None:
+                        outputs = fw.logits[:, 0].unsqueeze(0)
+                    else:
+                        outputs = torch.cat([outputs, fw.logits[:, i].unsqueeze(0)], dim=0)
+
             outputs = outputs.permute(1, 0, 2)
             loss = model.loss_fn(outputs, labels.to("cuda"), batch)
+            loss = loss / accum
 
-            if step == 0:
+            if step % 20 == 0:
                 for i in range(4):
                     out_correct = list(itertools.takewhile(lambda x: x != 3, outputs.argmax(2)[i].tolist()))[:out_len]
                     print('predict:', ''.join(tokenizer.decode(out_correct).split(" "))[1:].replace('\u0120', ' '))
                     print(' target:', ''.join(tokenizer.decode(
                         labels[i].tolist()).split(" "))[1:].replace('\u0120', ' '))
                     print()
-
-            if loss is None:
-                continue
 
             eval_loss += loss.mean().item()
             eval_steps += 1
