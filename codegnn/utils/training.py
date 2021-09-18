@@ -153,13 +153,19 @@ def configure_optimizers_alon(
         optimizer = optim.Lookahead(yogi, k=5, alpha=0.5)
         optimizer.defaults = []
 
-    elif hyper_parameters.optimizer == "Loookahead_DiffGrad":
+    elif hyper_parameters.optimizer == "Lookahead_DiffGrad":
         diffgrad = optim.DiffGrad(parameters, lr=hyper_parameters.learning_rate,
                                    weight_decay=hyper_parameters.weight_decay,
                                    betas=(0.9, 0.999),
                                    eps=1e-8
                                    )
-        optimizer = optim.Lokahead(diffgrad, k=5, alpha=0.5)
+        optimizer = optim.Lookahead(diffgrad, k=5, alpha=0.5)
+        optimizer.defaults = []
+
+    elif hyper_parameters.optimizer == "Lookahead_Adamax":
+        adamax = Adamax(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
+        optimizer = optim.Lookahead(adamax, k=5, alpha=0.5)
+        optimizer.defaults = []
 
     elif hyper_parameters.optimizer == "Adadelta":
         optimizer = Adadelta(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
