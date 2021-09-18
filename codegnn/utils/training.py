@@ -234,7 +234,7 @@ def configure_optimizers_alon(
                 optimizer,
                 lr_lambda=lambda step: min(
                     hyper_parameters.lr_decay_gamma ** (step // hyper_parameters.steps_in_epoch),
-                    step / hyper_parameters.warmup_steps
+                    (step + 1) / hyper_parameters.warmup_steps
                 )
             ),
             'interval': 'epoch',  # or 'epoch'
