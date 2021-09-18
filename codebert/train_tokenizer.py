@@ -75,7 +75,11 @@ if not (os.path.isfile(texts_name) or os.path.isfile(name)):
 
 if tokenize_words:
     if not os.path.isfile(name):
-        tokenizer = WordTokenizer(texts_name, pretrained=False, vocab_size=args.vocab_size if args.vocab_size != -1 else None)
+        tokenizer = WordTokenizer(
+            texts_name, pretrained=False, 
+            vocab_size=args.vocab_size if args.vocab_size != -1 else None,
+            special_tokens=["<unk>", "<pad>", "<s>", "</s>"]
+        )
         tokenizer.save(name)
     else:
         tokenizer = WordTokenizer(name, pretrained=True)
@@ -102,4 +106,8 @@ print(tokenizer.get_vocab_size())
 print('Example of tokenization for the phrase \'let us try with this text\':')
 ids = tokenizer.encode(u"let us try with this text").ids
 print(ids)
-print(''.join(tokenizer.decode(ids).split(" "))[1:].replace('\u0120', ' '))
+
+if tokenize_words:
+    print(tokenizer.decode(ids))
+else:
+    print(''.join(tokenizer.decode(ids).split(" "))[1:].replace('\u0120', ' '))
