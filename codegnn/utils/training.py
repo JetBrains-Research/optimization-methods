@@ -144,6 +144,23 @@ def configure_optimizers_alon(
         optimizer = optim.Lookahead(lamb, k=5, alpha=0.5)
         optimizer.defaults = []
 
+    elif hyper_parameters.optimizer == "Lookahead_Yogi":
+        yogi = optim.Yogi(parameters, lr=hyper_parameters.learning_rate,
+                               weight_decay=hyper_parameters.weight_decay,
+                               betas=(0.9, 0.999),
+                               eps=1e-3,
+                               initial_accumulator=1e-6)
+        optimizer = optim.Lookahead(yogi, k=5, alpha=0.5)
+        optimizer.defaults = []
+
+    elif hyper_parameters.optimizer == "Loookahead_DiffGrad":
+        diffgrad = optim.DiffGrad(parameters, lr=hyper_parameters.learning_rate,
+                                   weight_decay=hyper_parameters.weight_decay,
+                                   betas=(0.9, 0.999),
+                                   eps=1e-8
+                                   )
+        optimizer = optim.Lokahead(diffgrad, k=5, alpha=0.5)
+
     elif hyper_parameters.optimizer == "Adadelta":
         optimizer = Adadelta(parameters, hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
 
@@ -211,6 +228,18 @@ def configure_optimizers_alon(
         #     'interval': 'epoch',  # or 'epoch'
         #     'frequency': 1
         # }
+    elif hyper_parameters.strategy == 'warmup':
+        scheduler = {
+            'scheduler': LambdaLR(
+                optimizer,
+                lr_lambda=lambda step: min(
+                    hyper_parameters.lr_decay_gamma ** (step // hyper_parameters.steps_in_epoch),
+                    step / hyper_parameters.warmup_steps
+                )
+            ),
+            'interval': 'epoch',  # or 'epoch'
+            'frequency': 1
+        }
     elif hyper_parameters.strategy == "reduce_on_plateau":
         lr_scheduler = ReduceLROnPlateau(optimizer, factor=0.95, patience=50)
         scheduler = {
