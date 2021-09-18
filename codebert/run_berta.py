@@ -21,6 +21,7 @@ from transformers import get_linear_schedule_with_warmup
 from codexglue_dataset import CodeXGLUEDocstringDataset
 from javamed_dataset import JavaMedMethodNameDataset
 from codeberta import CodeBERTa
+from word_tokenizer import WordTokenizer, WordTokenizerResponse
 
 
 torch.manual_seed(7)
@@ -29,10 +30,10 @@ np.random.seed(7)
 
 
 in_len = 160
-
-
 out_len = 16  # for codexglue
 # out_len = 7  # for java-med
+
+tokenize_words = False
 
 parser = argparse.ArgumentParser(description='Train CodeBERTa.')
 parser.add_argument('optimizer', type=str,
@@ -49,18 +50,26 @@ lang = "python"
 # lang = "java-med"
 
 epochs = 5
-tokenizer_name = f"tokenizer_{lang}_{vocab_size}.json"
-dataset_postfix = f'dataset_{lang}_in={in_len}_out={out_len}_vocab={vocab_size}.pickle'
+tokenizer_name = f"tokenizer_{lang}_{vocab_size}" + ("_word" if tokenize_words else "") + (".pkl" if tokenize_words else ".json")
+dataset_postfix = f'dataset_{lang}_in={in_len}_out={out_len}_vocab={vocab_size}' + ("_word" if tokenize_words else "") + '.pickle'
 
 
-tokenizer = Tokenizer.from_file(tokenizer_name)
+if tokenize_words:
+    tokenizer = WordTokenizer(tokenizer_name, pretrained=True)
 
-tokenizer_input = Tokenizer.from_file(tokenizer_name)
-tokenizer_input.enable_truncation(max_length=in_len)
+    tokenizer_input = WordTokenizer(tokenizer_name, pretrained=True)
+    tokenizer_input.enable_truncation(max_length=in_len)
 
-tokenizer_output = Tokenizer.from_file(tokenizer_name)
-tokenizer_output.enable_truncation(max_length=out_len)
+    tokenizer_output = WordTokenizer(tokenizer_name, pretrained=True)
+    tokenizer_output.enable_truncation(max_length=out_len)
+else:
+    tokenizer = Tokenizer.from_file(tokenizer_name)
 
+    tokenizer_input = Tokenizer.from_file(tokenizer_name)
+    tokenizer_input.enable_truncation(max_length=in_len)
+
+    tokenizer_output = Tokenizer.from_file(tokenizer_name)
+    tokenizer_output.enable_truncation(max_length=out_len)
 
 if os.path.isfile('train_' + dataset_postfix):
     with open('train_' + dataset_postfix, 'rb') as f:

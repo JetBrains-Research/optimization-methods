@@ -7,6 +7,7 @@ from tokenizers.trainers import BpeTrainer
 from tokenizers.pre_tokenizers import ByteLevel
 from tokenizers.processors import BertProcessing
 import argparse
+from word_tokenizer import WordTokenizer, WordTokenizerResponse
 
 from pathlib import Path
 import os
@@ -19,10 +20,14 @@ parser.add_argument('lang', type=str,
                     help='Language (python, java, etc.)')
 parser.add_argument('vocab_size', type=int,
                     help='Size of vocabulary for tokenizer.')
+parser.add_argument('word', type=int,
+                    help='1 if need in word-level tokenization, else 0.')
 args = parser.parse_args()
 
-texts_name = "aggregated_texts_code.txt"
-name = f"tokenizer_{args.lang}_{args.vocab_size}.json"
+tokenize_words = args.word == 1
+
+texts_name = f"aggregated_texts_code_{args.lang}.txt"
+name = f"tokenizer_{args.lang}_{args.vocab_size}" + ("_word" if tokenize_words else "") + (".pkl" if tokenize_words else ".json")
 
 if not (os.path.isfile(texts_name) or os.path.isfile(name)):
     print('Process dataset...')
@@ -68,22 +73,29 @@ if not (os.path.isfile(texts_name) or os.path.isfile(name)):
 
     print('Text database generated.')
 
-if not os.path.isfile(name):
-    tokenizer = Tokenizer(BPE(unk_token="<unk>"))
-    trainer = BpeTrainer(
-        special_tokens=["<unk>", "<pad>", "<s>", "</s>"], vocab_size=args.vocab_size)
-    tokenizer.pre_tokenizer = ByteLevel()
-
-    files = [texts_name]
-    tokenizer.train(files, trainer)
-
-    tokenizer.post_processor = BertProcessing(
-        ("</s>", tokenizer.token_to_id("</s>")
-         ), ("<s>", tokenizer.token_to_id("<s>")),
-    )
-    tokenizer.save(name)
+if tokenize_words:
+    if not os.path.isfile(name):
+        tokenizer = WordTokenizer(texts_name, pretrained=False, vocab_size=args.vocab_size if args.vocab_size != -1 else None)
+        tokenizer.save(name)
+    else:
+        tokenizer = WordTokenizer(name, pretrained=True)
 else:
-    tokenizer = Tokenizer.from_file(name)
+    if not os.path.isfile(name):
+        tokenizer = Tokenizer(BPE(unk_token="<unk>"))
+        trainer = BpeTrainer(
+            special_tokens=["<unk>", "<pad>", "<s>", "</s>"], vocab_size=args.vocab_size)
+        tokenizer.pre_tokenizer = ByteLevel()
+
+        files = [texts_name]
+        tokenizer.train(files, trainer)
+
+        tokenizer.post_processor = BertProcessing(
+            ("</s>", tokenizer.token_to_id("</s>")
+            ), ("<s>", tokenizer.token_to_id("<s>")),
+        )
+        tokenizer.save(name)
+    else:
+        tokenizer = Tokenizer.from_file(name)
 
 print('Tokenizer is trained, vocab_size:')
 print(tokenizer.get_vocab_size())
