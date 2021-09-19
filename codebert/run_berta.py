@@ -33,15 +33,16 @@ in_len = 160
 out_len = 16  # for codexglue
 # out_len = 7  # for java-med
 
-tokenize_words = False
-
 parser = argparse.ArgumentParser(description='Train CodeBERTa.')
 parser.add_argument('optimizer', type=str,
                     help='Method to use for optimization.')
 parser.add_argument('vocab', type=int, default=10000,
                     help='Vocabulary size.')
+parser.add_argument('word', type=int,
+                    help='1 if need in word-level tokenization, else 0.')
 args = parser.parse_args()
 
+tokenize_words = args.word == 1
 vocab_size = args.vocab
 log_wandb = True
 cuda = True
@@ -212,9 +213,13 @@ for _ in train_iterator:
         if step % 20 == 0:
             for i in range(4):
                 out_correct = list(itertools.takewhile(lambda x: x != 3, outputs.argmax(2)[i].tolist()))
-                print('predict:', ''.join(tokenizer.decode(out_correct).split(" "))[1:].replace('\u0120', ' '))
-                print(' target:', ''.join(tokenizer.decode(
-                    labels[i].tolist()).split(" "))[1:].replace('\u0120', ' '))
+                if tokenize_words:
+                    print('predict:', tokenizer.decode(out_correct))
+                    print(' target:', tokenizer.decode(labels[i].tolist()))
+                else:
+                    print('predict:', ''.join(tokenizer.decode(out_correct).split(" "))[1:].replace('\u0120', ' '))
+                    print(' target:', ''.join(tokenizer.decode(
+                        labels[i].tolist()).split(" "))[1:].replace('\u0120', ' '))
                 print()
 
         loss.backward()
@@ -274,9 +279,13 @@ for _ in train_iterator:
             if step % 20 == 0:
                 for i in range(4):
                     out_correct = list(itertools.takewhile(lambda x: x != 3, outputs.argmax(2)[i].tolist()))[:out_len]
-                    print('predict:', ''.join(tokenizer.decode(out_correct).split(" "))[1:].replace('\u0120', ' '))
-                    print(' target:', ''.join(tokenizer.decode(
-                        labels[i].tolist()).split(" "))[1:].replace('\u0120', ' '))
+                    if tokenize_words:
+                        print('predict:', tokenizer.decode(out_correct))
+                        print(' target:', tokenizer.decode(labels[i].tolist()))
+                    else:
+                        print('predict:', ''.join(tokenizer.decode(out_correct).split(" "))[1:].replace('\u0120', ' '))
+                        print(' target:', ''.join(tokenizer.decode(
+                            labels[i].tolist()).split(" "))[1:].replace('\u0120', ' '))
                     print()
 
             eval_loss += loss.mean().item()
