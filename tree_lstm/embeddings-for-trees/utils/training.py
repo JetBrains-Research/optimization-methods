@@ -243,7 +243,7 @@ def configure_optimizers_alon(
                     (step + 1) / hyper_parameters.warmup_steps
                 )
             ),
-            'interval': 'epoch',  # or 'epoch'
+            'interval': 'step',  # or 'epoch'
             'frequency': 1
         }
     elif hyper_parameters.strategy == "reduce_on_plateau":
