@@ -56,6 +56,7 @@ dataset_postfix = f'dataset_{lang}_in={in_len}_out={out_len}_vocab={vocab_size}'
 
 if tokenize_words:
     tokenizer = WordTokenizer(tokenizer_name, pretrained=True)
+    vocab_size = tokenizer.get_vocab_size()
 
     tokenizer_input = WordTokenizer(tokenizer_name, pretrained=True)
     tokenizer_input.enable_truncation(max_length=in_len)

@@ -8,7 +8,10 @@ import numpy as np
 
 
 class CodeBERTa(Module):
-    def __init__(self, hidden_size, out_context_size, max_position_embeddings, vocab_size, verbose=True):
+    def __init__(
+        self, hidden_size, out_context_size, 
+        max_position_embeddings, vocab_size, verbose=True
+    ):
         super(CodeBERTa, self).__init__()
 
         num_hidden_layers = int(
@@ -18,12 +21,21 @@ class CodeBERTa(Module):
 
         encoder_config = RobertaConfig(
             vocab_size=vocab_size,
-            hidden_size=hidden_size, num_hidden_layers=num_hidden_layers, num_attention_heads=num_attention_heads,
-            intermediate_size=intermediate_size, max_position_embeddings=max_position_embeddings)
+            hidden_size=hidden_size,
+            num_hidden_layers=num_hidden_layers,
+            intermediate_size=intermediate_size,
+            num_attention_heads=num_attention_heads,
+            max_position_embeddings=max_position_embeddings
+        )
 
         decoder_config = GPT2Config(
-            vocab_size=vocab_size, n_ctx=out_context_size, n_positions=out_context_size,
-            n_embd=hidden_size, n_head=num_attention_heads, n_layer=2)
+            vocab_size=vocab_size,
+            n_embd=hidden_size,
+            n_layer=2,
+            n_head=num_attention_heads,
+            n_ctx=out_context_size,
+            n_positions=out_context_size
+        )
 
         decoder_config.is_decoder = True
         decoder_config.add_cross_attention = True
@@ -44,7 +56,12 @@ class CodeBERTa(Module):
             print('total', '%.1E' % (enc_sz + dec_sz))
 
     def forward(self, x, l, decoder_attention_mask=None):
-        return self.model(input_ids=x, decoder_input_ids=l*decoder_attention_mask, labels=l, decoder_attention_mask=decoder_attention_mask)
+        return self.model(
+            labels=l,
+            input_ids=x,
+            decoder_input_ids=l*decoder_attention_mask,
+            decoder_attention_mask=decoder_attention_mask
+        )
 
     @staticmethod
     def loss_fn(outputs, targets, batch):
