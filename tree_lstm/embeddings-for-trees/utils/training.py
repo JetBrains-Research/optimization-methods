@@ -57,7 +57,13 @@ def configure_optimizers_alon(
                                    gamma=1e-3,
                                    eps=1e-8,
                                    amsbound=False)
-
+    elif hyper_parameters.optimizer == "NovoGrad":
+        optimizer = optim.NovoGrad(parameters, lr=hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay,
+                                   betas=(0.9, 0.999),
+                                   eps=1e-8,
+                                   grad_averaging=False,
+                                   amsgrad=False
+                    )
     elif hyper_parameters.optimizer == "Yogi":
         optimizer = optim.Yogi(parameters, lr=hyper_parameters.learning_rate,
                                weight_decay=hyper_parameters.weight_decay,
