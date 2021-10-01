@@ -23,7 +23,8 @@ dict_keys(['meteor'])
 from collections import defaultdict
 import numpy as np
 
-from nltk.translate.meteor_score import single_meteor_score
+# from nltk.translate.meteor_score import single_meteor_score
+from sacrerouge.metrics import Meteor
 from sacrebleu import corpus_bleu, sentence_bleu
 from sacrebleu import corpus_chrf, sentence_chrf
 from sacrebleu import corpus_ter, sentence_ter
@@ -119,9 +120,9 @@ class Metrics:
         }
 
     def meteor(self) -> dict:
-        scores = []
-        for hyp, ref in zip(self.hyps, self.refs):
-            scores.append(single_meteor_score(ref, hyp))
+        technique = Meteor()
+        scores = technique.score_all(self.hyps, [[ref] for ref in self.refs])
+        scores = list(map(lambda x: x['METEOR'], scores))
 
         return {
             'scores': {
@@ -326,7 +327,5 @@ def calculate_one_token_metrics(true_positive: int, false_positive: int, false_n
 
 
 if __name__ == "__main__":
-    print(Metrics(['one two three four', 'one two three five'], ['one due three five', 'one two three four']).rouge())
-    
-    # import doctest
-    # doctest.testmod()
+    import doctest
+    doctest.testmod()
