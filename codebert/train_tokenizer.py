@@ -7,8 +7,11 @@ from tokenizers.trainers import BpeTrainer
 from tokenizers.pre_tokenizers import ByteLevel
 from tokenizers.processors import BertProcessing
 import argparse
+from tqdm import tqdm
 from word_tokenizer import WordTokenizer, WordTokenizerResponse
 
+from collections import Counter
+import pickle
 from pathlib import Path
 import os
 import ast
@@ -29,7 +32,7 @@ tokenize_words = args.word == 1
 texts_name = f"aggregated_texts_code_{args.lang}.txt"
 name = f"tokenizer_{args.lang}_{args.vocab_size}" + ("_word" if tokenize_words else "") + (".pkl" if tokenize_words else ".json")
 
-if not (os.path.isfile(texts_name) or os.path.isfile(name)):
+if not (os.path.isfile(texts_name) or os.path.isfile(name) or args.lang == "java-med"):
     print('Process dataset...')
 
     file_content = []
@@ -44,11 +47,14 @@ if not (os.path.isfile(texts_name) or os.path.isfile(name)):
 
     for src_file in src_files:
         if args.lang == 'java-med':
+            lines = []
+            num_lines = sum(1 for line in open(src_file))
             with open(src_file) as f:
-                lines = list(map(lambda x: dict(ast.literal_eval(x)), f.readlines()))
+                for line in tqdm(f, total=num_lines):
+                    lines.append(dict(ast.literal_eval(line)))
             df = {
-                "code_tokens": [line["code_tokens"] for line in lines],
-                "method_name_tokens": [line["method_name_tokens"] for line in lines]
+                "code_tokens": [line["SOURCE"].split("|") for line in lines],
+                "method_name_tokens": [line["label"].split("|") for line in lines]
             }
         else:
             df = pd.read_json(src_file, orient='records', lines=True)
@@ -74,7 +80,7 @@ if not (os.path.isfile(texts_name) or os.path.isfile(name)):
     print('Text database generated.')
 
 if tokenize_words:
-    if not os.path.isfile(name):
+    if not os.path.isfile(name) and args.lang != "java-med":
         tokenizer = WordTokenizer(
             texts_name, pretrained=False, 
             vocab_size=args.vocab_size if args.vocab_size != -1 else None,
@@ -82,6 +88,20 @@ if tokenize_words:
         )
         tokenizer.save(name)
     else:
+        if args.lang == "java-med":
+            with open(os.getcwd() + "/dataset/java-med/vocabulary.pkl", "rb") as f:
+                vocab_freq = pickle.load(f)
+            vocab = {k: vocab_freq["label"].get(k, 0) + vocab_freq["token"].get(k, 0) for k in set(vocab_freq["label"]) | set(vocab_freq["token"])}
+            special_tokens = ["<unk>", "<pad>", "<s>", "</s>"]
+            word_dict = {
+                    word_freq[0]: number 
+                    for number, word_freq in enumerate(
+                        list(zip(special_tokens, [0, 0, 0, 0])) +\
+                        list(Counter(vocab).most_common(args.vocab_size)))
+                }
+            with open(name, "wb") as config:
+                pickle.dump((word_dict, special_tokens), config)
+        
         tokenizer = WordTokenizer(name, pretrained=True)
 else:
     if not os.path.isfile(name):

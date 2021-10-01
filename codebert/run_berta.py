@@ -29,9 +29,9 @@ random.seed(7)
 np.random.seed(7)
 
 
-in_len = 160
-out_len = 16  # for codexglue
-# out_len = 7  # for java-med
+in_len = 80
+# out_len = 16  # for codexglue
+out_len = 7  # for java-med
 
 parser = argparse.ArgumentParser(description='Train CodeBERTa.')
 parser.add_argument('optimizer', type=str,
@@ -47,8 +47,8 @@ vocab_size = args.vocab
 log_wandb = True
 cuda = True
 
-lang = "python"
-# lang = "java-med"
+# lang = "python"
+lang = "java-med"
 
 epochs = 5
 tokenizer_name = f"tokenizer_{lang}_{vocab_size}" + ("_word" if tokenize_words else "") + (".pkl" if tokenize_words else ".json")
@@ -101,13 +101,13 @@ else:
     print('Dataset instances prepared and saved.')
 
 
-model = CodeBERTa(hidden_size=150, out_context_size=out_len,
+model = CodeBERTa(hidden_size=198, out_context_size=out_len,
                   max_position_embeddings=512, vocab_size=vocab_size)
 if cuda:
     model.to("cuda")
 model.train()
 
-batch = 2**6
+batch = 256
 
 def collate(examples):
     input_ids = pad_sequence([torch.tensor(x[0]) for x in examples], batch_first=True, padding_value=1)
@@ -120,7 +120,7 @@ train_dataloader = DataLoader(
     train_dataset, batch_size=batch, shuffle=True, collate_fn=collate)
 
 if log_wandb:
-    wandb.init(project=f'codeberta-pythonxglue', entity='dmivilensky')
+    wandb.init(project=f'codeberta-java-med', entity='dmivilensky')
 
 lr = 0.004
 decay_gamma = 0.95
@@ -194,9 +194,9 @@ for _ in train_iterator:
     for step, (input_ids, labels) in enumerate(epoch_iterator):
         outputs = None
 
-        for i in range(out_len):
+        for i in range(min(labels.shape[1], out_len)):
             if cuda:
-                decoder_attention_mask = torch.where(torch.arange(0, out_len) < i, torch.ones_like(labels), torch.zeros_like(labels))
+                decoder_attention_mask = torch.where(torch.arange(0, min(labels.shape[1], out_len)) < i, torch.ones_like(labels), torch.zeros_like(labels))
                 decoder_attention_mask = decoder_attention_mask.to("cuda")
                     
                 fw = model(input_ids.to("cuda"), labels.to("cuda"), decoder_attention_mask)

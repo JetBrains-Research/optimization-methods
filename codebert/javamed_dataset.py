@@ -5,6 +5,7 @@ import os
 import ast
 import pandas as pd
 import itertools
+from tqdm import tqdm
 from torch.utils.data.dataset import Dataset
 
 
@@ -22,11 +23,21 @@ class JavaMedMethodNameDataset(Dataset):
             )
 
         for src_file in src_files:
+            lines = []
+            if split == "train":
+                num_lines = int(0.40 * sum(1 for line in open(src_file)))
+            else:
+                num_lines = sum(1 for line in open(src_file))
             with open(src_file) as f:
-                lines = list(map(lambda x: dict(ast.literal_eval(x)), f.readlines()))
+                if split == "train":
+                    for line in tqdm(itertools.islice(f, num_lines), total=num_lines):
+                        lines.append(dict(ast.literal_eval(line)))
+                else:
+                    for line in tqdm(f, total=num_lines):
+                        lines.append(dict(ast.literal_eval(line)))
             df = {
-                "code_tokens": [line["code_tokens"] for line in lines],
-                "method_name_tokens": [line["method_name_tokens"] for line in lines]
+                "code_tokens": [line["SOURCE"].split("|") for line in lines],
+                "method_name_tokens": [line["label"].split("|") for line in lines]
             }
 
             code = list(map(lambda x: x.ids,
