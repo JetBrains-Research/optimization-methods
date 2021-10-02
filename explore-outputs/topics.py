@@ -7,7 +7,6 @@ import numpy as np
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import PCA
-from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 from sklearn.datasets import load_files
 
