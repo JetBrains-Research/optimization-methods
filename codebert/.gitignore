@@ -1,0 +1,15 @@
+__pycache__
+.ipynb_checkpoints
+dataset
+wandb
+eval_dataset*
+train_dataset*
+merges.txt
+vocab.json
+berta_fine_tune.ipynb
+deprecated
+aggregated_texts*
+evaldataset*
+traindataset*
+github*
+models*
