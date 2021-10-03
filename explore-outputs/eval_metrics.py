@@ -11,11 +11,11 @@ from textmetric.metrics import Metrics
 from scipy.stats import wilcoxon
 
 
-DIR = "outputs-javaxglue-code2seq"
+DIR = "javaxglue"
 
 for metric in ["chrFpp", "meteor"]:
     print("###", metric, "###")
-    method_2 = "Adamax"
+    method_2 = "RAdam"
 
     with open(DIR + "/" + method_2 + "_test_outputs.pkl", "rb") as f:
         hyps_2, refs_2 = pickle.load(f)
@@ -28,8 +28,9 @@ for metric in ["chrFpp", "meteor"]:
 
 
     for method_1 in [
-        "LaAdamax", "DiffGrad", "LaDiffGrad", 
-        "Adam", "Adam_200", "LaRAdam", "Yogi", "LaYogi"
+        "LaRAdam", "Adam", "LaAdam", "Adamax", "LaAdamax",
+        "DiffGrad", "LaDiffGrad", "Lamb", "LaLamb", "SGD", "LaSGD", 
+        "Yogi", "LaYogi"
     ]:
         print(method_1)
         with open(DIR + "/" + method_1 + "_test_outputs.pkl", "rb") as f:
