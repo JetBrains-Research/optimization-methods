@@ -2,10 +2,10 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from statistics import mean
 from time import time
-import wandb
 
 from torch.utils.tensorboard import SummaryWriter
 
+import wandb
 from code_transformer.utils.log import Logger
 
 

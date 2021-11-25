@@ -18,9 +18,8 @@ class CTStage2Sample:
         self.token_mapping = token_mapping
         self.stripped_code_snippet = stripped_code_snippet
         self.func_name = func_name
-        self.func_name = docstring
         self.docstring = docstring
-        self.encoded_func_name = None #encoded_func_name
+        self.encoded_func_name = encoded_func_name
 
     @staticmethod
     def from_compressed(compressed_sample):

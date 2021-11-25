@@ -37,16 +37,14 @@ ex = Experiment(base_dir='../../', interactive=False)
 class ExperimentSetup:
 
     def __init__(self):
-        torch.manual_seed(456)
-        random.seed(456)
-        self.project_name = 'ct-python'
-
         self._init_config()
         self._init_data_transforms()
         self._init_data()
         self._init_transfer_learning()
         self._init_model()
         self._init_optimizer()
+
+        self.project_name = "ct-java-small"
 
     @ex.capture
     def _init_config(self, _config):
@@ -316,6 +314,9 @@ class ExperimentSetup:
 
         self._init_metrics(metrics)
 
+        torch.manual_seed(random_seed)
+        random.seed(random_seed)
+
         # Simulated batches
         simulated_batch_size = batch_size if simulated_batch_size is None else simulated_batch_size
         assert simulated_batch_size % batch_size == 0, "simulated_batch_size must be a multiple of batch_size"
@@ -553,7 +554,8 @@ class EarlyStopping:
         self.evaluation_results[snapshot_iteration] = score
         sorted_results = sorted(self.evaluation_results.items(), key=lambda x: x[1], reverse=True)
         print(f"Current best performing snapshots: {sorted_results}")
-        snapshots_to_keep = [sorted_results[0][0]]
+        snapshots_to_keep = sorted_results[:self.patience]
+        snapshots_to_keep = [x[0] for x in snapshots_to_keep]
 
         stored_snapshots = self.model_manager.get_available_snapshots(self.run_id)
         for stored_snapshot in stored_snapshots:

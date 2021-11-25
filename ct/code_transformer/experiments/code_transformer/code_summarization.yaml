@@ -2,8 +2,7 @@ experiment_setup:
   executable: 'code_transformer/experiments/code_transformer/code_summarization.py'
 
 data_setup:
-  language: 'python,javascript,ruby,go' # The dataset (language) to use
-  filter_language: python               # only for multi-language datasets. Let only snippets of the specified language through (fine-tuning)
+  language: java-small-vocab
   use_validation: True
   num_sub_tokens: 5                     # Number of sub-tokens that input tokens should be split into
   num_subtokens_output: 6               # Number of sub-tokens of the method name to predict
@@ -33,14 +32,6 @@ data_transforms:
     type: 'exponential'                 # "exponential" or "equal". Exponential binning has more diversified (smaller) bins for smaller distances
     growth_factor: 1.3
     n_fixed_bins: 9
-
-transfer_learning:                      # Load a pretrained model for fine-tuninig
-  use_pretrained_model: False
-  model_type: 'ct_code_summarization'
-  run_id: CT-23
-  snapshot_iteration: 10
-  cpu: False
-  freeze_encoder_layers: None           # None, "all" or {number}. If and how many encoder layers to keep constant during fine-tuning
 
 model:
   with_cuda: True                       # Run model on GPU
@@ -76,8 +67,8 @@ model:
 
 optimizer:
   optimizer: 'Adam'
-  learning_rate: 8e-5
-  reg_scale: 3e-5
+  learning_rate: 1e-3
+  reg_scale: 0
 
   #scheduler: 'OneCycleLR'
   #scheduler_params:
@@ -94,11 +85,11 @@ optimizer:
 training:
   random_seed: 456
   batch_size: 8
-  simulated_batch_size: 128         # Gradient Accumulation. After how many samples the model parameters should be updated
+  simulated_batch_size: 512         # Gradient Accumulation. After how many samples the model parameters should be updated
   simulated_batch_size_valid: 1280  # Over how many samples validation metrics should be calculated
   accumulate_tokens_batch: False
   validate_every: 100               # Counted in number of parameter updates (simulated_batch_size). How often approximate evaluation should be done
-  persistent_snapshot_every: 10000  # Counted in loop iterations (batch_size). Also starts a full evaluation on the validation set to guide early stopping
+  persistent_snapshot_every: 86561  # Counted in loop iterations (batch_size). Also starts a full evaluation on the validation set to guide early stopping
   early_stopping_patience: 20       # How often the model evaluation can be worse than the current best before training is stopped
   max_validation_samples: 50000     # Limit number of samples for full evaluation on larger datasets to speed up training
   metrics:                          # Which metrics to log
