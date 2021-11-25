@@ -3,3 +3,5 @@ codebert
 textmetric/__pycache__
 code2seq
 github*
+jb-opt*
+.gitignore
