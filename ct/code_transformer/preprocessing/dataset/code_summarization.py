@@ -120,26 +120,19 @@ class CTCodeSummarizationDataset(CTBaseDataset):
                 # Function name was matched, exit the loop
                 break
 
-        
-        # TODO: uncomment if method name prediction!!!!!!!!
-        # if not idx_func_tokens:
-        #     logger.warn(f"Could not find method name {func_name} in token sequence, skipping sample")
-        #     # logger.warn(f"Token sequence was: {str([str([self.word_vocab.reverse_lookup(st) for st in token.sub_tokens]) for token in sample.tokens])}")
+        if not idx_func_tokens:
+            logger.warn(f"Could not find method name {func_name} in token sequence, skipping sample")
+        else:
+            # Remove any additional tokens if label is more than 1 token long
+            sample.tokens = [t for i, t in enumerate(sample.tokens) if i not in idx_func_tokens[1:]]
+            sample.token_mapping = [m for i, m in enumerate(sample.token_mapping) if i not in idx_func_tokens[1:]]
+            sample.tokens[idx_func_tokens[0]] = CTToken(
+                [self.word_vocab[CLS_TOKENS[-1]]],
+                RangeInterval.empty_interval(),
+                self.token_type_vocab[UNKNOWN_TOKEN])
 
-        #     # Ensure to free memory
-        #     del sample, cls_tokens, cls_token, func_name, label, idx_func_tokens, encoded_label
-        #     return next(self)
-
-        # Remove any additional tokens if label is more than 1 token long
-        sample.tokens = [t for i, t in enumerate(sample.tokens) if i not in idx_func_tokens[1:]]
-        sample.token_mapping = [m for i, m in enumerate(sample.token_mapping) if i not in idx_func_tokens[1:]]
-        sample.tokens[idx_func_tokens[0]] = CTToken(
-            [self.word_vocab[CLS_TOKENS[-1]]],
-            RangeInterval.empty_interval(),
-            self.token_type_vocab[UNKNOWN_TOKEN])
-
-        # Replace label token with method name mask
-        idx_func_tokens = [idx_func_tokens[0]]  # only one label position left now
+            # Replace label token with method name mask
+            idx_func_tokens = [idx_func_tokens[0]]  # only one label position left now
 
         transformed_sample = self.transform_sample(sample)
 
@@ -169,14 +162,15 @@ class CTCodeSummarizationDataset(CTBaseDataset):
                                  for sub_token in label]
             encoded_label = pad_or_truncate(encoded_label, self.num_sub_tokens_output, self.word_vocab[PAD_TOKEN])
 
-            # Mask Method name tokens such that they cannot be pointed to
-            n_label_subtokens = (transformed_sample.pointer_pad_mask[idx_func_tokens] == True).sum().item()
-            assert n_label_subtokens == 1, f"Label should be only a masked label token, but was {transformed_sample.tokens[idx_func_tokens]}"
-            transformed_sample.pointer_pad_mask[idx_func_tokens] = False
+            if idx_func_tokens:
+                # Mask Method name tokens such that they cannot be pointed to
+                n_label_subtokens = (transformed_sample.pointer_pad_mask[idx_func_tokens] == True).sum().item()
+                assert n_label_subtokens == 1, f"Label should be only a masked label token, but was {transformed_sample.tokens[idx_func_tokens]}"
+                transformed_sample.pointer_pad_mask[idx_func_tokens] = False
 
-            # Remove method name tokens from extended vocabulary IDs such that they cannot be pointed to
-            idx_func_sub_tokens = transformed_sample.pointer_pad_mask[:idx_func_tokens[0]].sum().item()
-            del transformed_sample.extended_vocabulary_ids[idx_func_sub_tokens]
+                # Remove method name tokens from extended vocabulary IDs such that they cannot be pointed to
+                idx_func_sub_tokens = transformed_sample.pointer_pad_mask[:idx_func_tokens[0]].sum().item()
+                del transformed_sample.extended_vocabulary_ids[idx_func_sub_tokens]
 
             # If a sub token only appears in the label, but nowhere else in the code, the model has no change to
             # predict it. Hence, it is truly unknown

@@ -22,7 +22,7 @@ class WordCounter:
         else:
             self.words[word] += 1
 
-    def to_vocabulary(self, limit_most_common: int = 2000, min_frequency=None, special_symbols: dict = None):
+    def to_vocabulary(self, limit_most_common: int = None, min_frequency=None, special_symbols: dict = None):
         if special_symbols is None:
             special_symbols = dict()
         assert limit_most_common is None or limit_most_common >= len(

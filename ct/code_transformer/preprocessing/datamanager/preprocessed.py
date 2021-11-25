@@ -50,13 +50,16 @@ class CTPreprocessedDataManager(DataManager):
         employ oversampling (i.e., duplication of samples from minority languages) to ensure that samples will occur
         evenly.
         """
-
-        self.dataset_location = f"{data_location}/{language}/{partition}"
         # Vocabularies and word counters are created on training data and used for all partitions
-        self.vocabularies_path = f"{data_location}/{language}/vocabularies"
-        print("!#@$%^%&%^$%#")
-        print(self.vocabularies_path)
-        self.word_counters_path = f"{data_location}/{language}/word-counters"
+        if language not in {"poj_104", "codeforces"}:
+            self.dataset_location = f"{data_location}/{language}/{partition}"
+            self.vocabularies_path = f"{data_location}/{language}/vocabularies"
+            self.word_counters_path = f"{data_location}/{language}/word-counters"
+        else:
+            self.dataset_location = f"{data_location}/{partition}"
+            self.vocabularies_path = f"{data_location}/vocabularies"
+            self.word_counters_path = f"{data_location}/word-counters"
+
         self.current_dataset_batch = 0
         self.language = language
         self.partition = partition
@@ -100,10 +103,8 @@ class CTPreprocessedDataManager(DataManager):
         Can only be used in stage 2.
         Returns a 3-tuple (word_vocab: Vocabulary, token_type_vocab: Vocabulary, node_type_vocab: Vocabulary)
         """
-        voc = load_zipped(self.vocabularies_path)
-        print("!!@!@#!#@")
-        print(len(voc[0]))
-        return voc
+
+        return load_zipped(self.vocabularies_path)
 
     def save_vocabularies(self, word_vocab: Vocabulary, token_type_vocab: Vocabulary, node_type_vocab: Vocabulary,
                           word_vocab_labels: Vocabulary = None):
@@ -123,10 +124,7 @@ class CTPreprocessedDataManager(DataManager):
         or a 4-tuple (word_counter: WordCounter, token_type_counter: WordCounter, node_type_counter, word_counter_labels: WordCounter)
         """
 
-        count = load_zipped(self.word_counters_path)
-        print("1!!!11!!")
-        print(count)
-        return count
+        return load_zipped(self.word_counters_path)
 
     def save_word_counters(self, word_counter: WordCounter, token_type_counter: WordCounter,
                            node_type_counter: WordCounter, word_counter_labels: WordCounter = None):

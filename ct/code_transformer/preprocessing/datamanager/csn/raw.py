@@ -8,9 +8,6 @@ from collections import namedtuple
 import random
 
 import jsonlines
-import itertools
-import string
-import re
 
 from code_transformer.preprocessing.datamanager.base import DataManager, RawDataLoader
 
@@ -53,17 +50,13 @@ class CSNRawDataLoader(RawDataLoader):
     def __len__(self):
         return len(self.lines)
 
-    @staticmethod
-    def docstr(s):
-        return re.sub('\s+', ' ', s.translate(str.maketrans('', '', string.punctuation))).strip()
-
     def read(self, batch_size=1, shuffle=False):
         if shuffle:
             lines = random.sample(self.lines, len(self.lines))
         else:
             lines = self.lines
         reader = jsonlines.Reader(lines)
-        reader = map(lambda line: CSNRawSample(line['func_name'], self.docstr(line['docstring']), line['code'].replace(line['docstring'], self.docstr(line['docstring']))), reader)
+        reader = map(lambda line: CSNRawSample(line['func_name'], line['docstring'], line['code']), reader)
 
         if batch_size > 1:
             return DataManager.to_batches(reader, batch_size)

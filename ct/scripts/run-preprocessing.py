@@ -14,7 +14,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("config_file")
     parser.add_argument("language")
-    parser.add_argument("partition", choices=["train", "valid", "test"])
+    parser.add_argument("partition")
     args = parser.parse_args()
 
     config = read_config(args.config_file)
