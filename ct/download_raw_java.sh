@@ -8,12 +8,13 @@
 # mv java-small code2seq/
 # cd ../..
 
-python3 -m scripts.extract-java-methods java-small-vocab
+DATASET="java-small-vocab"
+python3 -m scripts.extract-java-methods $DATASET
 
-python3 -m scripts.run-preprocessing code_transformer/experiments/preprocessing/preprocess-1-code2seq.yaml java-small-vocab train
-python3 -m scripts.run-preprocessing code_transformer/experiments/preprocessing/preprocess-1-code2seq.yaml java-small-vocab valid
-python3 -m scripts.run-preprocessing code_transformer/experiments/preprocessing/preprocess-1-code2seq.yaml java-small-vocab test
+python3 -m scripts.run-preprocessing code_transformer/experiments/preprocessing/preprocess-1-code2seq.yaml $DATASET train
+python3 -m scripts.run-preprocessing code_transformer/experiments/preprocessing/preprocess-1-code2seq.yaml $DATASET valid
+python3 -m scripts.run-preprocessing code_transformer/experiments/preprocessing/preprocess-1-code2seq.yaml $DATASET test
 
-python3 -m scripts.run-preprocessing code_transformer/experiments/preprocessing/preprocess-2-small-vocab.yaml java-small-vocab train
-python3 -m scripts.run-preprocessing code_transformer/experiments/preprocessing/preprocess-2-small-vocab.yaml java-small-vocab valid
-python3 -m scripts.run-preprocessing code_transformer/experiments/preprocessing/preprocess-2-small-vocab.yaml java-small-vocab test
+python3 -m scripts.run-preprocessing code_transformer/experiments/preprocessing/preprocess-2-small-vocab.yaml $DATASET train
+python3 -m scripts.run-preprocessing code_transformer/experiments/preprocessing/preprocess-2-small-vocab.yaml $DATASET valid
+python3 -m scripts.run-preprocessing code_transformer/experiments/preprocessing/preprocess-2-small-vocab.yaml $DATASET test

@@ -6,6 +6,7 @@ or to only contain tokens that appear at least n times.
 from code_transformer.modeling.constants import UNKNOWN_TOKEN
 from code_transformer.preprocessing.pipeline.stage1 import CTStage1Sample
 from code_transformer.preprocessing.nlp.tokenization import method_name_to_tokens
+from itertools import islice
 
 
 class WordCounter:
@@ -74,6 +75,13 @@ class Vocabulary:
             self.vocabulary[word] = next_id
             next_id += 1
 
+        self.reverse_vocabulary = {id: word for word, id in self.vocabulary.items() if not word == UNKNOWN_TOKEN}
+
+    def reduce(self, max_size):
+        voc = {}
+        for k, v in islice(sorted(self.vocabulary.items(), key=lambda x: x[1]), max_size):
+            voc.update({k: v})
+        self.vocabulary = voc
         self.reverse_vocabulary = {id: word for word, id in self.vocabulary.items() if not word == UNKNOWN_TOKEN}
 
     def reverse_lookup(self, id):

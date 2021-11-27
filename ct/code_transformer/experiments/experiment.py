@@ -67,12 +67,13 @@ class ExperimentSetup:
     @ex.capture(prefix="data_setup")
     def _init_data(self, language, num_predict, use_validation=False, mini_dataset=False,
                    use_no_punctuation=False, use_pointer_network=False, sort_by_length=False, shuffle=True,
-                   chunk_size=None, filter_language=None, dataset_imbalance=None, num_sub_tokens=NUM_SUB_TOKENS):
+                   chunk_size=None, filter_language=None, dataset_imbalance=None, num_sub_tokens=NUM_SUB_TOKENS, vocab=5000):
         self.data_manager = CTBufferedDataManager(DATA_PATH_STAGE_2, language, shuffle=shuffle,
                                                   infinite_loading=True,
                                                   mini_dataset=mini_dataset, size_load_buffer=10000,
                                                   sort_by_length=sort_by_length, chunk_size=chunk_size,
-                                                  filter_language=filter_language, dataset_imbalance=dataset_imbalance)
+                                                  filter_language=filter_language, dataset_imbalance=dataset_imbalance,
+                                                  vocab_size=vocab)
         self.word_vocab, self.token_type_vocab, self.node_type_vocab = self.data_manager.load_vocabularies()
 
         token_distances = None
@@ -105,7 +106,8 @@ class ExperimentSetup:
                                                             shuffle=True, infinite_loading=True,
                                                             mini_dataset=mini_dataset, size_load_buffer=10000,
                                                             filter_language=filter_language,
-                                                            dataset_imbalance=dataset_imbalance)
+                                                            dataset_imbalance=dataset_imbalance,
+                                                            vocab_size=vocab)
             if use_no_punctuation:
                 self.dataset_validation = CTLanguageModelingDatasetNoPunctuation(data_manager_validation,
                                                                                  token_distances=token_distances,
@@ -130,15 +132,17 @@ class ExperimentSetup:
                                                                      use_pointer_network,
                                                                      filter_language,
                                                                      dataset_imbalance,
-                                                                     num_sub_tokens)
+                                                                     num_sub_tokens,
+                                                                     vocab)
 
     def _create_validation_dataset(self, data_location, language, use_no_punctuation, token_distances,
                                    infinite_loading, num_predict, use_pointer_network, filter_language,
-                                   dataset_imbalance, num_sub_tokens):
+                                   dataset_imbalance, num_sub_tokens, vocab):
         data_manager_validation = CTBufferedDataManager(data_location, language, partition="valid",
                                                         shuffle=True, infinite_loading=infinite_loading,
                                                         size_load_buffer=10000, filter_language=filter_language,
-                                                        dataset_imbalance=dataset_imbalance)
+                                                        dataset_imbalance=dataset_imbalance,
+                                                        vocab_size=vocab)
         if use_no_punctuation:
             return CTLanguageModelingDatasetNoPunctuation(data_manager_validation,
                                                           token_distances=token_distances,
@@ -301,6 +305,7 @@ class ExperimentSetup:
         self.logger.info(f"===============================================")
         self.logger.info(f"Starting run {run_id}")
         self.logger.info(f"===============================================")
+
         wandb.init(project=self.project_name, entity='dmivilensky')
         config = wandb.config
         config.learning_rate = 0
@@ -448,6 +453,7 @@ class ExperimentSetup:
             t.measure()
 
         self._handle_shutdown()
+        exit()
 
     def _train_step(self, batch, num_simulated_batches):
         batch = batch_to_device(batch, self.device)
