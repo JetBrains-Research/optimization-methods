@@ -104,7 +104,7 @@ class Metrics:
     def bert(self) -> dict:
         # TODO: add a proper scaling
         (P, R, F), hashname = bert_score(
-            self.hyps, self.refs, lang="en", return_hash=True)
+            self.hyps, self.refs, model_type='microsoft/deberta-xlarge-mnli', return_hash=True, rescale_with_baseline=True, lang ="en")
 
         return {
             'scores': {
