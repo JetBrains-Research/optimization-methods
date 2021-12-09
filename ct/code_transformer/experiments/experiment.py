@@ -209,6 +209,7 @@ class ExperimentSetup:
 
         if hasattr(self, "word_vocab"):
             config.vocab_size = len(self.word_vocab)
+        print('sz', len(self.word_vocab))
         if hasattr(self, "token_type_vocab"):
             if hasattr(self, "use_only_ast") and self.use_only_ast:
                 config.num_token_types = None

@@ -22,7 +22,7 @@ class CTPreprocessedDataManager(DataManager):
 
     def __init__(self, data_location: str, language: str, partition="train", shuffle=False, infinite_loading=False,
                  mini_dataset=False, load_single_file=None, sort_by_length=False, chunk_size=None,
-                 filter_language: str = None, dataset_imbalance: Tuple = None, vocab_size: int = 5000):
+                 filter_language: str = None, dataset_imbalance: Tuple = None, vocab_size: int = 1000):
         """
         :param data_location: the main folder were samples will be loaded from and dataset slices saved to
         :param language: for which language samples should be loaded/saved
@@ -50,7 +50,7 @@ class CTPreprocessedDataManager(DataManager):
         employ oversampling (i.e., duplication of samples from minority languages) to ensure that samples will occur
         evenly.
         """
-        self.vocab_size = vocab_size
+        self.vocab_size = 2000
 
         # Vocabularies and word counters are created on training data and used for all partitions
         if language not in {"poj_104", "codeforces"}:
@@ -106,9 +106,10 @@ class CTPreprocessedDataManager(DataManager):
         Returns a 3-tuple (word_vocab: Vocabulary, token_type_vocab: Vocabulary, node_type_vocab: Vocabulary)
         """
         word_vocab, token_type_vocab, node_type_vocab = load_zipped(self.vocabularies_path)
-        print(len(word_vocab))
-        word_vocab.reduce(self.vocab_size)
-        print(len(word_vocab))
+        # print(len(word_vocab))
+        # word_vocab.reduce(self.vocab_size)
+        # print(len(word_vocab))
+        # self.save_vocabularies(word_vocab, token_type_vocab, node_type_vocab)
         return word_vocab, token_type_vocab, node_type_vocab
 
     def save_vocabularies(self, word_vocab: Vocabulary, token_type_vocab: Vocabulary, node_type_vocab: Vocabulary,
@@ -128,7 +129,6 @@ class CTPreprocessedDataManager(DataManager):
         Returns a 3-tuple (word_counter: WordCounter, token_type_counter: WordCounter, node_type_counter: WordCounter)
         or a 4-tuple (word_counter: WordCounter, token_type_counter: WordCounter, node_type_counter, word_counter_labels: WordCounter)
         """
-
         return load_zipped(self.word_counters_path)
 
     def save_word_counters(self, word_counter: WordCounter, token_type_counter: WordCounter,
