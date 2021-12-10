@@ -1,3 +1,9 @@
 code2seq-regularized
 codebert
 textmetric/__pycache__
+.gitignore
+code2seq/*
+ct*
+jb-opt
+jb-opt.pub
+results_*
