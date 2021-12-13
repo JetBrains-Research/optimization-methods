@@ -12,12 +12,20 @@ for model_dir in filter(lambda dir: dir.startswith("results_"), os.listdir()):
     model = model_dir.split("_")[1]
 
     for dataset in os.listdir(model_dir):
+        
+        if dataset == "javamed0.1":
+            continue
+
         print("dataset:", dataset)
 
         data = []
         methods = []
         print("methods:")
         for method in os.listdir(os.path.join(model_dir, dataset)):
+
+            if method == "analysis":
+                continue
+
             methods.append(method.split("_")[0])
             print(methods[-1])
 
