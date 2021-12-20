@@ -1,0 +1,1 @@
+python3 -m code_transformer.evaluate code_transformer CT-$1 96710 test

@@ -88,7 +88,7 @@ training:
   simulated_batch_size: 512         # Gradient Accumulation. After how many samples the model parameters should be updated
   simulated_batch_size_valid: 1280  # Over how many samples validation metrics should be calculated
   accumulate_tokens_batch: False
-  validate_every: 100               # Counted in number of parameter updates (simulated_batch_size). How often approximate evaluation should be done
+  validate_every: 200               # Counted in number of parameter updates (simulated_batch_size). How often approximate evaluation should be done
   persistent_snapshot_every: 19342  # Counted in loop iterations (batch_size). Also starts a full evaluation on the validation set to guide early stopping
   early_stopping_patience: -5       # How often the model evaluation can be worse than the current best before training is stopped
   max_validation_samples: 50000     # Limit number of samples for full evaluation on larger datasets to speed up training

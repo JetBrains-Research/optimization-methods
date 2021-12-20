@@ -59,13 +59,13 @@ class ModelManager:
         else:
             snapshot_path = f"{self._snapshot_location(run_id)}/snapshot-{snapshot_iteration}.p"
 
-        try:
-            # Legacy: model snapshots that were migrated from MongoDB are stored as pickle files, while newer
-            # runs are directly persisted by torch.save()
-            model_params = load_pickled(snapshot_path)
-            return torch.load(io.BytesIO(model_params), map_location=map_location)
-        except TypeError:
-            return torch.load(snapshot_path, map_location=map_location)
+        # try:
+        #     # Legacy: model snapshots that were migrated from MongoDB are stored as pickle files, while newer
+        #     # runs are directly persisted by torch.save()
+        #     model_params = load_pickled(snapshot_path)
+        #     return torch.load(io.BytesIO(model_params), map_location=map_location)
+        # except TypeError:
+        return torch.load(snapshot_path, map_location=map_location)
 
     @abstractmethod
     def load_model(self, run_id, snapshot_iteration, **kwargs):

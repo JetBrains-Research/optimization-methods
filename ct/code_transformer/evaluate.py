@@ -9,9 +9,10 @@ from argparse import ArgumentParser
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+import os
+import pickle
 
 from code_transformer.modeling.constants import PAD_TOKEN, UNKNOWN_TOKEN, NUM_SUB_TOKENS_METHOD_NAME
-from code_transformer.modeling.modelmanager import GreatModelManager, XLNetModelManager
 from code_transformer.modeling.modelmanager.code_transformer import CodeTransformerModelManager
 from code_transformer.preprocessing.datamanager.base import batch_to_device, batch_filter_distances
 from code_transformer.preprocessing.datamanager.preprocessed import CTBufferedDataManager
@@ -38,6 +39,18 @@ BATCH_SIZE = 8
 LIMIT_TOKENS = 1000  # MAX_NUM_TOKENS
 
 
+def ids_to_text(vocab, ids):
+    res = []
+    for token in ids:
+        txt_token = vocab.reverse_lookup(token.item())
+        if token.item() in [0, 1, 3] or txt_token == "<unk>":  # UNK, SOS, PAD
+            continue
+        elif token.item() == 2:  # EOS
+            return res
+        res.append(vocab.reverse_lookup(token.item()))
+    return res
+
+
 def format_scores(scores: dict):
     return f"\tF: {scores['f'] * 100:0.2f}\n" \
            f"\tPrec: {scores['p'] * 100:0.2f}\n" \
@@ -48,10 +61,6 @@ if __name__ == '__main__':
 
     if args.model == 'code_transformer':
         model_manager = CodeTransformerModelManager()
-    elif args.model == 'great':
-        model_manager = GreatModelManager()
-    elif args.model == 'xl_net':
-        model_manager = XLNetModelManager()
     else:
         raise ValueError(f"Unknown model type `{args.model}`")
 
@@ -124,16 +133,21 @@ if __name__ == '__main__':
 
     relative_distances = config['data_transforms']['relative_distances']
 
-    pad_id = word_vocab[PAD_TOKEN]
-    unk_id = word_vocab[UNKNOWN_TOKEN]
+    # pad_id = word_vocab[PAD_TOKEN]
+    # unk_id = word_vocab[UNKNOWN_TOKEN]
 
-    f1_scores = []
-    precisions = []
-    recalls = []
+    # f1_scores = []
+    # precisions = []
+    # recalls = []
     predictions = []
-    best_non_unk_predictions = []
+    # best_non_unk_predictions = []
     labels = []
-    losses = []
+    # losses = []
+
+    hyps = []
+    refs = []
+    os.makedirs("./" + "outputs" + "/" + args.run_id, exist_ok=True)
+
     progress = tqdm(enumerate(dataloader), total=int(data_manager.approximate_total_samples() / BATCH_SIZE))
     for i, batch in progress:
         batch = batch_filter_distances(batch, relative_distances)
@@ -144,53 +158,69 @@ if __name__ == '__main__':
 
         with torch.no_grad():
             output = model.forward_batch(batch).cpu()
-        losses.append(output.loss.item())
-        f1, prec, rec = f1_score(output.logits, label, pad_id=pad_id, unk_id=unk_id,
-                                 output_precision_recall=True)
-        f1_scores.append(f1)
-        precisions.append(prec)
-        recalls.append(rec)
+        # losses.append(output.loss.item())
+        # f1, prec, rec = f1_score(output.logits, label, pad_id=pad_id, unk_id=unk_id,
+        #                          output_precision_recall=True)
+        # f1_scores.append(f1)
+        # precisions.append(prec)
+        # recalls.append(rec)
 
         batch_logits = output.logits.detach().cpu()
-        best_non_unk_predictions.extend(get_best_non_unk_predictions(output.logits, unk_id=unk_id))
+        # best_non_unk_predictions.extend(get_best_non_unk_predictions(output.logits, unk_id=unk_id))
         predictions.extend(batch_logits.argmax(-1).squeeze(1))
         labels.extend(label.squeeze(1))
+
+        for l in range(BATCH_SIZE):
+            res_our = ids_to_text(word_vocab, predictions[-1-l])
+            res_ref = ids_to_text(word_vocab, labels[-1-l])
+
+            if len(res_ref) > 0:
+                if len(res_our) == 0:
+                    res_our = ['xxx']
+                hyps.append(' '.join(res_our))
+                refs.append(' '.join(res_ref))
+
+                # print("hyp:", hyps[-1])
+                # print("ref:", refs[-1])
 
         progress.set_description()
         del batch
 
     data_manager.shutdown()
 
-    predictions = torch.stack(predictions)
-    labels = torch.stack(labels)
-    pred = torch.cat(best_non_unk_predictions)
+    with open("./" + "outputs" + "/" + args.run_id + "/test_outputs.pkl", 'wb') as f:
+        pickle.dump((hyps, refs), f)
 
-    micro_prec = micro_precision(pred, labels, predictions_provided=True,
-                                 pad_id=pad_id, unk_id=unk_id)
-    micro_rec = micro_recall(pred, labels, predictions_provided=True,
-                             pad_id=pad_id, unk_id=unk_id)
-    micro_f1 = micro_f1_score(pred, labels, predictions_provided=True,
-                              pad_id=pad_id, unk_id=unk_id)
+    # predictions = torch.stack(predictions)
+    # labels = torch.stack(labels)
+    # pred = torch.cat(best_non_unk_predictions)
 
-    scores = compute_rouge(predictions, labels, pad_id=pad_id, predictions_provided=True)
+    # micro_prec = micro_precision(pred, labels, predictions_provided=True,
+    #                              pad_id=pad_id, unk_id=unk_id)
+    # micro_rec = micro_recall(pred, labels, predictions_provided=True,
+    #                          pad_id=pad_id, unk_id=unk_id)
+    # micro_f1 = micro_f1_score(pred, labels, predictions_provided=True,
+    #                           pad_id=pad_id, unk_id=unk_id)
 
-    print()
-    print('==============')
-    print('Final results:')
-    print('==============')
-    print(
-        f"F1: \n{format_scores(scores['rouge-1'])}"
-        f"Rouge-2: \n{format_scores(scores['rouge-2'])}"
-        f"Rouge-L: \n{format_scores(scores['rouge-l'])}"
-    )
+    # scores = compute_rouge(predictions, labels, pad_id=pad_id, predictions_provided=True)
 
-    print(
-        f"micro-F1: {micro_f1 * 100:0.2f} (micro-precision: {micro_prec * 100: 0.2f}, micro-recall: {micro_rec * 100:0.2f})")
+    # print()
+    # print('==============')
+    # print('Final results:')
+    # print('==============')
+    # print(
+    #     f"F1: \n{format_scores(scores['rouge-1'])}"
+    #     f"Rouge-2: \n{format_scores(scores['rouge-2'])}"
+    #     f"Rouge-L: \n{format_scores(scores['rouge-l'])}"
+    # )
 
-    print()
-    print(
-        f"Storing predictions into {model_manager._snapshot_location(args.run_id)}/predictions-snapshot-{args.snapshot_iteration}.p")
-    model_manager.save_artifact(args.run_id,
-                                (predictions, best_non_unk_predictions, labels),
-                                'predictions',
-                                snapshot_iteration=args.snapshot_iteration)
+    # print(
+    #     f"micro-F1: {micro_f1 * 100:0.2f} (micro-precision: {micro_prec * 100: 0.2f}, micro-recall: {micro_rec * 100:0.2f})")
+
+    # print()
+    # print(
+    #     f"Storing predictions into {model_manager._snapshot_location(args.run_id)}/predictions-snapshot-{args.snapshot_iteration}.p")
+    # model_manager.save_artifact(args.run_id,
+    #                             (predictions, best_non_unk_predictions, labels),
+    #                             'predictions',
+    #                             snapshot_iteration=args.snapshot_iteration)
