@@ -1,8 +1,8 @@
 experiment_setup:
-  executable: 'code_transformer/experiments/code_transformer/code_summarization.py'
+  executable: 'code_transformer/experiments/code_transformer/code_summarization_ddp.py'
 
 data_setup:
-  language: java-medium-0.1
+  language: java-small-vocab
   use_validation: True
   num_sub_tokens: 5                     # Number of sub-tokens that input tokens should be split into
   num_subtokens_output: 6               # Number of sub-tokens of the method name to predict
@@ -42,9 +42,9 @@ model:
     transformer:                          # CodeTransformer hyperparameters
       num_layers: 1
       encoder_layer:
-        d_model: 1024                       # Internal embedding dimension
-        nhead: 8                            # Number of attention heads
-        dim_feedforward: 2048               # Dimension of feed-forward layer
+        d_model: 512                       # Internal embedding dimension
+        nhead: 4                            # Number of attention heads
+        dim_feedforward: 1024               # Dimension of feed-forward layer
         dropout: 0.2
         activation: 'gelu'
         use_content_content: True           # Whether to use the content-content term in attention computation
@@ -55,9 +55,9 @@ model:
   lm_decoder:                           # Hyperparameters of the decoder
     output_nonlinearity: None
     n_layers: 1
-    decoder_dropout: 0.2
-    decoder_nhead: 8
-    decoder_dim_feedforward: 2048
+    decoder_dropout: 0.1
+    decoder_nhead: 4
+    decoder_dim_feedforward: 1024
     decoder_activation: 'gelu'
     use_teacher_forcing: True             # Whether to use teacher forcing during training (Label is fed into decoder instead of prediction for previous position)
     pointer_attention_type: 'additive'    # Attention type in Pointer Network. "scaled_dot_product", "multihead" or "additive"
@@ -89,8 +89,8 @@ training:
   simulated_batch_size_valid: 1280  # Over how many samples validation metrics should be calculated
   accumulate_tokens_batch: False
   validate_every: 100               # Counted in number of parameter updates (simulated_batch_size). How often approximate evaluation should be done
-  persistent_snapshot_every: 19342  # Counted in loop iterations (batch_size). Also starts a full evaluation on the validation set to guide early stopping
-  early_stopping_patience: -5       # How often the model evaluation can be worse than the current best before training is stopped
+  persistent_snapshot_every: 86561  # Counted in loop iterations (batch_size). Also starts a full evaluation on the validation set to guide early stopping
+  early_stopping_patience: 20       # How often the model evaluation can be worse than the current best before training is stopped
   max_validation_samples: 50000     # Limit number of samples for full evaluation on larger datasets to speed up training
   metrics:                          # Which metrics to log
     - top1_accuracy

@@ -5,11 +5,14 @@ from abc import abstractmethod
 from itertools import islice
 from statistics import mean
 
+import os
 import wandb
 import torch
 from sacred import Experiment
 from torch import optim
 from torch.utils.data import DataLoader
+import torch.distributed as dist
+from torch.nn.parallel import DistributedDataParallel as DDP
 from tqdm import tqdm
 
 from code_transformer.configuration.transformer_lm_encoder import TransformerLMEncoderConfig
@@ -33,8 +36,18 @@ from code_transformer.env import MODELS_SAVE_PATH, LOGS_PATH, DATA_PATH_STAGE_2
 
 ex = Experiment(base_dir='../../', interactive=False)
 
+def setup(rank, world_size):
+    os.environ['MASTER_ADDR'] = 'localhost'
+    os.environ['MASTER_PORT'] = '12355'
 
-class ExperimentSetup:
+    # initialize the process group
+    dist.init_process_group("gloo", rank=rank, world_size=world_size)
+
+def cleanup():
+    dist.destroy_process_group()
+
+
+class ExperimentSetupDDP:
 
     def __init__(self):
         self._init_config()
@@ -294,7 +307,7 @@ class ExperimentSetup:
               max_validation_samples=10000, accumulate_tokens_batch=False):
 
         if self.with_cuda:
-            self.model_lm = self.model_lm.cuda()
+            self.model_lm = DDP(self.model_lm.cuda(), device_ids=[0])
             self.device = "cuda"
         else:
             self.device = "cpu"
@@ -453,6 +466,7 @@ class ExperimentSetup:
 
             t.measure()
 
+        cleanup()
         self._handle_shutdown()
         exit()
 
@@ -558,34 +572,26 @@ class EarlyStopping:
         self._best = 0
 
     def evaluate(self, score, snapshot_iteration):
-        if self.patience > 0:
-            self.evaluation_results[snapshot_iteration] = score
-            sorted_results = sorted(self.evaluation_results.items(), key=lambda x: x[1], reverse=True)
-            print(f"Current best performing snapshots: {sorted_results}")
-            snapshots_to_keep = sorted_results[:self.patience]
-            snapshots_to_keep = [x[0] for x in snapshots_to_keep]
+        self.evaluation_results[snapshot_iteration] = score
+        sorted_results = sorted(self.evaluation_results.items(), key=lambda x: x[1], reverse=True)
+        print(f"Current best performing snapshots: {sorted_results}")
+        snapshots_to_keep = sorted_results[:self.patience]
+        snapshots_to_keep = [x[0] for x in snapshots_to_keep]
 
-            stored_snapshots = self.model_manager.get_available_snapshots(self.run_id)
-            for stored_snapshot in stored_snapshots:
-                if stored_snapshot not in snapshots_to_keep:
-                    self.model_manager.delete_snapshot(self.run_id, stored_snapshot)
+        stored_snapshots = self.model_manager.get_available_snapshots(self.run_id)
+        for stored_snapshot in stored_snapshots:
+            if stored_snapshot not in snapshots_to_keep:
+                self.model_manager.delete_snapshot(self.run_id, stored_snapshot)
 
-            if score > self._best:
-                self._best = score
-                self._counter = 0
-            else:
-                self._counter += 1
-
-            print(f"Counter: {self._counter}, Best: {self._best}")
-
-            if self._counter > self.patience:
-                return False
-            else:
-                return True
+        if score > self._best:
+            self._best = score
+            self._counter = 0
         else:
             self._counter += 1
 
-            if self._counter > -self.patience:
-                return False
-            else:
-                return True
+        print(f"Counter: {self._counter}, Best: {self._best}")
+
+        if self._counter > self.patience:
+            return False
+        else:
+            return True

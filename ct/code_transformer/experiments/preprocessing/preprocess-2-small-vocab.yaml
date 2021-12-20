@@ -2,7 +2,7 @@ experiment_setup:
   executable: 'code_transformer/experiments/preprocessing/preprocess-2.py'
 
 execution:
-  num_processes: 6
+  num_processes: 8
   batch_size: 50
   dataset_slice_size: 1000
 
