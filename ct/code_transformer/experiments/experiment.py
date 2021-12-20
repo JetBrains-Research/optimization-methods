@@ -12,6 +12,9 @@ from torch import optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
+from torch.optim import SGD, Adam
+from torch_optimizer import Lamb, RAdam, Lookahead, Yogi, DiffGrad, Adamax
+
 from code_transformer.configuration.transformer_lm_encoder import TransformerLMEncoderConfig
 from code_transformer.experiments.log import ExperimentLogger, TensorboardLogger
 from code_transformer.modeling.constants import PAD_TOKEN, UNKNOWN_TOKEN, EOS_TOKEN, NUM_SUB_TOKENS
@@ -237,11 +240,49 @@ class ExperimentSetup:
 
     @ex.capture(prefix="optimizer")
     def _init_optimizer(self, learning_rate, reg_scale, scheduler=None, scheduler_params=None, optimizer="Adam"):
-        if optimizer == 'Adam':
-            self.optimizer = optim.Adam(self.model_lm.parameters(), lr=learning_rate, weight_decay=reg_scale)
-        elif optimizer == 'Momentum':
-            self.optimizer = optim.SGD(self.model_lm.parameters(), lr=learning_rate, weight_decay=reg_scale,
-                                       momentum=0.95, nesterov=True)
+        if optimizer == "SGD":
+            self.optimizer = SGD(self.model_lm.parameters(), lr=learning_rate, weight_decay=reg_scale)
+        elif optimizer == "LaSGD":
+            sgd = SGD(self.model_lm.parameters(), lr=learning_rate, weight_decay=reg_scale)
+            self.optimizer = Lookahead(sgd, k=5, alpha=0.5)
+            self.optimizer.defaults = []
+        elif optimizer == 'Adam':
+            self.optimizer = Adam(self.model_lm.parameters(), lr=learning_rate, weight_decay=reg_scale)
+        elif optimizer == "LaAdam":
+            adam = Adam(self.model_lm.parameters(), lr=learning_rate, weight_decay=reg_scale)
+            self.optimizer = Lookahead(adam, k=5, alpha=0.5)
+            self.optimizer.defaults = []
+        elif optimizer == "Lamb":
+            self.optimizer = Lamb(self.model_lm.parameters(), lr=learning_rate, weight_decay=reg_scale)
+        elif optimizer == "LaLamb":
+            lamb = Lamb(self.model_lm.parameters(), lr=learning_rate, weight_decay=reg_scale)
+            self.optimizer = Lookahead(lamb, k=5, alpha=0.5)
+            self.optimizer.defaults = []
+        elif optimizer == "RAdam":
+            self.optimizer = RAdam(self.model_lm.parameters(), lr=learning_rate, weight_decay=reg_scale)
+        elif optimizer == "LaRAdam":
+            radam = RAdam(self.model_lm.parameters(), lr=learning_rate, weight_decay=reg_scale)
+            self.optimizer = Lookahead(radam, k=5, alpha=0.5)
+            self.optimizer.defaults = []
+        elif optimizer == "Yogi":
+            self.optimizer = Yogi(self.model_lm.parameters(), lr=learning_rate, weight_decay=reg_scale)
+        elif optimizer == "LaYogi":
+            yogi = Yogi(self.model_lm.parameters(), lr=learning_rate, weight_decay=reg_scale)
+            self.optimizer = Lookahead(yogi, k=5, alpha=0.5)
+            self.optimizer.defaults = []
+        elif optimizer == "DiffGrad":
+            self.optimizer = DiffGrad(self.model_lm.parameters(), lr=learning_rate, weight_decay=reg_scale)
+        elif optimizer == "LaDiffGrad":
+            diffGrad = DiffGrad(self.model_lm.parameters(), lr=learning_rate, weight_decay=reg_scale)
+            self.optimizer = Lookahead(diffGrad, k=5, alpha=0.5)
+            self.optimizer.defaults = []
+        elif optimizer == "Adamax":
+            self.optimizer = Adamax(self.model_lm.parameters(), lr=learning_rate, weight_decay=reg_scale)
+        elif optimizer == "LaAdamax":
+            adamax = Adamax(self.model_lm.parameters(), lr=learning_rate, weight_decay=reg_scale)
+            self.optimizer = Lookahead(adamax, k=5, alpha=0.5)
+            self.optimizer.defaults = []
+        
 
         self.scheduler = None
         if scheduler == 'OneCycleLR':
