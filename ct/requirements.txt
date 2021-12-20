@@ -16,3 +16,4 @@ Requests==2.23.0
 scikit_learn==0.24.1
 environs==9.3.1
 sacred==0.8.1
+torch_optimizer==0.3.0

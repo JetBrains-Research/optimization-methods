@@ -12,8 +12,8 @@ from torch import optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from torch.optim import SGD, Adam
-from torch_optimizer import Lamb, RAdam, Lookahead, Yogi, DiffGrad, Adamax
+from torch.optim import SGD, Adam, Adamax
+from torch_optimizer import Lamb, RAdam, Lookahead, Yogi, DiffGrad
 
 from code_transformer.configuration.transformer_lm_encoder import TransformerLMEncoderConfig
 from code_transformer.experiments.log import ExperimentLogger, TensorboardLogger
@@ -332,13 +332,10 @@ class ExperimentSetup:
     def train(self, batch_size, simulated_batch_size, random_seed, metrics,
               validate_every=None,
               persistent_snapshot_every=None, simulated_batch_size_valid=None, early_stopping_patience=10,
-              max_validation_samples=10000, accumulate_tokens_batch=False):
+              max_validation_samples=10000, accumulate_tokens_batch=False, device='cuda'):
 
-        if self.with_cuda:
-            self.model_lm = self.model_lm.cuda()
-            self.device = "cuda"
-        else:
-            self.device = "cpu"
+        self.device = device
+        self.model_lm = self.model_lm.to(self.device)
 
         run_id = self.model_manager.generate_run_name()
 
