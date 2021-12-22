@@ -53,21 +53,11 @@ class Metrics:
         self.hyps = hyps
         self.refs = refs
 
-    def get_statistics(
-        self, stats: set = set(), verbose = False,
-        with_symbolic: bool = False, bert: bool = False) -> dict:
-
-        if not verbose:
-            warnings.filterwarnings("ignore")
-
-        result = {
-            'scores': {},
-            'score': {}
-        }
-
+    @staticmethod
+    def get_list(stats: set = set(), with_symbolic: bool = False, bert: bool = True):
         metrics_to_evaluate = set(filter(
             lambda func: callable(
-                getattr(Metrics, func)) and func[0] != '_' and func != 'get_statistics' and \
+                getattr(Metrics, func)) and func[0] != '_' and not func.startswith('get_') and \
                     not ((not with_symbolic and 'symb' in func) or (not bert and func == 'bert')),
             dir(Metrics)
         ))
@@ -81,9 +71,22 @@ class Metrics:
                                       "\n\033[0mThese metrics are available:\n\033[92m" + all_str_list)
 
         if len(stats) != 0:
-            final_metrics_list = metrics_to_evaluate & stats
+            return metrics_to_evaluate & stats
         else:
-            final_metrics_list = metrics_to_evaluate
+            return metrics_to_evaluate
+
+    def get_statistics(
+        self, stats: set = set(), verbose = False,
+        with_symbolic: bool = False, bert: bool = True) -> dict:
+
+        if not verbose:
+            warnings.filterwarnings("ignore")
+
+        result = {
+            'scores': {},
+            'score': {}
+        }
+        final_metrics_list = self.get_list(stats, with_symbolic, bert)
 
         for func in final_metrics_list:
             if verbose:
@@ -102,9 +105,8 @@ class Metrics:
         return result
 
     def bert(self) -> dict:
-        # TODO: add a proper scaling
         (P, R, F), hashname = bert_score(
-            self.hyps, self.refs, lang="en", return_hash=True)
+            self.hyps, self.refs, model_type='microsoft/deberta-xlarge-mnli', return_hash=True, rescale_with_baseline=True, lang ="en")
 
         return {
             'scores': {
@@ -113,9 +115,9 @@ class Metrics:
                 'bert-F': F.cpu().detach().numpy()
             },
             'score': {
-                'bert-P': P.mean().item(),
-                'bert-R': R.mean().item(),
-                'bert-F': F.mean().item()
+                'bert-P': round(50 * (1 + P.mean().item()), 1),
+                'bert-R': round(50 * (1 + R.mean().item()), 1),
+                'bert-F': round(50 * (1 + F.mean().item()), 1)
             }
         }
 
@@ -129,7 +131,7 @@ class Metrics:
                 'meteor': np.array(scores)
             },
             'score': {
-                'meteor': np.mean(scores)
+                'meteor': round(100 * np.mean(scores), 1)
             }
         }
 
@@ -147,24 +149,24 @@ class Metrics:
                 'bleu': np.array(scores)
             },
             'score': {
-                'bleu': corpus_bleu(self.hyps, [self.refs]).score
+                'bleu': round(corpus_bleu(self.hyps, [self.refs]).score, 1)
             }
         }
     
-    def ter(self) -> dict:
-        scores = []
+    # def ter(self) -> dict:
+    #     scores = []
 
-        for hyp, ref in zip(self.hyps, self.refs):
-            scores.append(sentence_ter(hyp, [ref]).score)
+    #     for hyp, ref in zip(self.hyps, self.refs):
+    #         scores.append(sentence_ter(hyp, [ref]).score)
 
-        return {
-            'scores': {
-                'ter': np.array(scores)
-            },
-            'score': {
-                'ter': corpus_ter(self.hyps, [self.refs]).score
-            }
-        }
+    #     return {
+    #         'scores': {
+    #             'ter': np.array(scores)
+    #         },
+    #         'score': {
+    #             'ter': round(corpus_ter(self.hyps, [self.refs]).score, 1)
+    #         }
+    #     }
 
     def chrF(self) -> dict:
         scores = []
@@ -177,7 +179,7 @@ class Metrics:
                 'chrF': np.array(scores)
             },
             'score': {
-                'chrF': corpus_chrf(self.hyps, [self.refs]).score
+                'chrF': round(corpus_chrf(self.hyps, [self.refs]).score, 1)
             }
         }
 
@@ -192,7 +194,7 @@ class Metrics:
                 'chrFpp': np.array(scores)
             },
             'score': {
-                'chrFpp': corpus_chrf(self.hyps, [self.refs], word_order=2).score
+                'chrFpp': round(corpus_chrf(self.hyps, [self.refs], word_order=2).score, 1)
             }
         }
 
@@ -242,7 +244,7 @@ class Metrics:
         score_dict = {}
         for title in scores_dict:
             scores_dict[title] = np.array(scores_dict[title])
-            score_dict[title] = scores_dict[title].mean()
+            score_dict[title] = round(scores_dict[title].mean() * 100, 1)
 
         return {
             'scores': scores_dict,
@@ -290,9 +292,9 @@ class Metrics:
                 'f1': np.array(f1_scores)
             },
             'score': {
-                'precision': prec_total,
-                'recall': rec_total,
-                'f1': f1_total
+                'precision': round(100 * prec_total, 1),
+                'recall': round(100 * rec_total, 1),
+                'f1': round(100 * f1_total, 1)
             }
         }
 
