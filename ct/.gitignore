@@ -16,3 +16,4 @@ models
 .vscode
 build
 bin
+outputs
