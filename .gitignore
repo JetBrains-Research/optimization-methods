@@ -11,3 +11,8 @@ ct*
 jb-opt
 jb-opt.pub
 results_*
+results_ct/*
+results_code2seq/*
+
+*.data
+*.txt

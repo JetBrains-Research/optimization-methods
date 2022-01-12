@@ -5,7 +5,7 @@ import pandas as pd
 import pickle
 
 
-file = "code2seq_pythonxglue_metrics"
+file = "ct_javamed0.1_metrics"
 
 with open(file + ".data", "rb") as f:
     df = pickle.load(f)

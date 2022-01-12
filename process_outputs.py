@@ -12,9 +12,6 @@ for model_dir in filter(lambda dir: dir.startswith("results_"), os.listdir()):
     model = model_dir.split("_")[1]
 
     for dataset in os.listdir(model_dir):
-        
-        if dataset == "javamed0.1":
-            continue
 
         print("dataset:", dataset)
 
