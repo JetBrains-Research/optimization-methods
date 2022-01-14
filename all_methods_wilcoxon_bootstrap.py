@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Copyright 2021 Dmitry Vilensky-Pasechnyuk
 
+from cgi import print_directory
 import os
 from textmetric import Metrics
 import pandas as pd
@@ -9,15 +10,6 @@ import pickle
 import random
 import numpy as np
 from scipy.stats import wilcoxon
-
-
-# folder = "results_code2seq/javaxglue"
-# docstring = True
-
-folder = "results_code2seq/javamed"
-docstring = False
-
-compare = True
 
 
 def bootstrap_compare(scores_a, scores_b, h0, resamples=1000):
@@ -36,110 +28,137 @@ def bootstrap_compare(scores_a, scores_b, h0, resamples=1000):
     return score / len(sampled_scores_pairs)
 
 
-launch_id = folder.replace("/", "-")
+tasks = [
+    {"folder": "results_treelstm/pythonxglue", "docstring": True, "compare": False},
+    {"folder": "results_codegnn/pythonxglue", "docstring": True, "compare": False},
+    {"folder": "results_treelstm/javaxglue", "docstring": True, "compare": True},
+    {"folder": "results_treelstm/javamed0.1", "docstring": False, "compare": False},
+    {"folder": "results_treelstm/javamed", "docstring": False, "compare": True},
+    {"folder": "results_codegnn/javaxglue", "docstring": True, "compare": True},
+    {"folder": "results_codegnn/javamed0.1", "docstring": False, "compare": False},
+    {"folder": "results_codegnn/javamed", "docstring": False, "compare": True}
+]
 
-if os.path.isfile(f"dump_for_wilcoxon_bootstrap_{launch_id}.data"):
-    with open(f"dump_for_wilcoxon_bootstrap_{launch_id}.data", "rb") as file:
-        method_names, score, scores_for_method = pickle.load(file)
-else:
-    hyps_ref_all_methods = []
-    method_names = []
-    outputs_for_method = {}
+for task in tasks:
 
-    for outputs_file_name in os.listdir(folder):
-        method_name = outputs_file_name.split("_")[0]
-        method_names.append(method_name)
-        
-        with open(os.path.join(folder, outputs_file_name), "rb") as file:
-            outputs_for_method[method_name] = pickle.load(file)
+    folder = task["folder"]
+    docstring = task["docstring"]
+    compare = task["compare"]
 
-    if docstring:
-        meteor_for_method = {}
-        blue_for_method = {}
+    print('---------------------')
+    print(folder)
+    print('---------------------\n')
+
+    launch_id = folder.replace("/", "-")
+
+    if os.path.isfile(f"dump_for_wilcoxon_bootstrap_{launch_id}.data"):
+        with open(f"dump_for_wilcoxon_bootstrap_{launch_id}.data", "rb") as file:
+            method_names, score, scores_for_method = pickle.load(file)
     else:
-        F1_for_method = {}
-        chrF_for_method = {}
+        hyps_ref_all_methods = []
+        method_names = []
+        outputs_for_method = {}
 
-    score = {}
-    scores_for_method = {}
-
-    print("Calculating metrics...")
-
-    for method_name in tqdm(method_names):
-        print(method_name)
-        hyps, refs = outputs_for_method[method_name]
-        
-        if docstring:
-            evaluated_metrics = Metrics(hyps, refs).get_statistics(stats={"chrF", "meteor", "bleu"})
-            meteor_for_method[method_name] = evaluated_metrics["score"]["meteor"]
-            blue_for_method[method_name] = evaluated_metrics["score"]["bleu"]
-            scores_for_method[method_name] = evaluated_metrics["scores"]["chrF"]
-            score[method_name] = evaluated_metrics["score"]["chrF"]
-        else:
-            evaluated_metrics = Metrics(hyps, refs).get_statistics(stats={"chrF", "prec_rec_f1"})
-            F1_for_method[method_name] = evaluated_metrics["score"]["f1"]
-            scores_for_method[method_name] = evaluated_metrics["scores"]["f1"]
-            score[method_name] = evaluated_metrics["score"]["chrF"]
-
-    print("Metrics are calculated.")
-
-    with open(f"dump_for_wilcoxon_bootstrap_{launch_id}.data", "wb") as file:
-        pickle.dump((method_names, score, scores_for_method), file)
-
-    with open(f"dump_for_tables_{launch_id}.data", "wb") as file:
-        if docstring:
-            pickle.dump((meteor_for_method, blue_for_method), file)
-        else:
-            pickle.dump((F1_for_method, score), file)
-
-if compare:
-    comparisons = [[f"" for _ in range(len(method_names))] for _ in range(len(method_names))]
-    method_names.sort(key=lambda method: score[method])
-
-    print("Comparing methods...")
-
-    for i, method_a in tqdm(enumerate(method_names[:-1])):
-        print(method_a)
-        for j, method_b in enumerate(method_names[i+1:]):
-            result = ""
-
-            if score[method_a] > score[method_b]:
-                pc = round(100 * (score[method_a] - score[method_b]) / score[method_b], 2)
-                h0 = '>'
-                result += f"{h0} ({pc}%), "
-            else:
-                pc = round(100 * (score[method_b] - score[method_a]) / score[method_b], 2)
-                h0 = '<'
-                result += f"{h0} ({pc}%), "
+        for outputs_file_name in os.listdir(folder):
+            method_name = outputs_file_name.split("_")[0]
+            method_names.append(method_name)
             
-            h1 = '<' if h0 == '>' else '>'
+            with open(os.path.join(folder, outputs_file_name), "rb") as file:
+                outputs_for_method[method_name] = pickle.load(file)
 
-            w, p = wilcoxon(scores_for_method[method_a], scores_for_method[method_b], alternative="less" if h0 == '>' else "greater")
-            result += f"wilc. h0 1-p={1-p:.2E}: "
+        if docstring:
+            meteor_for_method = {}
+            blue_for_method = {}
+            F1_for_method = {}
+        else:
+            F1_for_method = {}
 
-            if p > 0.05:
-                result += f"h0 not rej...\n"
+        score = {}
+        scores_for_method = {}
+
+        print("Calculating metrics...")
+
+        for method_name in tqdm(method_names):
+            print(method_name)
+            hyps, refs = outputs_for_method[method_name]
+            
+            if docstring:
+                evaluated_metrics = Metrics(hyps, refs).get_statistics(stats={"chrF", "meteor", "bleu", "prec_rec_f1"})
+                meteor_for_method[method_name] = evaluated_metrics["score"]["meteor"]
+                blue_for_method[method_name] = evaluated_metrics["score"]["bleu"]
+                F1_for_method[method_name] = evaluated_metrics["score"]["f1"]
+                scores_for_method[method_name] = evaluated_metrics["scores"]["chrF"]
+                score[method_name] = evaluated_metrics["score"]["chrF"]
             else:
-                result += f"h0 rej. [{h1}]"
+                evaluated_metrics = Metrics(hyps, refs).get_statistics(stats={"chrF", "prec_rec_f1"})
+                F1_for_method[method_name] = evaluated_metrics["score"]["f1"]
+                scores_for_method[method_name] = evaluated_metrics["scores"]["f1"]
+                score[method_name] = evaluated_metrics["score"]["chrF"]
 
-            bootstrap_score_h0 = round(100 * bootstrap_compare(scores_for_method[method_a], scores_for_method[method_b], h0), 2)
+        print("Metrics are calculated.")
 
-            if p > 0.05:
-                w, p = wilcoxon(scores_for_method[method_a], scores_for_method[method_b], alternative="less" if h1 == '>' else "greater")
-                result += f"wilc. h1 1-p={1-p:.2E}: "
+        with open(f"dump_for_wilcoxon_bootstrap_{launch_id}.data", "wb") as file:
+            pickle.dump((method_names, score, scores_for_method), file)
+
+        with open(f"dump_for_tables_{launch_id}.data", "wb") as file:
+            if docstring:
+                pickle.dump((meteor_for_method, blue_for_method, score, F1_for_method), file)
+            else:
+                pickle.dump((score, F1_for_method), file)
+
+    if not compare:
+        method_names.sort(key=lambda method: score[method])
+        with open(f"dump_comparisons_{launch_id}.data", "wb") as file:
+            pickle.dump(method_names, file)
+
+    if compare:
+        comparisons = [[f"" for _ in range(len(method_names))] for _ in range(len(method_names))]
+        method_names.sort(key=lambda method: score[method])
+
+        print("Comparing methods...")
+
+        for i, method_a in tqdm(enumerate(method_names[:-1])):
+            print(method_a)
+            for j, method_b in enumerate(method_names[i+1:]):
+                result = ""
+
+                if score[method_a] > score[method_b]:
+                    pc = round(100 * (score[method_a] - score[method_b]) / score[method_b], 2)
+                    h0 = '>'
+                    result += f"{h0} ({pc}%), "
+                else:
+                    pc = round(100 * (score[method_b] - score[method_a]) / score[method_b], 2)
+                    h0 = '<'
+                    result += f"{h0} ({pc}%), "
+                
+                h1 = '<' if h0 == '>' else '>'
+
+                w, p = wilcoxon(scores_for_method[method_a], scores_for_method[method_b], alternative="less" if h0 == '>' else "greater")
+                result += f"wilc. h0 1-p={1-p:.2E}: "
 
                 if p > 0.05:
-                    result += f"h1 not rej. [?]"
+                    result += f"h0 not rej...\n"
                 else:
-                    result += f"h1 rej. [{h0}]"
+                    result += f"h0 rej. [{h1}]"
 
-                bootstrap_score_h1 = round(100 * bootstrap_compare(scores_for_method[method_a], scores_for_method[method_b], h1), 2)
-                result += f"\nbootstrap {h1} score = {bootstrap_score_h1}%"
+                bootstrap_score_h0 = round(100 * bootstrap_compare(scores_for_method[method_a], scores_for_method[method_b], h0), 2)
 
-            result += f"\nbootstrap {h0} score = {bootstrap_score_h0}%"
-            comparisons[i][j] = result
+                if p > 0.05:
+                    w, p = wilcoxon(scores_for_method[method_a], scores_for_method[method_b], alternative="less" if h1 == '>' else "greater")
+                    result += f"wilc. h1 1-p={1-p:.2E}: "
 
-    print("Comparison done.")
+                    if p > 0.05:
+                        result += f"h1 not rej. [?]"
+                    else:
+                        result += f"h1 rej. [{h0}]"
 
-    with open(f"dump_comparisons_{launch_id}.data", "wb") as file:
-        pickle.dump((method_names, comparisons), file)
+                    bootstrap_score_h1 = round(100 * bootstrap_compare(scores_for_method[method_a], scores_for_method[method_b], h1), 2)
+                    result += f"\nbootstrap {h1} score = {bootstrap_score_h1}%"
+
+                result += f"\nbootstrap {h0} score = {bootstrap_score_h0}%"
+                comparisons[i][j] = result
+
+        print("Comparison done.")
+
+        with open(f"dump_comparisons_{launch_id}.data", "wb") as file:
+            pickle.dump((method_names, comparisons), file)
