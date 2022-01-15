@@ -40,12 +40,13 @@ class CTCodeSummarizationDataset(CTBaseDataset):
 
     def __init__(self, data_manager: CTPreprocessedDataManager, token_distances=None, max_distance_mask=None,
                  num_sub_tokens=5, num_sub_tokens_output=5, use_token_types=True,
-                 use_pointer_network=False, max_num_tokens=MAX_NUM_TOKENS):
+                 use_pointer_network=False, max_num_tokens=MAX_NUM_TOKENS, docstrings=True):
         super(CTCodeSummarizationDataset, self).__init__(data_manager, token_distances, max_distance_mask,
                                                          num_sub_tokens, use_token_types,
                                                          use_pointer_network=use_pointer_network,
                                                          max_num_tokens=max_num_tokens)
         self.num_sub_tokens_output = num_sub_tokens_output
+        self.dosctrings = docstrings
 
     def __len__(self):
         return self.data_manager.approximate_total_samples()
@@ -62,7 +63,10 @@ class CTCodeSummarizationDataset(CTBaseDataset):
         sample.token_mapping.insert(0, 0)  # Map inserted CLS Token to root node
 
         # Split function name into sub tokens
-        func_name = sample.func_name
+        if self.dosctrings:
+            func_name = sample.docstring
+        else:
+            func_name = sample.func_name
         func_name = func_name[func_name.rindex('.') + 1:] if '.' in func_name else func_name
         label = split_identifier_into_parts(func_name)
         if func_name == '':
@@ -80,59 +84,60 @@ class CTCodeSummarizationDataset(CTBaseDataset):
 
         # Find the ascending indices of the tokens that correspond to the function name in order to mask them later
         # This is a bit complicated as function names can span several tokens but the tokens are already padded
-        for i in range(len(sample.tokens)):
-            at_least_one_match = False  # One sub token has to match in every subsequent token
-            v_i = i  # "virtual" token index that simulates that a function name can span several tokens
-            v_j = 0  # "virtual" label index that ensures that when this happens the next token has to match
+        if not self.dosctrings:
+            for i in range(len(sample.tokens)):
+                at_least_one_match = False  # One sub token has to match in every subsequent token
+                v_i = i  # "virtual" token index that simulates that a function name can span several tokens
+                v_j = 0  # "virtual" label index that ensures that when this happens the next token has to match
 
-            # the remaining label tokens by starting from the first sub token position
-            # Example func_name: fooMethod=
-            #         tokens: [1, 2, 0, 0, 0], [3, 0, 0, 0, 0]  (foo, method, PAD, PAD, PAD) (=, PAD, PAD, PAD, PAD)
-            #         label: [1, 2, 3, 0, 0]                    (foo, method, =, PAD, PAD)
-            label_idx = 0
-            idx_func_tokens.append(i)
+                # the remaining label tokens by starting from the first sub token position
+                # Example func_name: fooMethod=
+                #         tokens: [1, 2, 0, 0, 0], [3, 0, 0, 0, 0]  (foo, method, PAD, PAD, PAD) (=, PAD, PAD, PAD, PAD)
+                #         label: [1, 2, 3, 0, 0]                    (foo, method, =, PAD, PAD)
+                label_idx = 0
+                idx_func_tokens.append(i)
 
-            while label_idx < min(self.num_sub_tokens, len(encoded_label)):
-                if v_j < len(sample.tokens[v_i].sub_tokens) and sample.tokens[v_i].sub_tokens[v_j] == encoded_label[
-                    label_idx]:
-                    at_least_one_match = True
-                    v_j += 1
-                    label_idx += 1
-                elif encoded_label[v_j] == self.word_vocab[PAD_TOKEN]:
-                    # Label was completely matched, can exit
-                    break
-                elif at_least_one_match and v_j >= len(sample.tokens[v_i].sub_tokens):
-                    # Reached end of first matching token
-                    v_i += 1  # Check next token
-                    v_j = 0  # For next token use again first sub token
-                    at_least_one_match = False  # Ensure that next token has to have at least one match
-                    if v_i >= len(sample.tokens):
-                        # reached the end of the token sequence. Abort
-                        idx_func_tokens = []
+                while label_idx < min(self.num_sub_tokens, len(encoded_label)):
+                    if v_j < len(sample.tokens[v_i].sub_tokens) and sample.tokens[v_i].sub_tokens[v_j] == encoded_label[
+                        label_idx]:
+                        at_least_one_match = True
+                        v_j += 1
+                        label_idx += 1
+                    elif encoded_label[v_j] == self.word_vocab[PAD_TOKEN]:
+                        # Label was completely matched, can exit
                         break
+                    elif at_least_one_match and v_j >= len(sample.tokens[v_i].sub_tokens):
+                        # Reached end of first matching token
+                        v_i += 1  # Check next token
+                        v_j = 0  # For next token use again first sub token
+                        at_least_one_match = False  # Ensure that next token has to have at least one match
+                        if v_i >= len(sample.tokens):
+                            # reached the end of the token sequence. Abort
+                            idx_func_tokens = []
+                            break
+                        else:
+                            idx_func_tokens.append(v_i)
                     else:
-                        idx_func_tokens.append(v_i)
-                else:
-                    idx_func_tokens = []
-                    at_least_one_match = False
-                    break  # Cannot match function name at this position
-            if at_least_one_match:
-                # Function name was matched, exit the loop
-                break
+                        idx_func_tokens = []
+                        at_least_one_match = False
+                        break  # Cannot match function name at this position
+                if at_least_one_match:
+                    # Function name was matched, exit the loop
+                    break
 
-        if not idx_func_tokens:
-            logger.warn(f"Could not find method name {func_name} in token sequence, skipping sample")
-        else:
-            # Remove any additional tokens if label is more than 1 token long
-            sample.tokens = [t for i, t in enumerate(sample.tokens) if i not in idx_func_tokens[1:]]
-            sample.token_mapping = [m for i, m in enumerate(sample.token_mapping) if i not in idx_func_tokens[1:]]
-            sample.tokens[idx_func_tokens[0]] = CTToken(
-                [self.word_vocab[CLS_TOKENS[-1]]],
-                RangeInterval.empty_interval(),
-                self.token_type_vocab[UNKNOWN_TOKEN])
+            if not idx_func_tokens:
+                logger.warn(f"Could not find method name {func_name} in token sequence, skipping sample")
+            else:
+                # Remove any additional tokens if label is more than 1 token long
+                sample.tokens = [t for i, t in enumerate(sample.tokens) if i not in idx_func_tokens[1:]]
+                sample.token_mapping = [m for i, m in enumerate(sample.token_mapping) if i not in idx_func_tokens[1:]]
+                sample.tokens[idx_func_tokens[0]] = CTToken(
+                    [self.word_vocab[CLS_TOKENS[-1]]],
+                    RangeInterval.empty_interval(),
+                    self.token_type_vocab[UNKNOWN_TOKEN])
 
-            # Replace label token with method name mask
-            idx_func_tokens = [idx_func_tokens[0]]  # only one label position left now
+                # Replace label token with method name mask
+                idx_func_tokens = [idx_func_tokens[0]]  # only one label position left now
 
         transformed_sample = self.transform_sample(sample)
 

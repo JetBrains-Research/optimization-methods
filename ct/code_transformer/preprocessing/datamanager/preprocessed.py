@@ -256,7 +256,12 @@ class CTPreprocessedDataManager(DataManager):
         # Initialize internal files generator
         lazy_load_files = self._lazy_load_files()
         # Samples are directly drawn from files and files are loaded last minute ad hoc
+        # sample_generator = (sample for file in lazy_load_files for sample in self._load_zipped(file))
+        # sample = next(sample_generator)
+        # print("tokens", [t.string for t in sample.tokens])
+        # print("docstring", sample.docstring, "func_name", sample.func_name)
         sample_generator = (sample for file in lazy_load_files for sample in self._load_zipped(file))
+
         return sample_generator
 
 

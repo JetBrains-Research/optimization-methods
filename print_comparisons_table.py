@@ -7,9 +7,9 @@ import pickle
 from pprint import pprint
 
 
-folder = "treelstm-pythonxglue"
+folder = "codegnn-javaxglue"
 docstring = True
-compare = False
+compare = True
 
 
 if compare:

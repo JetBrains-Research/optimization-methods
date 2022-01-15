@@ -47,8 +47,6 @@ class ExperimentSetup:
         self._init_model()
         self._init_optimizer()
 
-        self.project_name = "ct-0.1java-med"
-
     @ex.capture
     def _init_config(self, _config):
         self.config = _config
@@ -70,7 +68,7 @@ class ExperimentSetup:
     @ex.capture(prefix="data_setup")
     def _init_data(self, language, num_predict, use_validation=False, mini_dataset=False,
                    use_no_punctuation=False, use_pointer_network=False, sort_by_length=False, shuffle=True,
-                   chunk_size=None, filter_language=None, dataset_imbalance=None, num_sub_tokens=NUM_SUB_TOKENS, vocab=5000):
+                   chunk_size=None, filter_language=None, dataset_imbalance=None, num_sub_tokens=NUM_SUB_TOKENS, vocab=5000, docstrings=False):
         self.data_manager = CTBufferedDataManager(DATA_PATH_STAGE_2, language, shuffle=shuffle,
                                                   infinite_loading=True,
                                                   mini_dataset=mini_dataset, size_load_buffer=10000,
@@ -95,7 +93,8 @@ class ExperimentSetup:
                                                                         max_distance_mask=self.max_distance_mask,
                                                                         num_labels_per_sample=num_predict,
                                                                         use_pointer_network=use_pointer_network,
-                                                                        num_sub_tokens=num_sub_tokens)
+                                                                        num_sub_tokens=num_sub_tokens,
+                                                                        docstring=docstrings)
         else:
             self.dataset_train = CTLanguageModelingDataset(self.data_manager, token_distances=token_distances,
                                                            max_distance_mask=self.max_distance_mask,
@@ -117,7 +116,8 @@ class ExperimentSetup:
                                                                                  max_distance_mask=self.max_distance_mask,
                                                                                  num_labels_per_sample=num_predict,
                                                                                  use_pointer_network=use_pointer_network,
-                                                                                 num_sub_tokens=num_sub_tokens)
+                                                                                 num_sub_tokens=num_sub_tokens,
+                                                                                 docstring=docstrings)
             else:
                 self.dataset_validation = CTLanguageModelingDataset(data_manager_validation,
                                                                     token_distances=token_distances,
@@ -136,11 +136,11 @@ class ExperimentSetup:
                                                                      filter_language,
                                                                      dataset_imbalance,
                                                                      num_sub_tokens,
-                                                                     vocab)
+                                                                     vocab, docstrings)
 
     def _create_validation_dataset(self, data_location, language, use_no_punctuation, token_distances,
                                    infinite_loading, num_predict, use_pointer_network, filter_language,
-                                   dataset_imbalance, num_sub_tokens, vocab):
+                                   dataset_imbalance, num_sub_tokens, vocab, docstring):
         data_manager_validation = CTBufferedDataManager(data_location, language, partition="valid",
                                                         shuffle=True, infinite_loading=infinite_loading,
                                                         size_load_buffer=10000, filter_language=filter_language,
@@ -152,7 +152,7 @@ class ExperimentSetup:
                                                           max_distance_mask=self.max_distance_mask,
                                                           num_labels_per_sample=num_predict,
                                                           use_pointer_network=use_pointer_network,
-                                                          num_sub_tokens=num_sub_tokens)
+                                                          num_sub_tokens=num_sub_tokens, docstring=docstring)
         else:
             return CTLanguageModelingDataset(data_manager_validation,
                                              token_distances=token_distances,
@@ -331,8 +331,8 @@ class ExperimentSetup:
     @ex.capture(prefix="training")
     def train(self, batch_size, simulated_batch_size, random_seed, metrics,
               validate_every=None,
-              persistent_snapshot_every=None, simulated_batch_size_valid=None, early_stopping_patience=10,
-              max_validation_samples=10000, accumulate_tokens_batch=False, device='cuda'):
+              persistent_snapshot_every=None, simulated_batch_size_valid=None, early_stopping_patience=100000, epochs=5,
+              max_validation_samples=10000, accumulate_tokens_batch=False, device='cuda', project_name="ct"):
 
         self.device = device
         self.model_lm = self.model_lm.to(self.device)
@@ -345,7 +345,7 @@ class ExperimentSetup:
         self.logger.info(f"Starting run {run_id}")
         self.logger.info(f"===============================================")
 
-        wandb.init(project=self.project_name, entity='dmivilensky')
+        wandb.init(project=project_name, entity='dmivilensky')
         config = wandb.config
         config.learning_rate = 0
 
@@ -404,8 +404,8 @@ class ExperimentSetup:
                                            if st.item() != self.word_vocab[PAD_TOKEN]
                                            and st.item() != self.word_vocab[EOS_TOKEN]]
                                           for token in batch.tokens[0]]))
-                self.logger.log_text("predicted words/train", str(self._decode_predicted_words(model_out, batch)))
-                self.logger.log_text("labels/train", str(self._decode_labels(batch)))
+                # print("predicted words/train", str(self._decode_predicted_words(model_out, batch)))
+                # print("labels/train", str(self._decode_labels(batch)))
 
                 # Calculate metrics
                 evaluation = self._evaluate_predictions(model_out.logits, batch.labels, loss=model_out.loss)
@@ -465,7 +465,11 @@ class ExperimentSetup:
                         self.logger.log_time(t.measure() / simulated_batch_size_valid, "valid_seconds/sample",
                                              train_step * simulated_batch_size)
 
-                if persistent_snapshot_every and (it + 1) % persistent_snapshot_every == 0:
+                progress_bar.update()
+                if progress_bar.n >= progress_bar.total:
+                    progress_bar = tqdm(total=int(self.data_manager.approximate_total_samples() / batch_size))
+                    epoch += 1
+
                     snapshot_iteration = it + 1
                     self.logger.info(f"Storing model params into snapshot-{snapshot_iteration}")
                     self.model_manager.save_snapshot(run_id, self.model_lm.state_dict(), snapshot_iteration)
@@ -476,23 +480,17 @@ class ExperimentSetup:
                         score_name = 'micro-F1'
                     else:
                         score_name = 'F1'
-                    self.logger.info(f"Full evaluation yielded {score} {score_name}")
-                    if not early_stopping.evaluate(score, snapshot_iteration):
-                        self.logger.info(f"Last {early_stopping_patience} evaluations did not improve performance. "
-                                         f"Stopping run")
+                    print(f"Full evaluation yielded (snapshot-{snapshot_iteration}) {score} {score_name}")
 
-                        break
-
-                progress_bar.update()
-                if progress_bar.n >= progress_bar.total:
-                    progress_bar = tqdm(total=int(self.data_manager.approximate_total_samples() / batch_size))
-                    epoch += 1
+                    if epoch > epochs:
+                        self.dataset_train.data_manager.shutdown()
+                        self.dataset_validation.data_manager.shutdown()
+                        sys.exit(0)
                     progress_bar.set_description(f"Epoch {epoch}")
 
             t.measure()
 
         self._handle_shutdown()
-        exit()
 
     def _train_step(self, batch, num_simulated_batches):
         batch = batch_to_device(batch, self.device)

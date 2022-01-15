@@ -53,7 +53,8 @@ class ExperimentLogger(Logger):
         self.log_metrics(avg_metrics, step=step)
 
         for metric_name, values in avg_metrics.items():
-            wandb.log({metric_name: values})
+            name = metric_name.split("/")
+            wandb.log({name[1] + "/" + name[0]: values})
 
         self.sub_batch_metrics.clear()
         if self.time_last_flush is not None:

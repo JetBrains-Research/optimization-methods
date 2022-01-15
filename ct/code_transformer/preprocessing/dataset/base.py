@@ -31,7 +31,7 @@ class CTBaseDataset(IterableDataset):
 
     def __init__(self, data_manager: CTPreprocessedDataManager, token_distances=None, max_distance_mask=None,
                  num_sub_tokens=5, use_token_types=True, use_pointer_network=False,
-                 max_num_tokens=MAX_NUM_TOKENS):
+                 max_num_tokens=MAX_NUM_TOKENS, dosctrings=False):
         self.data_manager = data_manager
         vocabularies = self.data_manager.load_vocabularies()
         if len(vocabularies) == 3:
@@ -49,6 +49,7 @@ class CTBaseDataset(IterableDataset):
         self.use_token_types = use_token_types
         self.use_pointer_network = use_pointer_network
         self.max_num_tokens = max_num_tokens
+        self.dosctrings = dosctrings
 
     def to_dataloader(self):
         return DataLoader(self, collate_fn=self.collate_fn)
@@ -160,7 +161,15 @@ class CTBaseDataset(IterableDataset):
             # use multi-language
             sample_language = self.data_manager.language.split(',').index(sample.language)
 
-        return CTBaseSample(tokens=sequence, token_types=token_types, node_types=node_types,
+        if self.dosctrings:
+            return CTBaseSample(tokens=sequence, token_types=token_types, node_types=node_types,
+                            distance_matrices=distance_matrices, binning_vectors=binning_vectors,
+                            distance_names=distance_names, func_name=sample.docstring, docstring=sample.docstring,
+                            extended_vocabulary=extended_vocabulary,
+                            extended_vocabulary_ids=extended_vocabulary_ids, pointer_pad_mask=pointer_pad_mask,
+                            language=sample_language)
+        else:
+            return CTBaseSample(tokens=sequence, token_types=token_types, node_types=node_types,
                             distance_matrices=distance_matrices, binning_vectors=binning_vectors,
                             distance_names=distance_names, func_name=sample.func_name, docstring=sample.docstring,
                             extended_vocabulary=extended_vocabulary,

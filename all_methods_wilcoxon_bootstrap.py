@@ -29,15 +29,16 @@ def bootstrap_compare(scores_a, scores_b, h0, resamples=1000):
 
 
 tasks = [
-    {"folder": "results_treelstm/pythonxglue", "docstring": True, "compare": False},
-    {"folder": "results_codegnn/pythonxglue", "docstring": True, "compare": False},
-    {"folder": "results_treelstm/javaxglue", "docstring": True, "compare": True},
-    {"folder": "results_treelstm/javamed0.1", "docstring": False, "compare": False},
+    # {"folder": "results_treelstm/pythonxglue", "docstring": True, "compare": False},
+    # {"folder": "results_codegnn/pythonxglue", "docstring": True, "compare": False},
+    # {"folder": "results_treelstm/javaxglue", "docstring": True, "compare": True},
+    # {"folder": "results_treelstm/javamed0.1", "docstring": False, "compare": False},
     {"folder": "results_treelstm/javamed", "docstring": False, "compare": True},
     {"folder": "results_codegnn/javaxglue", "docstring": True, "compare": True},
     {"folder": "results_codegnn/javamed0.1", "docstring": False, "compare": False},
     {"folder": "results_codegnn/javamed", "docstring": False, "compare": True}
 ]
+
 
 for task in tasks:
 
@@ -116,6 +117,11 @@ for task in tasks:
         method_names.sort(key=lambda method: score[method])
 
         print("Comparing methods...")
+
+        for i, method_a in tqdm(enumerate(method_names[:-1])):
+            if folder[-7:] == "javamed":
+                if len(scores_for_method[method_a]) == 428318:
+                    scores_for_method[method_a] = np.append(scores_for_method[method_a], 0.0)
 
         for i, method_a in tqdm(enumerate(method_names[:-1])):
             print(method_a)

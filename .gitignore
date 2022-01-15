@@ -7,7 +7,6 @@ jb-opt*
 .gitignore
 .gitignore
 code2seq/*
-ct*
 jb-opt
 jb-opt.pub
 results_*

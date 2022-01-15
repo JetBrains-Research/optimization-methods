@@ -20,14 +20,14 @@ class CTLanguageModelingDataset(CTBaseDataset):
     """
 
     def __init__(self, data_manager: CTPreprocessedDataManager, token_distances=None, max_distance_mask=None,
-                 num_sub_tokens=5, num_labels_per_sample=5, max_num_tokens=MAX_NUM_TOKENS, use_pointer_network=False):
+                 num_sub_tokens=5, num_labels_per_sample=5, max_num_tokens=MAX_NUM_TOKENS, use_pointer_network=False, docstrings=False):
         """
         :param num_labels_per_sample: the number of tokens per sample to be predicted
         """
 
         super(CTLanguageModelingDataset, self).__init__(data_manager, token_distances, max_distance_mask,
                                                         num_sub_tokens, max_num_tokens=max_num_tokens,
-                                                        use_pointer_network=use_pointer_network)
+                                                        use_pointer_network=use_pointer_network, docstrings=docstrings)
         self.num_labels_per_sample = num_labels_per_sample
 
     def collate_fn(self, batch: List) -> CTBatch:
@@ -96,16 +96,17 @@ class CTLanguageModelingDatasetNoPunctuation(CTLanguageModelingDataset):
 
     def __init__(self, data_manager: CTPreprocessedDataManager, token_distances=None, max_distance_mask=None,
                  num_sub_tokens=5, num_labels_per_sample=5, min_sequence_length=5, max_num_tokens=MAX_NUM_TOKENS,
-                 use_pointer_network=False):
+                 use_pointer_network=False, docstring=False):
         super(CTLanguageModelingDatasetNoPunctuation, self).__init__(data_manager, token_distances=token_distances,
                                                                      max_distance_mask=max_distance_mask,
                                                                      num_sub_tokens=num_sub_tokens,
                                                                      num_labels_per_sample=num_labels_per_sample,
                                                                      max_num_tokens=None,
-                                                                     use_pointer_network=use_pointer_network)
+                                                                     use_pointer_network=use_pointer_network, docstrings=docstring)
         self.config = data_manager.load_config()
         self.min_sequence_length = min_sequence_length
         self.max_num_tokens_no_punctuation = max_num_tokens
+        self.docstring = docstring
 
     def __next__(self):
         sample = super(CTLanguageModelingDatasetNoPunctuation, self).__next__()
@@ -149,7 +150,13 @@ class CTLanguageModelingDatasetNoPunctuation(CTLanguageModelingDataset):
             assert pointer_pad_mask.sum() == len(extended_vocabulary_ids), \
                 f"Number of non-masked subtokens ({pointer_pad_mask.sum().item()}) does not match number of extended vocabulary ids ({len(extended_vocabulary_ids)})"
 
-        return CTBaseSample(tokens_no_punctuation, token_types_no_punctuation, node_types_no_punctuation,
+        if self.docstring:
+            return CTBaseSample(tokens_no_punctuation, token_types_no_punctuation, node_types_no_punctuation,
+                            distance_matrices_no_punctuation, sample.binning_vectors, sample.distance_names,
+                            sample.docstring, sample.docstring, sample.extended_vocabulary,
+                            extended_vocabulary_ids, pointer_pad_mask, sample.language)
+        else:
+            return CTBaseSample(tokens_no_punctuation, token_types_no_punctuation, node_types_no_punctuation,
                             distance_matrices_no_punctuation, sample.binning_vectors, sample.distance_names,
                             sample.func_name, sample.docstring, sample.extended_vocabulary,
                             extended_vocabulary_ids, pointer_pad_mask, sample.language)
