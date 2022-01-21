@@ -240,6 +240,7 @@ class ExperimentSetup:
 
     @ex.capture(prefix="optimizer")
     def _init_optimizer(self, learning_rate, reg_scale, scheduler=None, scheduler_params=None, optimizer="Adam"):
+        self.optimizer_name = optimizer
         if optimizer == "SGD":
             self.optimizer = SGD(self.model_lm.parameters(), lr=learning_rate, weight_decay=reg_scale)
         elif optimizer == "LaSGD":
@@ -346,11 +347,13 @@ class ExperimentSetup:
         self.logger.info(f"===============================================")
 
         wandb.init(project=project_name, entity='dmivilensky')
+        wandb.run.name = f"{self.optimizer_name} {run_id}"
+        wandb.run.save()
         config = wandb.config
         config.learning_rate = 0
 
         self.model_manager.save_config(run_id, self.config)
-        early_stopping = EarlyStopping(self.model_manager, run_id, early_stopping_patience)
+        # early_stopping = EarlyStopping(self.model_manager, run_id, early_stopping_patience)
 
         num_params = sum([len(params.view(-1)) for params in self.model_lm.parameters()])
         self.logger.info(f"Start training model with {num_params} parameters")

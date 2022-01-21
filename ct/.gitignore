@@ -17,3 +17,5 @@ models
 build
 bin
 outputs
+
+code_transformer/experiments/code_transformer/javaxglue*

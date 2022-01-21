@@ -49,5 +49,5 @@ def parse_command(config):
     config_strings = [f'{key}="{val}"' if type(val) != str else f'{key}="\'{val}\'"' for key, val in config.items() if
                       not key == 'experiment_setup']
     exe = config['experiment_setup']['executable']
-    cmd = f"PYTHONPATH=$(pwd) python3 {exe} with {' '.join(config_strings)}"
+    cmd = f"PYTHONPATH=$(pwd) python3.8 {exe} with {' '.join(config_strings)}"
     return exe, cmd
