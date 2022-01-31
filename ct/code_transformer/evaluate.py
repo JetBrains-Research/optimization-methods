@@ -12,7 +12,7 @@ from tqdm import tqdm
 import os
 import pickle
 
-from code_transformer.modeling.constants import PAD_TOKEN, UNKNOWN_TOKEN, NUM_SUB_TOKENS_METHOD_NAME
+from code_transformer.modeling.constants import PAD_TOKEN, UNKNOWN_TOKEN, NUM_SUB_TOKENS_METHOD_NAME, NUM_SUB_TOKENS_DOCSTRING
 from code_transformer.modeling.modelmanager.code_transformer import CodeTransformerModelManager
 from code_transformer.preprocessing.datamanager.base import batch_to_device, batch_filter_distances
 from code_transformer.preprocessing.datamanager.preprocessed import CTBufferedDataManager
@@ -37,6 +37,7 @@ args = parser.parse_args()
 
 BATCH_SIZE = 8
 LIMIT_TOKENS = 1000  # MAX_NUM_TOKENS
+DOCSTRING = True
 
 
 def ids_to_text(vocab, ids):
@@ -50,6 +51,11 @@ def ids_to_text(vocab, ids):
         res.append(vocab.reverse_lookup(token.item()))
     return res
 
+def ids_to_string(vocab, ids):
+    res = []
+    for token in ids:
+        res.append(vocab.reverse_lookup(token.item()))
+    return res
 
 def format_scores(scores: dict):
     return f"\tF: {scores['f'] * 100:0.2f}\n" \
@@ -108,22 +114,24 @@ if __name__ == '__main__':
     print(f"model: {args.model}")
     print(f"use_pointer_network: {use_pointer_network}")
 
+    NUM_SUB_TOKENS = NUM_SUB_TOKENS_METHOD_NAME if not DOCSTRING else NUM_SUB_TOKENS_DOCSTRING
+
     if dataset_type == 'great':
-        dataset = CTCodeSummarizationDatasetEdgeTypes(data_manager, num_sub_tokens_output=NUM_SUB_TOKENS_METHOD_NAME,
+        dataset = CTCodeSummarizationDatasetEdgeTypes(data_manager, num_sub_tokens_output=NUM_SUB_TOKENS,
                                                       use_pointer_network=use_pointer_network,
                                                       token_distances=token_distances, max_num_tokens=LIMIT_TOKENS)
     elif dataset_type == 'regular':
-        dataset = CTCodeSummarizationDataset(data_manager, num_sub_tokens_output=NUM_SUB_TOKENS_METHOD_NAME,
+        dataset = CTCodeSummarizationDataset(data_manager, num_sub_tokens_output=NUM_SUB_TOKENS,
                                              use_pointer_network=use_pointer_network, max_num_tokens=LIMIT_TOKENS,
                                              token_distances=token_distances)
     elif dataset_type == 'no_punctuation':
         dataset = CTCodeSummarizationDatasetNoPunctuation(data_manager,
-                                                          num_sub_tokens_output=NUM_SUB_TOKENS_METHOD_NAME,
+                                                          num_sub_tokens_output=NUM_SUB_TOKENS,
                                                           use_pointer_network=use_pointer_network,
                                                           max_num_tokens=LIMIT_TOKENS,
                                                           token_distances=token_distances)
     elif dataset_type == 'only_ast':
-        dataset = CTCodeSummarizationOnlyASTDataset(data_manager, num_sub_tokens_output=NUM_SUB_TOKENS_METHOD_NAME,
+        dataset = CTCodeSummarizationOnlyASTDataset(data_manager, num_sub_tokens_output=NUM_SUB_TOKENS,
                                                     use_pointer_network=use_pointer_network,
                                                     max_num_tokens=LIMIT_TOKENS, token_distances=token_distances)
     else:
@@ -171,8 +179,11 @@ if __name__ == '__main__':
         labels.extend(label.squeeze(1))
 
         for l in range(BATCH_SIZE):
+            print(len(predictions[-1-l]), len(labels[-1-l]))
             res_our = ids_to_text(word_vocab, predictions[-1-l])
             res_ref = ids_to_text(word_vocab, labels[-1-l])
+            print(res_our, res_ref)
+            print(ids_to_string(word_vocab, predictions[-1-l]), ids_to_string(word_vocab, labels[-1-l]))
 
             if len(res_ref) > 0:
                 if len(res_our) == 0:

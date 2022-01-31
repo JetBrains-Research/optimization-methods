@@ -7,6 +7,7 @@ from code_transformer.modeling.constants import UNKNOWN_TOKEN
 from code_transformer.preprocessing.pipeline.stage1 import CTStage1Sample
 from code_transformer.preprocessing.nlp.tokenization import method_name_to_tokens
 from itertools import islice
+import numpy
 
 
 class WordCounter:
@@ -23,7 +24,7 @@ class WordCounter:
         else:
             self.words[word] += 1
 
-    def to_vocabulary(self, limit_most_common: int = None, min_frequency=None, special_symbols: dict = None):
+    def to_vocabulary(self, coverage: float = 0.95, limit_most_common: int = None, min_frequency=None, special_symbols: dict = None):
         if special_symbols is None:
             special_symbols = dict()
         assert limit_most_common is None or limit_most_common >= len(
@@ -38,10 +39,16 @@ class WordCounter:
         word_counts = {word: count for word, count in self.words.items() if word not in {symbol.lower() for symbol in
                                                                                          special_symbols}}
         sorted_words = sorted(word_counts.items(), key=lambda x: x[1], reverse=True)
+        coverages = [sorted_word[1] + 0.0 for sorted_word in sorted_words]
+        total_coverage = numpy.sum(coverages)
         if min_frequency is not None:
             sorted_words = filter(lambda x: x[1] >= min_frequency, sorted_words)
         most_common_words = [sorted_word[0] for sorted_word in sorted_words]
-        if limit_most_common is not None:
+        if coverage is not None:
+            cum_coverage = numpy.cumsum(coverages)
+            count_to_take = numpy.searchsorted(cum_coverage, coverage * total_coverage) 
+            most_common_words = most_common_words[:count_to_take]
+        elif limit_most_common is not None:
             most_common_words = most_common_words[:limit_most_common - len(special_symbols)]
 
         return Vocabulary(most_common_words, special_symbols)

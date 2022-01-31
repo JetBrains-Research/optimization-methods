@@ -9,10 +9,11 @@ execution:
 preprocessing:
   remove_punctuation: True
   max_num_tokens: 10000
-  vocab_size: 2000
+  vocab_size: None
+  coverage: 0.95
   min_vocabulary_frequency: 100
   separate_label_vocabulary: False
-  vocab_size_labels: 3000
+  vocab_size_labels: None
   min_vocabulary_frequency_labels: None
 
 distances:

@@ -13,6 +13,7 @@ class CodeTransDecoderExperimentSetup(CodeTransformerDecoderMixin,
 def main():
     experiment = CodeTransDecoderExperimentSetup()
     experiment.train()
+    quit()
 
 
 @ex.command(unobserved=True)

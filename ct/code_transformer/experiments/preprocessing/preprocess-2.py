@@ -65,6 +65,7 @@ class Preprocess2Container:
                             remove_punctuation,
                             max_num_tokens,
                             vocab_size,
+                            coverage,
                             min_vocabulary_frequency,
                             separate_label_vocabulary,
                             vocab_size_labels,
@@ -72,6 +73,7 @@ class Preprocess2Container:
         self.remove_punctuation = remove_punctuation
         self.max_num_tokens = max_num_tokens
         self.vocab_size = vocab_size
+        self.coverage = coverage
         self.min_vocabulary_frequency = min_vocabulary_frequency
         self.separate_label_vocabulary = separate_label_vocabulary
         self.vocab_size_labels = vocab_size_labels
@@ -174,7 +176,8 @@ class Preprocess2Container:
     def _setup_vocabularies(self):
         if self.partition == "train":
             # Only build vocabularies on train data
-            self.word_vocab = self.word_counter.to_vocabulary(limit_most_common=self.vocab_size,
+            self.word_vocab = self.word_counter.to_vocabulary(coverage=self.coverage,
+                                                              limit_most_common=self.vocab_size,
                                                               min_frequency=self.min_vocabulary_frequency,
                                                               special_symbols=SPECIAL_SYMBOLS)
             self.token_type_vocab = self.token_type_counter.to_vocabulary(

@@ -349,8 +349,6 @@ class ExperimentSetup:
         wandb.init(project=project_name, entity='dmivilensky')
         wandb.run.name = f"{self.optimizer_name} {run_id}"
         wandb.run.save()
-        config = wandb.config
-        config.learning_rate = 0
 
         self.model_manager.save_config(run_id, self.config)
         # early_stopping = EarlyStopping(self.model_manager, run_id, early_stopping_patience)
@@ -389,7 +387,7 @@ class ExperimentSetup:
         progress_bar.set_description(f"Epoch {epoch}")
 
         # Ensure graceful shutdown when training is interrupted
-        signal.signal(signal.SIGINT, self._handle_shutdown)
+        # signal.signal(signal.SIGINT, self._handle_shutdown)
 
         with Timing() as t:
             for it, batch in enumerate(dataloader):
@@ -488,7 +486,7 @@ class ExperimentSetup:
                     if epoch > epochs:
                         self.dataset_train.data_manager.shutdown()
                         self.dataset_validation.data_manager.shutdown()
-                        sys.exit(0)
+                        quit()
                     progress_bar.set_description(f"Epoch {epoch}")
 
             t.measure()
@@ -583,7 +581,7 @@ class ExperimentSetup:
     def _handle_shutdown(self, sig=None, frame=None):
         self.dataset_train.data_manager.shutdown()
         self.dataset_validation.data_manager.shutdown()
-        sys.exit(0)
+        quit()
 
 
 class EarlyStopping:

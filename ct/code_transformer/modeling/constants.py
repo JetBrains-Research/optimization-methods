@@ -17,6 +17,7 @@ DEDENT_TOKEN = "[DEDENT]"  # Represents that everything afterwards i indented by
 NUM_SUB_TOKENS = 5  # In how many subtokens one token should be split into, .e.g., get_db_connection => [get, db,
 # connection, PAD, PAD]
 NUM_SUB_TOKENS_METHOD_NAME = 6  # Maximum number of subtokens for the label, i.e., the method name that is to be predicted
+NUM_SUB_TOKENS_DOCSTRING = 16
 MAX_NUM_TOKENS = 512  # Any Snippet that produces more than the specified amount of tokens will be discarded
 
 # =============================================================================
