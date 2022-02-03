@@ -2,7 +2,7 @@ experiment_setup:
   executable: 'code_transformer/experiments/code_transformer/code_summarization.py'
 
 data_setup:
-  language: python
+  language: java
   docstrings: True
   use_validation: True
   num_sub_tokens: 5                     # Number of sub-tokens that input tokens should be split into
@@ -67,9 +67,9 @@ optimizer:
   reg_scale: 0
 
 training:
-  project_name: ct-pythonxglue
+  project_name: ct-javaxglue
   random_seed: 456
-  batch_size: 16
+  batch_size: 8
   simulated_batch_size: 512         # Gradient Accumulation. After how many samples the model parameters should be updated
   simulated_batch_size_valid: 1280  # Over how many samples validation metrics should be calculated
   accumulate_tokens_batch: False

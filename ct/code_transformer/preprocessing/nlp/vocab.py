@@ -47,6 +47,8 @@ class WordCounter:
         if coverage is not None:
             cum_coverage = numpy.cumsum(coverages)
             count_to_take = numpy.searchsorted(cum_coverage, coverage * total_coverage) 
+            print("vocab count:", count_to_take)
+            print("cumulative:", cum_coverage[count_to_take], "cumsum:", cum_coverage[-1], "target:", coverage * total_coverage)
             most_common_words = most_common_words[:count_to_take]
         elif limit_most_common is not None:
             most_common_words = most_common_words[:limit_most_common - len(special_symbols)]

@@ -35,7 +35,7 @@ parser.add_argument("partition", type=str, choices=['train', 'valid', 'test'], d
 parser.add_argument("--no-gpu", action='store_true', default=False)
 args = parser.parse_args()
 
-BATCH_SIZE = 8
+BATCH_SIZE = 4
 LIMIT_TOKENS = 1000  # MAX_NUM_TOKENS
 DOCSTRING = True
 

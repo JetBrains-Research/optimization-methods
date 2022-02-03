@@ -16,3 +16,4 @@ results_code2seq/*
 *.data
 *.txt
 zip.py
+stats

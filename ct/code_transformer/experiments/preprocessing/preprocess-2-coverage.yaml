@@ -10,7 +10,7 @@ preprocessing:
   remove_punctuation: True
   max_num_tokens: 10000
   vocab_size: None
-  coverage: 0.95
+  coverage: 0.995
   min_vocabulary_frequency: 100
   separate_label_vocabulary: False
   vocab_size_labels: None
