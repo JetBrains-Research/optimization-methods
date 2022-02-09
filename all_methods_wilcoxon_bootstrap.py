@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # Copyright 2021 Dmitry Vilensky-Pasechnyuk
 
-from cgi import print_directory
 import os
 from textmetric import Metrics
 import pandas as pd
@@ -29,14 +28,15 @@ def bootstrap_compare(scores_a, scores_b, h0, resamples=1000):
 
 
 tasks = [
-    # {"folder": "results_treelstm/pythonxglue", "docstring": True, "compare": False},
-    # {"folder": "results_codegnn/pythonxglue", "docstring": True, "compare": False},
-    # {"folder": "results_treelstm/javaxglue", "docstring": True, "compare": True},
-    # {"folder": "results_treelstm/javamed0.1", "docstring": False, "compare": False},
-    {"folder": "results_treelstm/javamed", "docstring": False, "compare": True},
-    {"folder": "results_codegnn/javaxglue", "docstring": True, "compare": True},
-    {"folder": "results_codegnn/javamed0.1", "docstring": False, "compare": False},
-    {"folder": "results_codegnn/javamed", "docstring": False, "compare": True}
+    # {"folder": "results_code2seq/javamed", "docstring": False, "compare": True},
+    # {"folder": "results_code2seq/javamed0.1", "docstring": False, "compare": True},
+    # {"folder": "results_code2seq/javaxglue", "docstring": True, "compare": True},
+    # {"folder": "results_code2seq/pythonxglue", "docstring": True, "compare": True},
+    # {"folder": "results_codegnn/pythonxglue", "docstring": True, "compare": True},
+    # {"folder": "results_treelstm/pythonxglue", "docstring": True, "compare": True},
+    # {"folder": "results_treelstm/javamed", "docstring": False, "compare": True},
+    # {"folder": "results_codegnn/javamed0.1", "docstring": False, "compare": True},
+    # {"folder": "results_treelstm/javamed0.1", "docstring": False, "compare": True}
 ]
 
 
@@ -118,8 +118,8 @@ for task in tasks:
 
         print("Comparing methods...")
 
-        for i, method_a in tqdm(enumerate(method_names[:-1])):
-            if folder[-7:] == "javamed":
+        for i, method_a in tqdm(enumerate(method_names)):
+            if folder[-7:] in ["javamed", "amed0.1"]:
                 if len(scores_for_method[method_a]) == 428318:
                     scores_for_method[method_a] = np.append(scores_for_method[method_a], 0.0)
 

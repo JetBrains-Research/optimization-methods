@@ -27,6 +27,12 @@ class ModelManager:
         with open(snapshot_path, 'wb') as f:
             torch.save(model_params, f)
 
+    def load_snapshot(self, run_id, iteration):
+        snapshot_path = f"{self._snapshot_location(run_id)}/snapshot-{iteration}.p"
+        with open(snapshot_path, 'rb') as f:
+            model_params = torch.load(f)
+        return model_params
+
     def delete_snapshot(self, run_id, snapshot_iteration):
         snapshot_path = self._snapshot_location(run_id)
         os.remove(f"{snapshot_path}/snapshot-{snapshot_iteration}.p")

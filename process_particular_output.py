@@ -7,13 +7,12 @@ import pandas as pd
 from tqdm import tqdm 
 import pickle
 from pprint import pprint
-from scipy.stats import bootstrap
 import numpy as np
 
 
 model = "ct"
 model_dir = "results_" + model
-dataset = "javamed0.1"
+dataset = "pythonxglue"
 
 data = []
 methods = []
@@ -31,7 +30,8 @@ for method in os.listdir(os.path.join(model_dir, dataset)):
 
 results = []
 for hyps, refs in tqdm(data):
-    res = Metrics(hyps, refs).get_statistics(stats={"bert"}, bert=True)
+    print(hyps[:10], refs[:10])
+    res = Metrics(hyps, refs).get_statistics(stats={"prec_rec_f1", "chrF"}, bert=True)
     score = res["score"]
     scores = res["scores"]
     results.append(score)

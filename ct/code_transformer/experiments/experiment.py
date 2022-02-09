@@ -333,7 +333,7 @@ class ExperimentSetup:
     def train(self, batch_size, simulated_batch_size, random_seed, metrics,
               validate_every=None,
               persistent_snapshot_every=None, simulated_batch_size_valid=None, early_stopping_patience=100000, epochs=5,
-              max_validation_samples=10000, accumulate_tokens_batch=False, device='cuda', project_name="ct"):
+              max_validation_samples=10000, accumulate_tokens_batch=False, device='cuda', project_name="ct", start_from_snapshot_run_id=None, start_from_snapshot_iteration=None):
 
         self.device = device
         self.model_lm = self.model_lm.to(self.device)
@@ -366,6 +366,9 @@ class ExperimentSetup:
         simulated_batch_size = batch_size if simulated_batch_size is None else simulated_batch_size
         assert simulated_batch_size % batch_size == 0, "simulated_batch_size must be a multiple of batch_size"
         num_simulated_batches = simulated_batch_size // batch_size
+
+        if start_from_snapshot_run_id is not None:
+            self.model_lm.load_state_dict(self.model_manager.load_snapshot(start_from_snapshot_run_id, start_from_snapshot_iteration))
 
         # Main train loop
         train_step = 0

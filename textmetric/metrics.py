@@ -24,7 +24,7 @@ from collections import defaultdict
 import numpy as np
 
 # from nltk.translate.meteor_score import single_meteor_score
-from sacrerouge.metrics import Meteor
+# from sacrerouge.metrics import Meteor
 from sacrebleu import corpus_bleu, sentence_bleu
 from sacrebleu import corpus_chrf, sentence_chrf
 from sacrebleu import corpus_ter, sentence_ter
@@ -122,16 +122,16 @@ class Metrics:
         }
 
     def meteor(self) -> dict:
-        technique = Meteor()
-        scores = technique.score_all(self.hyps, [[ref] for ref in self.refs])
-        scores = list(map(lambda x: x['METEOR'], scores))
+        # technique = Meteor()
+        # scores = technique.score_all(self.hyps, [[ref] for ref in self.refs])
+        # scores = list(map(lambda x: x['METEOR'], scores))
 
         return {
             'scores': {
-                'meteor': np.array(scores)
+                'meteor': np.zeros(len(self.hyps)) # np.array(scores)
             },
             'score': {
-                'meteor': round(100 * np.mean(scores), 1)
+                'meteor': 0.0 # round(100 * np.mean(scores), 1)
             }
         }
 
