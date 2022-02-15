@@ -10,7 +10,7 @@ import sys
 sys.path.append("..")
 
 
-launch_id = "results_treelstm-javamed0.1"
+launch_id = "results_ct-javaxglue"
 
 with open(f"dump_comparisons_{launch_id}.data", "rb") as file:
     method_names, comparisons = pickle.load(file)

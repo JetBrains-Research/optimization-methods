@@ -28,15 +28,7 @@ def bootstrap_compare(scores_a, scores_b, h0, resamples=1000):
 
 
 tasks = [
-    # {"folder": "results_code2seq/javamed", "docstring": False, "compare": True},
-    # {"folder": "results_code2seq/javamed0.1", "docstring": False, "compare": True},
-    # {"folder": "results_code2seq/javaxglue", "docstring": True, "compare": True},
-    # {"folder": "results_code2seq/pythonxglue", "docstring": True, "compare": True},
-    # {"folder": "results_codegnn/pythonxglue", "docstring": True, "compare": True},
-    # {"folder": "results_treelstm/pythonxglue", "docstring": True, "compare": True},
-    # {"folder": "results_treelstm/javamed", "docstring": False, "compare": True},
-    # {"folder": "results_codegnn/javamed0.1", "docstring": False, "compare": True},
-    # {"folder": "results_treelstm/javamed0.1", "docstring": False, "compare": True}
+    {"folder": "results_ct/javaxglue", "docstring": True, "compare": True}
 ]
 
 

@@ -4,6 +4,7 @@ import sys
 from abc import abstractmethod
 from itertools import islice
 from statistics import mean
+from .scheduler import MyCyclicLR
 
 import wandb
 import torch
@@ -239,7 +240,7 @@ class ExperimentSetup:
         self.model_manager = None
 
     @ex.capture(prefix="optimizer")
-    def _init_optimizer(self, learning_rate, reg_scale, scheduler=None, scheduler_params=None, optimizer="Adam"):
+    def _init_optimizer(self, learning_rate, reg_scale, scheduler=None, scheduler_params=None, optimizer="Adam", simulated_batch_size=None):
         self.optimizer_name = optimizer
         if optimizer == "SGD":
             self.optimizer = SGD(self.model_lm.parameters(), lr=learning_rate, weight_decay=reg_scale)
@@ -290,6 +291,13 @@ class ExperimentSetup:
             self.scheduler = optim.lr_scheduler.OneCycleLR(self.optimizer, **scheduler_params)
         elif scheduler == 'MultiStepLR':
             self.scheduler = optim.lr_scheduler.MultiStepLR(self.optimizer, **scheduler_params)
+        elif scheduler == 'MyCyclicLR':
+            dataloader = DataLoader(self.dataset_train, batch_size=simulated_batch_size, collate_fn=self.dataset_train.collate_fn)
+            cycle = len(dataloader)
+            print("cycle", cycle)
+            self.scheduler = MyCyclicLR(self.optimizer, min_lr=1e-6, max_lr=learning_rate,
+                                    cycle_len=cycle, gamma=0.95,
+                                    start_from=20, swa=False)
 
     def _init_metrics(self, metrics):
         self.metrics = dict()
@@ -436,9 +444,7 @@ class ExperimentSetup:
                     self.optimizer.step()
                     self.optimizer.zero_grad()
                     if self.scheduler:
-                        if not hasattr(self.scheduler,
-                                       "total_steps") or train_step < self.scheduler.total_steps - 1:
-                            self.scheduler.step()
+                        self.scheduler.step()
                         self.logger.log_metrics({'lr': self.scheduler.get_lr()[0]},
                                                 train_step * simulated_batch_size)
 

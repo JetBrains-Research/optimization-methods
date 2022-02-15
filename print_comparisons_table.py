@@ -7,7 +7,7 @@ import pickle
 from pprint import pprint
 
 
-for folder in ["codegnn-javaxglue"]:
+for folder in ["ct-javaxglue"]:
     docstring = True
     compare = True
 

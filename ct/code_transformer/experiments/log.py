@@ -38,6 +38,8 @@ class ExperimentLogger(Logger):
 
     def log_metrics(self, metrics: dict, step=None):
         for metric_name, value in metrics.items():
+            if metric_name == "lr":
+                wandb.log({"lr": value})
             self.metrics_logger.log_scalar(metric_name, value, step=step)
 
     def log_text(self, key: str, text: str, step=None):

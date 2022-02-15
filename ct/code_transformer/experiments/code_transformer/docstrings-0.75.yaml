@@ -62,20 +62,22 @@ model:
     attend_cls_token: False               # Whether to mask the CLS token for attention
 
 optimizer:
-  optimizer: 'Lamb'
+  scheduler: 'MyCyclicLR'
+  optimizer: 'Adam'
+  simulated_batch_size: 512
   learning_rate: 1e-3
   reg_scale: 0
 
 training:
-  start_from_snapshot_run_id: 13
-  start_from_snapshot_iteration: 51687
+  start_from_snapshot_run_id: None
+  start_from_snapshot_iteration: None
   project_name: ct-pythonxglue
   random_seed: 456
   batch_size: 8
   simulated_batch_size: 512         # Gradient Accumulation. After how many samples the model parameters should be updated
   simulated_batch_size_valid: 1280  # Over how many samples validation metrics should be calculated
   accumulate_tokens_batch: False
-  device: 'cpu'
+  device: 'cuda:0'
   validate_every: 200               # Counted in number of parameter updates (simulated_batch_size). How often approximate evaluation should be done
   epochs: 5
   max_validation_samples: 10000
