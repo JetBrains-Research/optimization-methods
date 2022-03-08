@@ -67,7 +67,6 @@ class CTCodeSummarizationDataset(CTBaseDataset):
             func_name = sample.docstring
         else:
             func_name = sample.func_name
-        print('!!!!!!!!', self.dosctrings)
         func_name = func_name[func_name.rindex('.') + 1:] if '.' in func_name else func_name
         label = split_identifier_into_parts(func_name)
         if func_name == '':
