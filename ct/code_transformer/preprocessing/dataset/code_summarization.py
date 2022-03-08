@@ -67,6 +67,7 @@ class CTCodeSummarizationDataset(CTBaseDataset):
             func_name = sample.docstring
         else:
             func_name = sample.func_name
+        print('!!!!!!!!', self.dosctrings)
         func_name = func_name[func_name.rindex('.') + 1:] if '.' in func_name else func_name
         label = split_identifier_into_parts(func_name)
         if func_name == '':
@@ -334,12 +335,12 @@ class CTCodeSummarizationDatasetNoPunctuation(CTCodeSummarizationDataset):
 
     def __init__(self, data_manager: CTPreprocessedDataManager, token_distances=None, max_distance_mask=None,
                  num_sub_tokens=5, num_sub_tokens_output=5, use_token_types=True,
-                 use_pointer_network=False, max_num_tokens=MAX_NUM_TOKENS):
+                 use_pointer_network=False, max_num_tokens=MAX_NUM_TOKENS, docstrings=True):
         super(CTCodeSummarizationDatasetNoPunctuation, self).__init__(data_manager, token_distances, max_distance_mask,
                                                                       num_sub_tokens, num_sub_tokens_output,
                                                                       use_token_types,
                                                                       use_pointer_network=use_pointer_network,
-                                                                      max_num_tokens=None)
+                                                                      max_num_tokens=None, docstrings=docstrings)
         self.config = data_manager.load_config()
         self.max_num_tokens_no_punctuation = max_num_tokens
 

@@ -101,7 +101,8 @@ class ExperimentSetup:
                                                            max_distance_mask=self.max_distance_mask,
                                                            num_labels_per_sample=num_predict,
                                                            use_pointer_network=use_pointer_network,
-                                                           num_sub_tokens=num_sub_tokens)
+                                                           num_sub_tokens=num_sub_tokens,
+                                                           docstring=docstrings)
 
         self.use_validation = use_validation
         if self.use_validation:
@@ -125,7 +126,8 @@ class ExperimentSetup:
                                                                     max_distance_mask=self.max_distance_mask,
                                                                     num_labels_per_sample=num_predict,
                                                                     use_pointer_network=use_pointer_network,
-                                                                    num_sub_tokens=num_sub_tokens)
+                                                                    num_sub_tokens=num_sub_tokens,
+                                                                    docstring=docstrings)
         self.dataset_validation_creator = \
             lambda infinite_loading: self._create_validation_dataset(DATA_PATH_STAGE_2,
                                                                      language,
@@ -160,7 +162,8 @@ class ExperimentSetup:
                                              max_distance_mask=self.max_distance_mask,
                                              num_labels_per_sample=num_predict,
                                              use_pointer_network=use_pointer_network,
-                                             num_sub_tokens=num_sub_tokens)
+                                             num_sub_tokens=num_sub_tokens,
+                                             docstring=docstring)
 
     @ex.capture(prefix="transfer_learning")
     def _init_transfer_learning(self, use_pretrained_model=False, model_type=None, run_id=None,

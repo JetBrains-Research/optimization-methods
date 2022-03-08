@@ -62,11 +62,14 @@ model:
     attend_cls_token: False               # Whether to mask the CLS token for attention
 
 optimizer:
-  scheduler: 'MyCyclicLR'
-  optimizer: 'Adam'
-  simulated_batch_size: 512
+  optimizer: 'LaAdam'
   learning_rate: 1e-3
   reg_scale: 0
+  # scheduler: 'MyCyclicLR'
+  # optimizer: 'LaRAdam'
+  # simulated_batch_size: 512
+  # learning_rate: 1e-3
+  # reg_scale: 0
 
 training:
   start_from_snapshot_run_id: None
