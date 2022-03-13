@@ -129,7 +129,7 @@ if __name__ == '__main__':
                                                           num_sub_tokens_output=NUM_SUB_TOKENS,
                                                           use_pointer_network=use_pointer_network,
                                                           max_num_tokens=LIMIT_TOKENS,
-                                                          token_distances=token_distances)
+                                                          token_distances=token_distances, docstrings=DOCSTRING)
     elif dataset_type == 'only_ast':
         dataset = CTCodeSummarizationOnlyASTDataset(data_manager, num_sub_tokens_output=NUM_SUB_TOKENS,
                                                     use_pointer_network=use_pointer_network,
@@ -156,8 +156,7 @@ if __name__ == '__main__':
     refs = []
     os.makedirs("./" + "outputs" + "/" + args.run_id, exist_ok=True)
 
-    progress = tqdm(enumerate(dataloader), total=int(data_manager.approximate_total_samples() / BATCH_SIZE))
-    for i, batch in progress:
+    for batch in dataloader:
         batch = batch_filter_distances(batch, relative_distances)
         if not args.no_gpu:
             batch = batch_to_device(batch)
@@ -179,11 +178,11 @@ if __name__ == '__main__':
         labels.extend(label.squeeze(1))
 
         for l in range(BATCH_SIZE):
-            print(len(predictions[-1-l]), len(labels[-1-l]))
+            # print(len(predictions[-1-l]), len(labels[-1-l]))
             res_our = ids_to_text(word_vocab, predictions[-1-l])
             res_ref = ids_to_text(word_vocab, labels[-1-l])
-            print(res_our, res_ref)
-            print(ids_to_string(word_vocab, predictions[-1-l]), ids_to_string(word_vocab, labels[-1-l]))
+            # print(res_our, res_ref)
+            # print(ids_to_string(word_vocab, predictions[-1-l]), ids_to_string(word_vocab, labels[-1-l]))
 
             if len(res_ref) > 0:
                 if len(res_our) == 0:
@@ -194,7 +193,6 @@ if __name__ == '__main__':
                 # print("hyp:", hyps[-1])
                 # print("ref:", refs[-1])
 
-        progress.set_description()
         del batch
 
     data_manager.shutdown()
