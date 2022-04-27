@@ -48,6 +48,18 @@ def configure_optimizers_alon(
         )
     elif hyper_parameters.optimizer == "Nadam":
         optimizer = Nadam(parameters, lr=hyper_parameters.learning_rate, weight_decay=hyper_parameters.weight_decay)
+        
+    elif hyper_parameters.optimizer == 'Adafactor':
+        optimizer = optim.Adafactor(
+            parameters, lr=hyper_parameters.learning_rate,
+            weight_decay=hyper_parameters.weight_decay
+        )
+    elif hyper_parameters.optimizer == 'AdaBelief':
+        optimizer = optim.AdaBelief(
+            parameters,
+            lr=hyper_parameters.learning_rate,
+            weight_decay=hyper_parameters.weight_decay
+        )
 
     elif hyper_parameters.optimizer == "AdaBound":
         optimizer = optim.AdaBound(parameters, lr=hyper_parameters.learning_rate,
