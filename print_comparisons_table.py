@@ -6,10 +6,9 @@ import pandas as pd
 import pickle
 from pprint import pprint
 
-
-for folder in ["ct-javaxglue"]:
+for folder in ["treelstm-javaxglue"]:
     docstring = True
-    compare = True
+    compare = False
 
 
     if compare:
@@ -40,11 +39,11 @@ for folder in ["ct-javaxglue"]:
         
         print(table)
 
+
 # for i, method_a in enumerate(method_names[:-1]):
 #     for j, method_b in enumerate(method_names[i+1:]):
-#         print(method_a, method_b)
-#         print(comparisons[i][j])
-#         print()
-        
-#     print()
+#         if (comparisons[i][j].find("[>]") != -1) or (comparisons[i][j].find("[?]") != -1) or not comparisons[i][j].endswith("100.0%"):
+#             print(method_a, method_b)
+#             print(comparisons[i][j])
+#             print()
 #     print()

@@ -12,7 +12,7 @@ import numpy as np
 
 model = "ct"
 model_dir = "results_" + model
-dataset = "pythonxglue"
+dataset = "javamed"
 
 data = []
 methods = []

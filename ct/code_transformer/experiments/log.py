@@ -5,7 +5,7 @@ from time import time
 
 from torch.utils.tensorboard import SummaryWriter
 
-import wandb
+# import wandb
 from code_transformer.utils.log import Logger
 
 
@@ -38,8 +38,8 @@ class ExperimentLogger(Logger):
 
     def log_metrics(self, metrics: dict, step=None):
         for metric_name, value in metrics.items():
-            if metric_name == "lr":
-                wandb.log({"lr": value})
+            #if metric_name == "lr":
+            #    wandb.log({"lr": value})
             self.metrics_logger.log_scalar(metric_name, value, step=step)
 
     def log_text(self, key: str, text: str, step=None):
@@ -56,7 +56,7 @@ class ExperimentLogger(Logger):
 
         for metric_name, values in avg_metrics.items():
             name = metric_name.split("/")
-            wandb.log({name[1] + "/" + name[0]: values})
+            #wandb.log({name[1] + "/" + name[0]: values})
 
         self.sub_batch_metrics.clear()
         if self.time_last_flush is not None:

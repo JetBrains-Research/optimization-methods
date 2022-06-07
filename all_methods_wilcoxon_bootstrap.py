@@ -28,7 +28,7 @@ def bootstrap_compare(scores_a, scores_b, h0, resamples=1000):
 
 
 tasks = [
-    {"folder": "results_ct/javaxglue", "docstring": True, "compare": True}
+    {"folder": "results_treelstm/javaxglue", "docstring": True, "compare": False}
 ]
 
 
@@ -52,12 +52,15 @@ for task in tasks:
         method_names = []
         outputs_for_method = {}
 
+        with open(os.path.join(folder, "refs.pkl"), "rb") as file:
+            refs = pickle.load(file)
+
         for outputs_file_name in os.listdir(folder):
             method_name = outputs_file_name.split("_")[0]
             method_names.append(method_name)
             
             with open(os.path.join(folder, outputs_file_name), "rb") as file:
-                outputs_for_method[method_name] = pickle.load(file)
+                outputs_for_method[method_name] = pickle.load(file), refs
 
         if docstring:
             meteor_for_method = {}
@@ -112,8 +115,12 @@ for task in tasks:
 
         for i, method_a in tqdm(enumerate(method_names)):
             if folder[-7:] in ["javamed", "amed0.1"]:
-                if len(scores_for_method[method_a]) == 428318:
+                if len(scores_for_method[method_a]) == 417821:
                     scores_for_method[method_a] = np.append(scores_for_method[method_a], 0.0)
+                    scores_for_method[method_a] = np.append(scores_for_method[method_a], 0.0)
+                    scores_for_method[method_a] = np.append(scores_for_method[method_a], 0.0)
+                    scores_for_method[method_a] = np.append(scores_for_method[method_a], 0.0)
+            print(len(scores_for_method[method_a]))
 
         for i, method_a in tqdm(enumerate(method_names[:-1])):
             print(method_a)

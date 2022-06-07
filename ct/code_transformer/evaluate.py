@@ -33,11 +33,12 @@ parser.add_argument("run_id", type=str)
 parser.add_argument("snapshot_iteration", type=str)
 parser.add_argument("partition", type=str, choices=['train', 'valid', 'test'], default='valid')
 parser.add_argument("--no-gpu", action='store_true', default=False)
+parser.add_argument("--docstring", action='store_true', default=False)
 args = parser.parse_args()
 
 BATCH_SIZE = 4
 LIMIT_TOKENS = 1000  # MAX_NUM_TOKENS
-DOCSTRING = True
+DOCSTRING = args.docstring
 
 
 def ids_to_text(vocab, ids):

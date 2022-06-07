@@ -62,12 +62,12 @@ model:
     attend_cls_token: False               # Whether to mask the CLS token for attention
 
 optimizer:
-  optimizer: 'LaAdam'
+  optimizer: 'LaAdamax'
   learning_rate: 1e-3
   reg_scale: 0
 
 training:
-  project_name: code-transformer-java-med
+  project_name: code-transformer-java-med0.1
   random_seed: 456
   batch_size: 8
   simulated_batch_size: 512         # Gradient Accumulation. After how many samples the model parameters should be updated

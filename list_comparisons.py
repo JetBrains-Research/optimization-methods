@@ -10,7 +10,7 @@ import sys
 sys.path.append("..")
 
 
-launch_id = "results_ct-javaxglue"
+launch_id = "results_ct-pythonxglue"
 
 with open(f"dump_comparisons_{launch_id}.data", "rb") as file:
     method_names, comparisons = pickle.load(file)

@@ -6,7 +6,7 @@ from itertools import islice
 from statistics import mean
 from .scheduler import MyCyclicLR
 
-import wandb
+# import wandb
 import torch
 from sacred import Experiment
 from torch import optim
@@ -357,9 +357,9 @@ class ExperimentSetup:
         self.logger.info(f"Starting run {run_id}")
         self.logger.info(f"===============================================")
 
-        wandb.init(project=project_name, entity='dmivilensky')
-        wandb.run.name = f"{self.optimizer_name} {run_id}"
-        wandb.run.save()
+        #wandb.init(project=project_name, entity='dmivilensky')
+        #wandb.run.name = f"{self.optimizer_name} {run_id}"
+        #wandb.run.save()
 
         self.model_manager.save_config(run_id, self.config)
         # early_stopping = EarlyStopping(self.model_manager, run_id, early_stopping_patience)
