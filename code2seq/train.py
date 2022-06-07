@@ -33,7 +33,7 @@ def get_typed_code2seq(config: DictConfig, vocabulary: Vocabulary) -> Tuple[Ligh
     return model, data_module
 
 
-@hydra.main(config_path="configs", config_name="code2seq-java-small")
+@hydra.main(config_path="configs", config_name="code2seq-pythonxglue")
 def train(config: DictConfig):
     filter_warnings()
     print_config(config)

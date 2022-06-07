@@ -1,3 +1,6 @@
+import sys
+sys.path.append('..')
+
 from os.path import exists
 from typing import Dict, List, Optional
 
