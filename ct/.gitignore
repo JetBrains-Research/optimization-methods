@@ -1,0 +1,21 @@
+# Python cache
+_pycache__
+*.py[cod]
+*.egg-info
+
+# IntelliJ/Jupyter
+.idea
+.ipynb_checkpoints
+.DS_Store
+
+# Folders
+data
+logs
+wandb
+models
+.vscode
+build
+bin
+outputs
+
+code_transformer/experiments/code_transformer/javaxglue*
