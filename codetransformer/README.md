@@ -12,8 +12,6 @@ The `CodeTransformer` is a Transformer based architecture that jointly learns fr
 It does so by linking source code tokens to AST nodes and using pairwise distances (e.g., Shortest Paths, PPR) between the nodes to represent the AST. 
 This combined representation is processed in the model by adding the contributions of each distance type to the raw self-attention score between two input tokens (See the paper for more details).  
 
-![](figures/code_transformer_overview.png)
-
 Strengths of the `CodeTransformer`:
  - Outperforms other approaches on the source **code summarization** task.
  - Effectively leverages similarities among different programming languages when trained in a **multi-lingual setting**.
@@ -213,8 +211,6 @@ Variable (+ `CODE_TRANSFORMER_` prefix) | Description | Preprocessing | Training
 
 
 # 2. Preprocessing
-
-![Code Transformer Overview](figures/preprocessing_overview.png)
 
 ## 2.1. semantic
 
