@@ -4,7 +4,7 @@ PyTorch's implementation of code2seq model.
 
 ## Configuration
 
-Use `yaml` files from [config](code2seq/configs) directory to configure all processes.
+Use `yaml` files from [config](configs) directory to configure all processes.
 `model` option is used to define model, for now repository supports:
 - code2seq
 - typed-code2seq
@@ -27,8 +27,7 @@ To train model use `train.py` script
 ```shell
 python train.py model
 ```
-Use [`main.yaml`](code2seq/configs/main.yaml) to set up hyper-parameters.
-Use corresponding configuration from [`configs/model`](code2seq/configs/model) to set up dataset.
+Use corresponding configuration from [`configs`](configs) to set up dataset.
 
 To resume training from saved checkpoint use `--resume` argument
 ```shell
