@@ -1,0 +1,869 @@
+Adam - Lamb
+bleu < (28.0%) 
+wilcoxon signed-rank: w = 15367670000 , p = 1.0
+mann-whitneyu: s = 84408700000 , p = 1.0
+
+meteor < (17.0%) 
+wilcoxon signed-rank: w = 4495560000 , p = 1.0
+mann-whitneyu: s = 84943200000 , p = 1.0
+
+rouge-1F < (12.0%) 
+wilcoxon signed-rank: w = 4255200000 , p = 1.0
+mann-whitneyu: s = 85350800000 , p = 1.0
+
+rouge-1P < (11.0%) 
+wilcoxon signed-rank: w = 4368150000 , p = 1.0
+mann-whitneyu: s = 85624900000 , p = 1.0
+
+rouge-1R < (13.0%) 
+wilcoxon signed-rank: w = 1938040000 , p = 1.0
+mann-whitneyu: s = 85334500000 , p = 1.0
+
+rouge-2F < (28.0%) 
+wilcoxon signed-rank: w = 287180000 , p = 1.0
+mann-whitneyu: s = 86504300000 , p = 1.0
+
+rouge-2P < (28.0%) 
+wilcoxon signed-rank: w = 289350000 , p = 1.0
+mann-whitneyu: s = 86492500000 , p = 1.0
+
+rouge-2R < (28.0%) 
+wilcoxon signed-rank: w = 233460000 , p = 1.0
+mann-whitneyu: s = 86489700000 , p = 1.0
+
+rouge-lF < (12.0%) 
+wilcoxon signed-rank: w = 3983750000 , p = 1.0
+mann-whitneyu: s = 85159300000 , p = 1.0
+
+rouge-lP < (12.0%) 
+wilcoxon signed-rank: w = 3659010000 , p = 1.0
+mann-whitneyu: s = 85277700000 , p = 1.0
+
+rouge-lR < (12.0%) 
+wilcoxon signed-rank: w = 1918420000 , p = 1.0
+mann-whitneyu: s = 85414200000 , p = 1.0
+
+symb-rouge-lF < (7.0%) 
+wilcoxon signed-rank: w = 13952860000 , p = 1.0
+mann-whitneyu: s = 84248900000 , p = 1.0
+
+symb-rouge-lP < (4.0%) 
+wilcoxon signed-rank: w = 13492660000 , p = 1.0
+mann-whitneyu: s = 86606500000 , p = 1.0
+
+symb-rouge-lR < (9.0%) 
+wilcoxon signed-rank: w = 8013580000 , p = 1.0
+mann-whitneyu: s = 83830600000 , p = 1.0
+
+
+Adam - LaRAdam
+bleu < (47.0%) 
+wilcoxon signed-rank: w = 12477250000 , p = 1.0
+mann-whitneyu: s = 77989900000 , p = 1.0
+
+meteor < (29.0%) 
+wilcoxon signed-rank: w = 3878600000 , p = 1.0
+mann-whitneyu: s = 80408000000 , p = 1.0
+
+rouge-1F < (21.0%) 
+wilcoxon signed-rank: w = 3718900000 , p = 1.0
+mann-whitneyu: s = 81076400000 , p = 1.0
+
+rouge-1P < (18.0%) 
+wilcoxon signed-rank: w = 4198100000 , p = 1.0
+mann-whitneyu: s = 81929600000 , p = 1.0
+
+rouge-1R < (23.0%) 
+wilcoxon signed-rank: w = 1795280000 , p = 1.0
+mann-whitneyu: s = 80837900000 , p = 1.0
+
+rouge-2F < (47.0%) 
+wilcoxon signed-rank: w = 297810000 , p = 1.0
+mann-whitneyu: s = 83713500000 , p = 1.0
+
+rouge-2P < (47.0%) 
+wilcoxon signed-rank: w = 313600000 , p = 1.0
+mann-whitneyu: s = 83718000000 , p = 1.0
+
+rouge-2R < (47.0%) 
+wilcoxon signed-rank: w = 250750000 , p = 1.0
+mann-whitneyu: s = 83684000000 , p = 1.0
+
+rouge-lF < (21.0%) 
+wilcoxon signed-rank: w = 3558670000 , p = 1.0
+mann-whitneyu: s = 80840300000 , p = 1.0
+
+rouge-lP < (19.0%) 
+wilcoxon signed-rank: w = 3540170000 , p = 1.0
+mann-whitneyu: s = 81498700000 , p = 1.0
+
+rouge-lR < (22.0%) 
+wilcoxon signed-rank: w = 1778740000 , p = 1.0
+mann-whitneyu: s = 80956600000 , p = 1.0
+
+symb-rouge-lF < (13.0%) 
+wilcoxon signed-rank: w = 11632370000 , p = 1.0
+mann-whitneyu: s = 78154100000 , p = 1.0
+
+symb-rouge-lP < (6.0%) 
+wilcoxon signed-rank: w = 13354250000 , p = 1.0
+mann-whitneyu: s = 84171600000 , p = 1.0
+
+symb-rouge-lR < (17.0%) 
+wilcoxon signed-rank: w = 6134120000 , p = 1.0
+mann-whitneyu: s = 76667000000 , p = 1.0
+
+
+Adam - RAdam
+bleu < (26.0%) 
+wilcoxon signed-rank: w = 13933820000 , p = 1.0
+mann-whitneyu: s = 84767400000 , p = 1.0
+
+meteor < (14.0%) 
+wilcoxon signed-rank: w = 4024950000 , p = 1.0
+mann-whitneyu: s = 86067600000 , p = 1.0
+
+rouge-1F < (9.0%) 
+wilcoxon signed-rank: w = 3788960000 , p = 1.0
+mann-whitneyu: s = 86757300000 , p = 1.0
+
+rouge-1P < (6.0%) 
+wilcoxon signed-rank: w = 4126680000 , p = 1.0
+mann-whitneyu: s = 87623900000 , p = 1.0
+
+rouge-1R < (10.0%) 
+wilcoxon signed-rank: w = 1743280000 , p = 1.0
+mann-whitneyu: s = 86289600000 , p = 1.0
+
+rouge-2F < (26.0%) 
+wilcoxon signed-rank: w = 253390000 , p = 1.0
+mann-whitneyu: s = 86905600000 , p = 1.0
+
+rouge-2P < (25.0%) 
+wilcoxon signed-rank: w = 262180000 , p = 1.0
+mann-whitneyu: s = 86913500000 , p = 1.0
+
+rouge-2R < (26.0%) 
+wilcoxon signed-rank: w = 203950000 , p = 1.0
+mann-whitneyu: s = 86883300000 , p = 1.0
+
+rouge-lF < (10.0%) 
+wilcoxon signed-rank: w = 3603230000 , p = 1.0
+mann-whitneyu: s = 86359600000 , p = 1.0
+
+rouge-lP < (8.0%) 
+wilcoxon signed-rank: w = 3505620000 , p = 1.0
+mann-whitneyu: s = 86830100000 , p = 1.0
+
+rouge-lR < (10.0%) 
+wilcoxon signed-rank: w = 1729400000 , p = 1.0
+mann-whitneyu: s = 86334900000 , p = 1.0
+
+symb-rouge-lF < (6.0%) 
+wilcoxon signed-rank: w = 13013900000 , p = 1.0
+mann-whitneyu: s = 84823700000 , p = 1.0
+
+symb-rouge-lP < (3.0%) 
+wilcoxon signed-rank: w = 12978130000 , p = 1.0
+mann-whitneyu: s = 87603300000 , p = 1.0
+
+symb-rouge-lR < (8.0%) 
+wilcoxon signed-rank: w = 7429270000 , p = 1.0
+mann-whitneyu: s = 84424200000 , p = 1.0
+
+
+Adam - SGD
+bleu < (12.0%) 
+wilcoxon signed-rank: w = 18067310000 , p = 1.0
+mann-whitneyu: s = 88242800000 , p = 1.0
+
+meteor < (8.0%) 
+wilcoxon signed-rank: w = 5321310000 , p = 1.0
+mann-whitneyu: s = 87545100000 , p = 1.0
+
+rouge-1F < (8.0%) 
+wilcoxon signed-rank: w = 4773220000 , p = 1.0
+mann-whitneyu: s = 87047500000 , p = 1.0
+
+rouge-1P < (10.0%) 
+wilcoxon signed-rank: w = 4246310000 , p = 1.0
+mann-whitneyu: s = 86173400000 , p = 1.0
+
+rouge-1R < (7.0%) 
+wilcoxon signed-rank: w = 2421630000 , p = 1.0
+mann-whitneyu: s = 87897400000 , p = 1.0
+
+rouge-2F < (13.0%) 
+wilcoxon signed-rank: w = 397770000 , p = 1.0
+mann-whitneyu: s = 88727900000 , p = 1.0
+
+rouge-2P < (14.0%) 
+wilcoxon signed-rank: w = 374490000 , p = 1.0
+mann-whitneyu: s = 88657200000 , p = 1.0
+
+rouge-2R < (12.0%) 
+wilcoxon signed-rank: w = 342030000 , p = 1.0
+mann-whitneyu: s = 88736300000 , p = 1.0
+
+rouge-lF < (8.0%) 
+wilcoxon signed-rank: w = 4584770000 , p = 1.0
+mann-whitneyu: s = 87041700000 , p = 1.0
+
+rouge-lP < (10.0%) 
+wilcoxon signed-rank: w = 3683420000 , p = 1.0
+mann-whitneyu: s = 86028500000 , p = 1.0
+
+rouge-lR < (6.0%) 
+wilcoxon signed-rank: w = 2391380000 , p = 1.0
+mann-whitneyu: s = 87933000000 , p = 1.0
+
+symb-rouge-lF < (4.0%) 
+wilcoxon signed-rank: w = 15854220000 , p = 1.0
+mann-whitneyu: s = 87268000000 , p = 1.0
+
+symb-rouge-lP < (4.0%) 
+wilcoxon signed-rank: w = 13060740000 , p = 1.0
+mann-whitneyu: s = 86120200000 , p = 1.0
+
+symb-rouge-lR < (3.0%) 
+wilcoxon signed-rank: w = 9949190000 , p = 1.0
+mann-whitneyu: s = 88121600000 , p = 1.0
+
+
+Adam - LaSGD
+bleu > (1.0%) 
+wilcoxon signed-rank: w = 20844360000 , p = 1.0
+mann-whitneyu: s = 92018300000 , p = 1.0
+
+meteor < (1.0%) 
+wilcoxon signed-rank: w = 6240710000 , p = 1.0
+mann-whitneyu: s = 89807200000 , p = 1.0
+
+rouge-1F < (4.0%) 
+wilcoxon signed-rank: w = 5507250000 , p = 1.0
+mann-whitneyu: s = 88863700000 , p = 1.0
+
+rouge-1P < (9.0%) 
+wilcoxon signed-rank: w = 4405000000 , p = 1.0
+mann-whitneyu: s = 87244400000 , p = 1.0
+
+rouge-1R < (1.0%) 
+wilcoxon signed-rank: w = 2767660000 , p = 1.0
+mann-whitneyu: s = 90099700000 , p = 1.0
+
+rouge-2F < (1.0%) 
+wilcoxon signed-rank: w = 523280000 , p = 0.13044396578274187
+mann-whitneyu: s = 90565100000 , p = 0.9999999994070417
+
+rouge-2P < (3.0%) 
+wilcoxon signed-rank: w = 483070000 , p = 0.9999999856919504
+mann-whitneyu: s = 90475900000 , p = 0.999999999999861
+
+rouge-2R > (0.0%) 
+wilcoxon signed-rank: w = 446380000 , p = 0.9999999656268815
+mann-whitneyu: s = 90579200000 , p = 1.9031449195927625e-09
+
+rouge-lF < (4.0%) 
+wilcoxon signed-rank: w = 5234010000 , p = 1.0
+mann-whitneyu: s = 88860700000 , p = 1.0
+
+rouge-lP < (9.0%) 
+wilcoxon signed-rank: w = 3777820000 , p = 1.0
+mann-whitneyu: s = 87068600000 , p = 1.0
+
+rouge-lR < (1.0%) 
+wilcoxon signed-rank: w = 2732230000 , p = 0.9999999999999999
+mann-whitneyu: s = 90109500000 , p = 0.9999999999999999
+
+symb-rouge-lF < (0.0%) 
+wilcoxon signed-rank: w = 18071000000 , p = 1.0
+mann-whitneyu: s = 90670400000 , p = 0.9986776544004078
+
+symb-rouge-lP < (3.0%) 
+wilcoxon signed-rank: w = 13008490000 , p = 1.0
+mann-whitneyu: s = 86575000000 , p = 1.0
+
+symb-rouge-lR > (1.0%) 
+wilcoxon signed-rank: w = 11877900000 , p = 1.0
+mann-whitneyu: s = 92301400000 , p = 1.0
+
+
+Lamb - LaRAdam
+bleu < (16.0%) 
+wilcoxon signed-rank: w = 15240420000 , p = 1.0
+mann-whitneyu: s = 84627200000 , p = 1.0
+
+meteor < (10.0%) 
+wilcoxon signed-rank: w = 5443730000 , p = 1.0
+mann-whitneyu: s = 86506600000 , p = 1.0
+
+rouge-1F < (8.0%) 
+wilcoxon signed-rank: w = 5031010000 , p = 1.0
+mann-whitneyu: s = 86732700000 , p = 1.0
+
+rouge-1P < (7.0%) 
+wilcoxon signed-rank: w = 4980300000 , p = 1.0
+mann-whitneyu: s = 87358800000 , p = 1.0
+
+rouge-1R < (9.0%) 
+wilcoxon signed-rank: w = 2251780000 , p = 1.0
+mann-whitneyu: s = 86500000000 , p = 1.0
+
+rouge-2F < (15.0%) 
+wilcoxon signed-rank: w = 498550000 , p = 1.0
+mann-whitneyu: s = 88195000000 , p = 1.0
+
+rouge-2P < (15.0%) 
+wilcoxon signed-rank: w = 486670000 , p = 1.0
+mann-whitneyu: s = 88218100000 , p = 1.0
+
+rouge-2R < (15.0%) 
+wilcoxon signed-rank: w = 395470000 , p = 1.0
+mann-whitneyu: s = 88178900000 , p = 1.0
+
+rouge-lF < (8.0%) 
+wilcoxon signed-rank: w = 4698840000 , p = 1.0
+mann-whitneyu: s = 86683200000 , p = 1.0
+
+rouge-lP < (7.0%) 
+wilcoxon signed-rank: w = 4052720000 , p = 1.0
+mann-whitneyu: s = 87272200000 , p = 1.0
+
+rouge-lR < (9.0%) 
+wilcoxon signed-rank: w = 2201950000 , p = 1.0
+mann-whitneyu: s = 86539300000 , p = 1.0
+
+symb-rouge-lF < (6.0%) 
+wilcoxon signed-rank: w = 13438080000 , p = 1.0
+mann-whitneyu: s = 84952800000 , p = 1.0
+
+symb-rouge-lP < (2.0%) 
+wilcoxon signed-rank: w = 12676980000 , p = 1.0
+mann-whitneyu: s = 88607500000 , p = 1.0
+
+symb-rouge-lR < (8.0%) 
+wilcoxon signed-rank: w = 7595820000 , p = 1.0
+mann-whitneyu: s = 83857000000 , p = 1.0
+
+
+Lamb - RAdam
+bleu > (2.0%) 
+wilcoxon signed-rank: w = 20068390000 , p = 0.9999751655590673
+mann-whitneyu: s = 91359200000 , p = 0.9989033496506691
+
+meteor > (2.0%) 
+wilcoxon signed-rank: w = 7321330000 , p = 1.0
+mann-whitneyu: s = 92134800000 , p = 1.0
+
+rouge-1F > (3.0%) 
+wilcoxon signed-rank: w = 6713530000 , p = 1.0
+mann-whitneyu: s = 92433500000 , p = 1.0
+
+rouge-1P > (4.0%) 
+wilcoxon signed-rank: w = 6403470000 , p = 1.0
+mann-whitneyu: s = 93092500000 , p = 1.0
+
+rouge-1R > (2.0%) 
+wilcoxon signed-rank: w = 3156140000 , p = 1.0
+mann-whitneyu: s = 91970300000 , p = 1.0
+
+rouge-2F > (2.0%) 
+wilcoxon signed-rank: w = 662000000 , p = 0.9999999999237299
+mann-whitneyu: s = 91408600000 , p = 0.9999995463926246
+
+rouge-2P > (2.0%) 
+wilcoxon signed-rank: w = 634240000 , p = 0.9999999999894812
+mann-whitneyu: s = 91433700000 , p = 0.9999999140665858
+
+rouge-2R > (1.0%) 
+wilcoxon signed-rank: w = 527310000 , p = 0.9999987119847119
+mann-whitneyu: s = 91398800000 , p = 0.9999991716979929
+
+rouge-lF > (2.0%) 
+wilcoxon signed-rank: w = 6212100000 , p = 1.0
+mann-whitneyu: s = 92214000000 , p = 1.0
+
+rouge-lP > (3.0%) 
+wilcoxon signed-rank: w = 5178540000 , p = 1.0
+mann-whitneyu: s = 92616600000 , p = 1.0
+
+rouge-lR > (2.0%) 
+wilcoxon signed-rank: w = 3078260000 , p = 1.0
+mann-whitneyu: s = 91933800000 , p = 1.0
+
+symb-rouge-lF > (1.0%) 
+wilcoxon signed-rank: w = 17948860000 , p = 1.0
+mann-whitneyu: s = 91587700000 , p = 0.9999998114447124
+
+symb-rouge-lP > (1.0%) 
+wilcoxon signed-rank: w = 14698130000 , p = 1.0
+mann-whitneyu: s = 92080100000 , p = 1.0
+
+symb-rouge-lR > (1.0%) 
+wilcoxon signed-rank: w = 11246640000 , p = 1.0
+mann-whitneyu: s = 91577800000 , p = 0.9999997191615189
+
+
+Lamb - SGD
+bleu > (14.0%) 
+wilcoxon signed-rank: w = 18736170000 , p = 1.0
+mann-whitneyu: s = 94828600000 , p = 1.0
+
+meteor > (8.0%) 
+wilcoxon signed-rank: w = 6204900000 , p = 1.0
+mann-whitneyu: s = 93657100000 , p = 1.0
+
+rouge-1F > (4.0%) 
+wilcoxon signed-rank: w = 5493920000 , p = 1.0
+mann-whitneyu: s = 92734500000 , p = 1.0
+
+rouge-1P > (1.0%) 
+wilcoxon signed-rank: w = 4353320000 , p = 0.9999999999445633
+mann-whitneyu: s = 91490100000 , p = 0.9999942326561106
+
+rouge-1R > (6.0%) 
+wilcoxon signed-rank: w = 2504440000 , p = 1.0
+mann-whitneyu: s = 93618600000 , p = 1.0
+
+rouge-2F > (13.0%) 
+wilcoxon signed-rank: w = 554200000 , p = 1.0
+mann-whitneyu: s = 93256800000 , p = 1.0
+
+rouge-2P > (12.0%) 
+wilcoxon signed-rank: w = 495200000 , p = 1.0
+mann-whitneyu: s = 93179700000 , p = 1.0
+
+rouge-2R > (14.0%) 
+wilcoxon signed-rank: w = 429520000 , p = 1.0
+mann-whitneyu: s = 93286100000 , p = 1.0
+
+rouge-lF > (4.0%) 
+wilcoxon signed-rank: w = 5077240000 , p = 1.0
+mann-whitneyu: s = 92917500000 , p = 1.0
+
+rouge-lP > (1.0%) 
+wilcoxon signed-rank: w = 3571160000 , p = 1.0
+mann-whitneyu: s = 91663600000 , p = 0.9999999991466003
+
+rouge-lR > (6.0%) 
+wilcoxon signed-rank: w = 2436420000 , p = 1.0
+mann-whitneyu: s = 93573600000 , p = 1.0
+
+symb-rouge-lF > (3.0%) 
+wilcoxon signed-rank: w = 15550940000 , p = 1.0
+mann-whitneyu: s = 94048800000 , p = 1.0
+
+symb-rouge-lP < (0.0%) 
+wilcoxon signed-rank: w = 10706220000 , p = 0.999999828936253
+mann-whitneyu: s = 90512700000 , p = 0.9999965527266734
+
+symb-rouge-lR > (5.0%) 
+wilcoxon signed-rank: w = 10015390000 , p = 1.0
+mann-whitneyu: s = 95305000000 , p = 1.0
+
+
+Lamb - LaSGD
+bleu > (29.0%) 
+wilcoxon signed-rank: w = 22179010000 , p = 1.0
+mann-whitneyu: s = 98563000000 , p = 1.0
+
+meteor > (15.0%) 
+wilcoxon signed-rank: w = 7787700000 , p = 1.0
+mann-whitneyu: s = 95940200000 , p = 1.0
+
+rouge-1F > (8.0%) 
+wilcoxon signed-rank: w = 6894130000 , p = 1.0
+mann-whitneyu: s = 94575500000 , p = 1.0
+
+rouge-1P > (2.0%) 
+wilcoxon signed-rank: w = 5003080000 , p = 1.0
+mann-whitneyu: s = 92518000000 , p = 1.0
+
+rouge-1R > (11.0%) 
+wilcoxon signed-rank: w = 3370270000 , p = 1.0
+mann-whitneyu: s = 95851500000 , p = 1.0
+
+rouge-2F > (27.0%) 
+wilcoxon signed-rank: w = 795820000 , p = 1.0
+mann-whitneyu: s = 95107600000 , p = 1.0
+
+rouge-2P > (25.0%) 
+wilcoxon signed-rank: w = 702250000 , p = 1.0
+mann-whitneyu: s = 95005600000 , p = 1.0
+
+rouge-2R > (28.0%) 
+wilcoxon signed-rank: w = 655650000 , p = 1.0
+mann-whitneyu: s = 95142600000 , p = 1.0
+
+rouge-lF > (8.0%) 
+wilcoxon signed-rank: w = 6329270000 , p = 1.0
+mann-whitneyu: s = 94763100000 , p = 1.0
+
+rouge-lP > (3.0%) 
+wilcoxon signed-rank: w = 4041910000 , p = 1.0
+mann-whitneyu: s = 92646400000 , p = 1.0
+
+rouge-lR > (11.0%) 
+wilcoxon signed-rank: w = 3291230000 , p = 1.0
+mann-whitneyu: s = 95779600000 , p = 1.0
+
+symb-rouge-lF > (7.0%) 
+wilcoxon signed-rank: w = 18526190000 , p = 1.0
+mann-whitneyu: s = 97404800000 , p = 1.0
+
+symb-rouge-lP > (0.0%) 
+wilcoxon signed-rank: w = 11308220000 , p = 0.8967356385070436
+mann-whitneyu: s = 90934900000 , p = 0.24460067947479647
+
+symb-rouge-lR > (10.0%) 
+wilcoxon signed-rank: w = 12660530000 , p = 1.0
+mann-whitneyu: s = 99423900000 , p = 1.0
+
+
+LaRAdam - RAdam
+bleu > (17.0%) 
+wilcoxon signed-rank: w = 24944200000 , p = 1.0
+mann-whitneyu: s = 97710200000 , p = 1.0
+
+meteor > (13.0%) 
+wilcoxon signed-rank: w = 9296780000 , p = 1.0
+mann-whitneyu: s = 96653200000 , p = 1.0
+
+rouge-1F > (11.0%) 
+wilcoxon signed-rank: w = 8494840000 , p = 1.0
+mann-whitneyu: s = 96721500000 , p = 1.0
+
+rouge-1P > (11.0%) 
+wilcoxon signed-rank: w = 7793370000 , p = 1.0
+mann-whitneyu: s = 96815200000 , p = 1.0
+
+rouge-1R > (11.0%) 
+wilcoxon signed-rank: w = 4671160000 , p = 1.0
+mann-whitneyu: s = 96483200000 , p = 1.0
+
+rouge-2F > (17.0%) 
+wilcoxon signed-rank: w = 973270000 , p = 1.0
+mann-whitneyu: s = 94221700000 , p = 1.0
+
+rouge-2P > (17.0%) 
+wilcoxon signed-rank: w = 919960000 , p = 1.0
+mann-whitneyu: s = 94227900000 , p = 1.0
+
+rouge-2R > (17.0%) 
+wilcoxon signed-rank: w = 802100000 , p = 1.0
+mann-whitneyu: s = 94226500000 , p = 1.0
+
+rouge-lF > (10.0%) 
+wilcoxon signed-rank: w = 8126050000 , p = 1.0
+mann-whitneyu: s = 96541100000 , p = 1.0
+
+rouge-lP > (10.0%) 
+wilcoxon signed-rank: w = 6571970000 , p = 1.0
+mann-whitneyu: s = 96392000000 , p = 1.0
+
+rouge-lR > (11.0%) 
+wilcoxon signed-rank: w = 4553010000 , p = 1.0
+mann-whitneyu: s = 96406300000 , p = 1.0
+
+symb-rouge-lF > (7.0%) 
+wilcoxon signed-rank: w = 22301140000 , p = 1.0
+mann-whitneyu: s = 97648200000 , p = 1.0
+
+symb-rouge-lP > (3.0%) 
+wilcoxon signed-rank: w = 16366720000 , p = 1.0
+mann-whitneyu: s = 94518500000 , p = 1.0
+
+symb-rouge-lR > (9.0%) 
+wilcoxon signed-rank: w = 14948870000 , p = 1.0
+mann-whitneyu: s = 98704500000 , p = 1.0
+
+
+LaRAdam - SGD
+bleu > (31.0%) 
+wilcoxon signed-rank: w = 27579000000 , p = 1.0
+mann-whitneyu: s = 101214600000 , p = 1.0
+
+meteor > (19.0%) 
+wilcoxon signed-rank: w = 10920910000 , p = 1.0
+mann-whitneyu: s = 98197400000 , p = 1.0
+
+rouge-1F > (12.0%) 
+wilcoxon signed-rank: w = 9814550000 , p = 1.0
+mann-whitneyu: s = 97029400000 , p = 1.0
+
+rouge-1P > (7.0%) 
+wilcoxon signed-rank: w = 7569210000 , p = 1.0
+mann-whitneyu: s = 95082700000 , p = 1.0
+
+rouge-1R > (15.0%) 
+wilcoxon signed-rank: w = 5666970000 , p = 1.0
+mann-whitneyu: s = 98154900000 , p = 1.0
+
+rouge-2F > (30.0%) 
+wilcoxon signed-rank: w = 1368620000 , p = 1.0
+mann-whitneyu: s = 96076400000 , p = 1.0
+
+rouge-2P > (28.0%) 
+wilcoxon signed-rank: w = 1249110000 , p = 1.0
+mann-whitneyu: s = 95966600000 , p = 1.0
+
+rouge-2R > (32.0%) 
+wilcoxon signed-rank: w = 1200820000 , p = 1.0
+mann-whitneyu: s = 96123900000 , p = 1.0
+
+rouge-lF > (12.0%) 
+wilcoxon signed-rank: w = 9300820000 , p = 1.0
+mann-whitneyu: s = 97261200000 , p = 1.0
+
+rouge-lP > (8.0%) 
+wilcoxon signed-rank: w = 6408020000 , p = 1.0
+mann-whitneyu: s = 95348800000 , p = 1.0
+
+rouge-lR > (15.0%) 
+wilcoxon signed-rank: w = 5545930000 , p = 1.0
+mann-whitneyu: s = 98070400000 , p = 1.0
+
+symb-rouge-lF > (9.0%) 
+wilcoxon signed-rank: w = 24146580000 , p = 1.0
+mann-whitneyu: s = 100136700000 , p = 1.0
+
+symb-rouge-lP > (2.0%) 
+wilcoxon signed-rank: w = 14962270000 , p = 1.0
+mann-whitneyu: s = 92906300000 , p = 1.0
+
+symb-rouge-lR > (13.0%) 
+wilcoxon signed-rank: w = 17260600000 , p = 1.0
+mann-whitneyu: s = 102467200000 , p = 1.0
+
+
+LaRAdam - LaSGD
+bleu > (49.0%) 
+wilcoxon signed-rank: w = 31384200000 , p = 1.0
+mann-whitneyu: s = 104937600000 , p = 1.0
+
+meteor > (27.0%) 
+wilcoxon signed-rank: w = 12758300000 , p = 1.0
+mann-whitneyu: s = 100504000000 , p = 1.0
+
+rouge-1F > (17.0%) 
+wilcoxon signed-rank: w = 11501380000 , p = 1.0
+mann-whitneyu: s = 98883900000 , p = 1.0
+
+rouge-1P > (9.0%) 
+wilcoxon signed-rank: w = 8333170000 , p = 1.0
+mann-whitneyu: s = 96084200000 , p = 1.0
+
+rouge-1R > (21.0%) 
+wilcoxon signed-rank: w = 6897750000 , p = 1.0
+mann-whitneyu: s = 100403200000 , p = 1.0
+
+rouge-2F > (46.0%) 
+wilcoxon signed-rank: w = 1727700000 , p = 1.0
+mann-whitneyu: s = 97925700000 , p = 1.0
+
+rouge-2P > (43.0%) 
+wilcoxon signed-rank: w = 1562850000 , p = 1.0
+mann-whitneyu: s = 97789200000 , p = 1.0
+
+rouge-2R > (48.0%) 
+wilcoxon signed-rank: w = 1541890000 , p = 1.0
+mann-whitneyu: s = 97978100000 , p = 1.0
+
+rouge-lF > (17.0%) 
+wilcoxon signed-rank: w = 10897890000 , p = 1.0
+mann-whitneyu: s = 99120200000 , p = 1.0
+
+rouge-lP > (10.0%) 
+wilcoxon signed-rank: w = 6995310000 , p = 1.0
+mann-whitneyu: s = 96302500000 , p = 1.0
+
+rouge-lR > (21.0%) 
+wilcoxon signed-rank: w = 6765780000 , p = 1.0
+mann-whitneyu: s = 100291500000 , p = 1.0
+
+symb-rouge-lF > (13.0%) 
+wilcoxon signed-rank: w = 27701980000 , p = 1.0
+mann-whitneyu: s = 103471500000 , p = 1.0
+
+symb-rouge-lP > (2.0%) 
+wilcoxon signed-rank: w = 15826640000 , p = 1.0
+mann-whitneyu: s = 93318100000 , p = 1.0
+
+symb-rouge-lR > (19.0%) 
+wilcoxon signed-rank: w = 20486550000 , p = 1.0
+mann-whitneyu: s = 106526300000 , p = 1.0
+
+
+RAdam - SGD
+bleu > (12.0%) 
+wilcoxon signed-rank: w = 23391960000 , p = 1.0
+mann-whitneyu: s = 94470000000 , p = 1.0
+
+meteor > (5.0%) 
+wilcoxon signed-rank: w = 7871140000 , p = 1.0
+mann-whitneyu: s = 92522200000 , p = 1.0
+
+rouge-1F > (1.0%) 
+wilcoxon signed-rank: w = 6897960000 , p = 1.0
+mann-whitneyu: s = 91305200000 , p = 0.9961818682110822
+
+rouge-1P < (4.0%) 
+wilcoxon signed-rank: w = 5386750000 , p = 1.0
+mann-whitneyu: s = 89430700000 , p = 1.0
+
+rouge-1R > (4.0%) 
+wilcoxon signed-rank: w = 3757060000 , p = 1.0
+mann-whitneyu: s = 92656100000 , p = 1.0
+
+rouge-2F > (12.0%) 
+wilcoxon signed-rank: w = 862420000 , p = 1.0
+mann-whitneyu: s = 92856900000 , p = 1.0
+
+rouge-2P > (10.0%) 
+wilcoxon signed-rank: w = 800490000 , p = 1.0
+mann-whitneyu: s = 92758200000 , p = 1.0
+
+rouge-2R > (13.0%) 
+wilcoxon signed-rank: w = 744590000 , p = 1.0
+mann-whitneyu: s = 92894900000 , p = 1.0
+
+rouge-lF > (2.0%) 
+wilcoxon signed-rank: w = 6614290000 , p = 1.0
+mann-whitneyu: s = 91714600000 , p = 0.999999999917537
+
+rouge-lP < (2.0%) 
+wilcoxon signed-rank: w = 4670330000 , p = 1.0
+mann-whitneyu: s = 90086900000 , p = 1.0
+
+rouge-lR > (4.0%) 
+wilcoxon signed-rank: w = 3688660000 , p = 1.0
+mann-whitneyu: s = 92647400000 , p = 1.0
+
+symb-rouge-lF > (3.0%) 
+wilcoxon signed-rank: w = 20014110000 , p = 1.0
+mann-whitneyu: s = 93474300000 , p = 1.0
+
+symb-rouge-lP < (1.0%) 
+wilcoxon signed-rank: w = 13979210000 , p = 1.0
+mann-whitneyu: s = 89450200000 , p = 1.0
+
+symb-rouge-lR > (4.0%) 
+wilcoxon signed-rank: w = 13434450000 , p = 1.0
+mann-whitneyu: s = 94724400000 , p = 1.0
+
+
+RAdam - LaSGD
+bleu > (27.0%) 
+wilcoxon signed-rank: w = 26465500000 , p = 1.0
+mann-whitneyu: s = 98195200000 , p = 1.0
+
+meteor > (12.0%) 
+wilcoxon signed-rank: w = 9236190000 , p = 1.0
+mann-whitneyu: s = 94805000000 , p = 1.0
+
+rouge-1F > (5.0%) 
+wilcoxon signed-rank: w = 8025590000 , p = 1.0
+mann-whitneyu: s = 93142700000 , p = 1.0
+
+rouge-1P < (2.0%) 
+wilcoxon signed-rank: w = 5769560000 , p = 1.0
+mann-whitneyu: s = 90487400000 , p = 0.9999992594069492
+
+rouge-1R > (9.0%) 
+wilcoxon signed-rank: w = 4448240000 , p = 1.0
+mann-whitneyu: s = 94887200000 , p = 1.0
+
+rouge-2F > (25.0%) 
+wilcoxon signed-rank: w = 1102900000 , p = 1.0
+mann-whitneyu: s = 94705400000 , p = 1.0
+
+rouge-2P > (22.0%) 
+wilcoxon signed-rank: w = 1014170000 , p = 1.0
+mann-whitneyu: s = 94584400000 , p = 1.0
+
+rouge-2R > (27.0%) 
+wilcoxon signed-rank: w = 964400000 , p = 1.0
+mann-whitneyu: s = 94748300000 , p = 1.0
+
+rouge-lF > (6.0%) 
+wilcoxon signed-rank: w = 7611080000 , p = 1.0
+mann-whitneyu: s = 93554200000 , p = 1.0
+
+rouge-lP < (0.0%) 
+wilcoxon signed-rank: w = 4904820000 , p = 0.9470041892712292
+mann-whitneyu: s = 91090000000 , p = 0.23432984278002977
+
+rouge-lR > (9.0%) 
+wilcoxon signed-rank: w = 4378880000 , p = 1.0
+mann-whitneyu: s = 94850900000 , p = 1.0
+
+symb-rouge-lF > (6.0%) 
+wilcoxon signed-rank: w = 22592440000 , p = 1.0
+mann-whitneyu: s = 96828100000 , p = 1.0
+
+symb-rouge-lP < (1.0%) 
+wilcoxon signed-rank: w = 14112710000 , p = 1.0
+mann-whitneyu: s = 89886500000 , p = 1.0
+
+symb-rouge-lR > (10.0%) 
+wilcoxon signed-rank: w = 15990530000 , p = 1.0
+mann-whitneyu: s = 98818500000 , p = 1.0
+
+
+SGD - LaSGD
+bleu > (13.0%) 
+wilcoxon signed-rank: w = 13400200000 , p = 1.0
+mann-whitneyu: s = 94752600000 , p = 1.0
+
+meteor > (7.0%) 
+wilcoxon signed-rank: w = 4190710000 , p = 1.0
+mann-whitneyu: s = 93300600000 , p = 1.0
+
+rouge-1F > (4.0%) 
+wilcoxon signed-rank: w = 3779090000 , p = 1.0
+mann-whitneyu: s = 92857900000 , p = 1.0
+
+rouge-1P > (2.0%) 
+wilcoxon signed-rank: w = 3032480000 , p = 1.0
+mann-whitneyu: s = 92022300000 , p = 1.0
+
+rouge-1R > (5.0%) 
+wilcoxon signed-rank: w = 1596470000 , p = 1.0
+mann-whitneyu: s = 93248200000 , p = 1.0
+
+rouge-2F > (12.0%) 
+wilcoxon signed-rank: w = 326120000 , p = 1.0
+mann-whitneyu: s = 92865100000 , p = 1.0
+
+rouge-2P > (11.0%) 
+wilcoxon signed-rank: w = 294920000 , p = 1.0
+mann-whitneyu: s = 92835700000 , p = 1.0
+
+rouge-2R > (12.0%) 
+wilcoxon signed-rank: w = 244720000 , p = 1.0
+mann-whitneyu: s = 92872900000 , p = 1.0
+
+rouge-lF > (4.0%) 
+wilcoxon signed-rank: w = 3421140000 , p = 1.0
+mann-whitneyu: s = 92861900000 , p = 1.0
+
+rouge-lP > (2.0%) 
+wilcoxon signed-rank: w = 2433400000 , p = 1.0
+mann-whitneyu: s = 91986600000 , p = 1.0
+
+rouge-lR > (5.0%) 
+wilcoxon signed-rank: w = 1559970000 , p = 1.0
+mann-whitneyu: s = 93221500000 , p = 1.0
+
+symb-rouge-lF > (3.0%) 
+wilcoxon signed-rank: w = 10992860000 , p = 1.0
+mann-whitneyu: s = 94392200000 , p = 1.0
+
+symb-rouge-lP > (0.0%) 
+wilcoxon signed-rank: w = 7573890000 , p = 0.9999999999999761
+mann-whitneyu: s = 91432200000 , p = 0.9999254118836779
+
+symb-rouge-lR > (5.0%) 
+wilcoxon signed-rank: w = 6995100000 , p = 1.0
+mann-whitneyu: s = 95167900000 , p = 1.0
+
